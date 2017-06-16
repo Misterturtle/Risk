@@ -39,11 +39,11 @@ class FSMTests extends FreeSpec with Matchers {
     fsm.getState() shouldBe None
   }
 
-//  "A FSM should be able to handle a pop call on an empty stack" in {
-//    val fsm = new FSM
-//
-//
-//  }
+  "A FSM should be able to handle a pop call on an empty stack" in {
+    val fsm = new FSM
+
+    fsm.pop()
+  }
 
 //  "A FSM should check the active state's transition conditions" in {
 //

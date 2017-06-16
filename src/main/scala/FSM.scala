@@ -12,7 +12,7 @@ class FSM {
   }
 
   def pop(): Unit ={
-    //if(stack.nonEmpty)
+    if(stack.nonEmpty)
       stack.remove(stack.size-1)
   }
 
