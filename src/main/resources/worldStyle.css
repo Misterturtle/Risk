@@ -1,0 +1,9 @@
+
+
+
+.test {
+    -fx-background-image: url('map.jpg');
+    -fx-background-repeat: no-repeat;
+    -fx-border-color: red;
+    -fx-background-size: stretch;
+}
