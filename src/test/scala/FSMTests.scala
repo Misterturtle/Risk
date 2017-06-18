@@ -47,7 +47,6 @@ class FSMTests extends FreeSpec with Matchers {
 
 
   "A state should be able register a condition/effect transition" in {
-    val fsm = new FSM
     var state = State(Nil)
     val conditionVar = false
     var effectVar = false
@@ -60,6 +59,21 @@ class FSMTests extends FreeSpec with Matchers {
 
     state shouldBe State(List(trans))
   }
+
+  "When updating a state, it should return None if no transition conditions are met" in {
+    var conditionVar = false
+    var effectVar = false
+    val conditionList = List(()=>conditionVar)
+    val effectList = List(()=>effectVar = true)
+    val trans:Transition = Transition(conditionList, effectList, State())
+    val state = State(List(trans))
+
+    state.update() shouldBe None
+  }
+
+//  "A state should return the transition if a all conditions of that transition are met" in{
+//
+//  }
 
 
   //  "A FSM should check the active state's transition conditions" in {

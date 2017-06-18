@@ -5,7 +5,7 @@ case class Transition(conditions: List[()=>Boolean], effects: List[()=>Unit], ne
 
 case class State(transitions:List[Transition] = Nil) {
 
-  def checkTransitions(): (List[() => Unit], State) = ???
+  def update(): Option[Transition] = transitions.find(_.conditions.forall(_()))
 
   def registerTransition(newTransition: Transition): State = copy(newTransition :: transitions)
 
