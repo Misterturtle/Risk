@@ -18,6 +18,18 @@ class FSM {
 
   def getState(): Option[State] = stack.lastOption
 
+  def update(): Unit ={
+    stack.last.update() match{
+      case Some(transition)=>
+        transition.effects.foreach{_()}
+        if(transition.popOldState)
+          pop()
+        push(transition.newState())
+
+      case None =>
+    }
+  }
+
 
 
 

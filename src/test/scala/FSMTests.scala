@@ -53,7 +53,7 @@ class FSMTests extends FreeSpec with Matchers {
     val conditionList = List(()=>conditionVar)
     val effectList = List(()=>effectVar = true)
 
-    val trans = Transition(conditionList, effectList, state)
+    val trans = Transition(conditionList, effectList, ()=>state, false)
 
     state = state.registerTransition(trans)
 
@@ -66,7 +66,7 @@ class FSMTests extends FreeSpec with Matchers {
     var effectVar = false
     val conditionList = List(()=>conditionVar, ()=>conditionVar2)
     val effectList = List(()=>effectVar = true)
-    val trans:Transition = Transition(conditionList, effectList, State())
+    val trans:Transition = Transition(conditionList, effectList, ()=>State(), false)
     val state = State(List(trans))
 
     state.update() shouldBe None
@@ -78,26 +78,28 @@ class FSMTests extends FreeSpec with Matchers {
     var effectVar = false
     val conditionList = List(()=>conditionVar, ()=>conditionVar2)
     val effectList = List(()=>effectVar = true)
-    val trans = Transition(conditionList, effectList, State())
+    val trans = Transition(conditionList, effectList, ()=>State(), false)
     val state = State(List(trans))
 
     state.update() shouldBe Some(trans)
   }
 
 
-  //  "A FSM should check the active state's transition conditions" in {
-  //
-  //    val fsm = new FSM
-  //    val mockState = State(){
-  //      var test = 1
-  //      override def checkTransitions(): (List[() => Unit], State) = {
-  //        (List(() => {test += 1}), this)
-  //      }
-  //    }
-  //    fsm.push(mockState)
-  //
-  //    fsm.update()
-  //
-  //
-  //  }
+    "A FSM should execute the state's transition effects if a transition is returned from their update" in {
+      var effectCounter = 0
+
+      val fsm = new FSM {
+        var state1 = State(Nil)
+        val trans = Transition(List(()=>true), List(()=>{effectCounter +=1}, ()=> {effectCounter+= 1}), ()=>state1, false)
+        state1 = state1.registerTransition(trans)
+      }
+      fsm.push(fsm.state1)
+
+      fsm.update()
+
+      effectCounter shouldBe 2
+    }
+
+
+
 }
