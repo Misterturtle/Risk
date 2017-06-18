@@ -5,32 +5,36 @@ import scala.collection.mutable.ListBuffer
   */
 class FSM {
 
-  private val stack = new ListBuffer[State]()
+  private val stack = new ListBuffer[() => State]()
 
-  def push(state:State): Unit ={
-    stack.append(state)
+  def push(stateRef: () => State): Unit = {
+    stack.append(stateRef)
   }
 
-  def pop(): Unit ={
-    if(stack.nonEmpty)
-      stack.remove(stack.size-1)
+  def pop(): Unit = {
+    if (stack.nonEmpty)
+      stack.remove(stack.size - 1)
   }
 
-  def getState(): Option[State] = stack.lastOption
+  def getState: Option[State] = stack.lastOption.map(_ ())
 
-  def update(): Unit ={
-    stack.last.update() match{
-      case Some(transition)=>
-        transition.effects.foreach{_()}
-        if(transition.popOldState)
-          pop()
-        push(transition.newState())
+  def update(): Unit = {
+    stack.lastOption match {
+      case Some(stateRef) =>
+        stateRef().update() match {
+          case Some(transition) =>
+            transition.effects.foreach {
+              _ ()
+            }
+            if (transition.popOldState)
+              pop()
+            push(transition.newStateRef)
 
+          case None =>
+        }
       case None =>
     }
   }
-
-
 
 
 }

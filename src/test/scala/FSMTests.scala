@@ -14,9 +14,9 @@ class FSMTests extends FreeSpec with Matchers {
     val fsm = new FSM
     val mockState = State()
 
-    fsm.push(mockState)
+    fsm.push(()=>mockState)
 
-    fsm.getState() shouldBe Some(mockState)
+    fsm.getState shouldBe Some(mockState)
   }
 
   "A FSM should be able to pop a state from the state stack" in {
@@ -24,19 +24,19 @@ class FSMTests extends FreeSpec with Matchers {
     val fsm = new FSM
     val mockState = State()
     val mockState2 = State()
-    fsm.push(mockState)
-    fsm.push(mockState2)
-    fsm.getState() shouldBe Some(mockState2)
+    fsm.push(()=>mockState)
+    fsm.push(()=>mockState2)
+    fsm.getState shouldBe Some(mockState2)
 
     fsm.pop()
 
-    fsm.getState() shouldBe Some(mockState)
+    fsm.getState shouldBe Some(mockState)
   }
 
   "A FSM should return None as current state is the stack is empty" in {
     val fsm = new FSM
 
-    fsm.getState() shouldBe None
+    fsm.getState shouldBe None
   }
 
   "A FSM should be able to handle a pop call on an empty stack" in {
@@ -85,7 +85,7 @@ class FSMTests extends FreeSpec with Matchers {
   }
 
 
-    "A FSM should execute the state's transition effects if a transition is returned from their update" in {
+    "A FSM should execute the state's transition effects if a transition is returned from the state's update" in {
       var effectCounter = 0
 
       val fsm = new FSM {
@@ -93,12 +93,39 @@ class FSMTests extends FreeSpec with Matchers {
         val trans = Transition(List(()=>true), List(()=>{effectCounter +=1}, ()=> {effectCounter+= 1}), ()=>state1, false)
         state1 = state1.registerTransition(trans)
       }
-      fsm.push(fsm.state1)
+      fsm.push(fsm.state1 _)
 
       fsm.update()
 
       effectCounter shouldBe 2
     }
+
+  "A FSM should push the new state reference if a transition is valid" in {
+    val fsm = new FSM{
+      var state1 = State(Nil)
+      var state2 = State(Nil)
+      val trans = Transition(List(()=>true), List(()=>{}, ()=> {}), ()=>state2, false)
+      state1 = state1.registerTransition(trans)
+    }
+    fsm.push(fsm.state1 _)
+    fsm.update()
+
+    fsm.getState shouldBe Some(fsm.state2)
+  }
+
+  "A FSM should pop the current state before pushing the new state if the popState param is true" in {
+    val fsm = new FSM{
+      var state1 = State(Nil)
+      var state2 = State(Nil)
+      val trans = Transition(List(()=>true), List(()=>{}, ()=> {}), ()=>state2, true)
+      state1 = state1.registerTransition(trans)
+    }
+    fsm.push(fsm.state1 _)
+    fsm.update()
+    fsm.pop()
+
+    fsm.getState shouldBe None
+  }
 
 
 
