@@ -28,18 +28,18 @@ class WorldUI extends AnchorPane {
 
 
 
-  val northAmerica = new Country(CountryPixelDB.alaska)
-  val nwTerritory = new Country(CountryPixelDB.nwTerritory)
-  val greenland = new Country(CountryPixelDB.greenLand)
-  val alberta = new Country(CountryPixelDB.alberta)
-  val ontario = new Country(CountryPixelDB.ontario)
-  val quebec = new Country(CountryPixelDB.quebec)
-  val westernUS = new Country(CountryPixelDB.westernUS)
-  val easternUS = new Country(CountryPixelDB.easternUS)
-  val centralAmerica = new Country(CountryPixelDB.centralAmerica)
+  val northAmerica = new Country("alaska", CountryPixelDB.alaska)
+  val nwTerritory = new Country("nwTerritory", CountryPixelDB.nwTerritory)
+  val greenland = new Country("greenland", CountryPixelDB.greenLand)
+  val alberta = new Country("alberta", CountryPixelDB.alberta)
+  val ontario = new Country("ontario", CountryPixelDB.ontario)
+  val quebec = new Country("quebec", CountryPixelDB.quebec)
+  val westernUS = new Country("westernUS", CountryPixelDB.westernUS)
+  val easternUS = new Country("easternUS", CountryPixelDB.easternUS)
+  val centralAmerica = new Country("centralAmerica", CountryPixelDB.centralAmerica)
 
 
-  val countries = List[Country](northAmerica, nwTerritory,greenland, alberta, ontario, quebec, westernUS, easternUS,centralAmerica)
+  val countries = List[Country](northAmerica, nwTerritory, greenland, alberta, ontario, quebec, westernUS, easternUS, centralAmerica)
 
   def bindCountries(): Unit ={
     countries.foreach{

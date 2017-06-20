@@ -126,7 +126,4 @@ class FSMTests extends FreeSpec with Matchers {
 
     fsm.getState shouldBe None
   }
-
-
-
 }
