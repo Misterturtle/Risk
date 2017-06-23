@@ -11,8 +11,7 @@ import scalafx.scene.layout.AnchorPane
   */
 object Main extends JFXApp {
 
-  val worldUI = new WorldUI
-  val worldMap = new WorldMapFSM(List())
+  val worldUI = new WorldMap(new CountryFactory)
 
 
 
