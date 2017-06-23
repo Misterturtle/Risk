@@ -6,6 +6,8 @@ import javafx.scene.input.MouseEvent
   */
 class Country(val name: String, val origPoints: List[(Double, Double)]) extends javafx.scene.shape.Polygon() {
 
+  protected var _clickAction = () => {}
+
   private var _owner:Option[Player] = None
   def owner = _owner
   def setOwner(owner:Player) = _owner = Some(owner)
@@ -16,10 +18,13 @@ class Country(val name: String, val origPoints: List[(Double, Double)]) extends 
   def removeArmies(amount:Int) = _armies -= amount
 
   def setClickAction(action: ()=>Unit): Unit ={
+    _clickAction = action
     this.setOnMouseClicked(new EventHandler[MouseEvent] {
       override def handle(event: MouseEvent): Unit = action()
     })
   }
+
+  def getClickAction(): ()=>Unit = _clickAction
 
 
 
