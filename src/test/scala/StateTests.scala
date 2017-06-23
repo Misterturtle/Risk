@@ -68,4 +68,36 @@ class StateTests extends FreeSpec with Matchers {
     forwardStateUpdated shouldBe false
   }
 
+  "When updating, A state should update it's logic machine after checking for state transitions" in {
+
+    var updateCounter = 0
+    val mockLM = new LogicMachine{
+      override def update(): Unit ={
+        updateCounter += 1
+      }
+    }
+    val ts = new TestState(Nil, mockLM)
+
+    ts.update()
+    ts.update()
+
+    updateCounter shouldBe 2
+  }
+
+  "When updating, a state should NOT update its logic machine if a state transition is valid" in {
+    var updateCounter = 0
+    val mockLM = new LogicMachine{
+      override def update(): Unit ={
+        updateCounter += 1
+      }
+    }
+    val trans = ForwardTransition(List(()=>true), new TestState(Nil))
+    val ts = new TestState(List(trans), mockLM)
+
+    ts.update()
+    ts.update()
+
+    updateCounter shouldBe 0
+  }
+
 }

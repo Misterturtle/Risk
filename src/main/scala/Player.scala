@@ -1,13 +1,18 @@
 /**
   * Created by Harambe on 6/18/2017.
   */
-class Player {
+class Player(val isHuman:Boolean) {
 
-  private var armiesToPlace_ = 0
+  private var _availableArmies = 0
+  def availableArmies: Int = _availableArmies
+  private var _playerNumber = 0
+  def playerNumber = _playerNumber
 
-  def addArmiesToPlace(amount:Int):Unit = armiesToPlace_ += amount
 
-  def armiesToPlace: Int = armiesToPlace_
+  def addAvailableArmies(amount:Int):Unit = _availableArmies += amount
+  def removeAvailableArmies(amount:Int):Unit = _availableArmies -= amount
+
+
 
 
 }

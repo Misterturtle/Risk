@@ -9,7 +9,8 @@ class LogicMachineTests extends FreeSpec with Matchers {
 
     var effectFired = 0
     val event = LogicEvent(List(()=>true), List(() =>effectFired += 1))
-    val lm = new LogicMachine(List(event))
+    val lm = new LogicMachine()
+    lm.addEvent(event)
 
     lm.update()
     lm.update()
@@ -21,7 +22,8 @@ class LogicMachineTests extends FreeSpec with Matchers {
 
     var effectFired = 0
     val event = LogicEvent(List(()=>true, ()=> false), List(() =>effectFired += 1))
-    val lm = new LogicMachine(List(event))
+    val lm = new LogicMachine()
+    lm.addEvent(event)
 
     lm.update()
     lm.update()

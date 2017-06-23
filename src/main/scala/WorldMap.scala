@@ -13,14 +13,10 @@ import scalafx.scene.paint.Color
   * Created by Harambe on 6/16/2017.
   */
 
-class WorldMap(countryFactory: CountryFactory) extends AnchorPane {
+class WorldMap(countryFactory: CountryFactory, val players:List[Player]) extends AnchorPane {
 
   val bgXScale = new SimpleDoubleProperty()
   val bgYScale = new SimpleDoubleProperty()
-
-  protected var _initialPlacementComplete = false
-  val baseState = WorldMapState(_initialPlacementComplete _)
-
 
   val northAmerica = countryFactory.newCountry("alaska", CountryPixelDB.alaska)
   val nwTerritory = countryFactory.newCountry("nwTerritory", CountryPixelDB.nwTerritory)
@@ -31,7 +27,15 @@ class WorldMap(countryFactory: CountryFactory) extends AnchorPane {
   val westernUS = countryFactory.newCountry("westernUS", CountryPixelDB.westernUS)
   val easternUS = countryFactory.newCountry("easternUS", CountryPixelDB.easternUS)
   val centralAmerica = countryFactory.newCountry("centralAmerica", CountryPixelDB.centralAmerica)
-  val countries = List[Country](northAmerica, nwTerritory, greenland, alberta, ontario, quebec, westernUS, easternUS, centralAmerica)
+  val countries = Map[String, Country](
+    northAmerica.name -> northAmerica, nwTerritory.name -> nwTerritory, greenland.name -> greenland,
+    alberta.name -> alberta, ontario.name -> ontario, quebec.name -> quebec, westernUS.name -> westernUS,
+    easternUS.name -> easternUS, centralAmerica.name -> centralAmerica)
+
+  protected var _initialPlacementComplete = false
+  val baseState = WorldMapState(_initialPlacementComplete _, players, countries)
+
+
 
   def styleMap(): Unit = {
     this.stylesheets.add("worldStyle.css")
@@ -49,7 +53,7 @@ class WorldMap(countryFactory: CountryFactory) extends AnchorPane {
 
   def bindCountries(): Unit ={
     countries.foreach{
-      case country =>
+      case (name, country) =>
         this.heightProperty().addListener(new ChangeListener[Number] {
           override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
 
@@ -87,7 +91,7 @@ class WorldMap(countryFactory: CountryFactory) extends AnchorPane {
       }
     })
 
-    countries.foreach{x=> x.setFill(listOfColors(Random.nextInt(9)))}
+    countries.foreach{case (name, country) => country.setFill(listOfColors(Random.nextInt(9)))}
   }
 
   def init(): Unit ={

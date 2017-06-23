@@ -7,15 +7,15 @@ class WorldMapStateTransTests extends FreeSpec with Matchers {
 
   "The world map should transition to the initial placement state if the initial placement flag is false" in {
 
-    val worldMap = new WorldMap(new CountryFactory)
+    val worldMap = new WorldMap(new CountryFactory, List(new Player(true), new Player(false)))
     worldMap.baseState.update()
 
-    worldMap.baseState.forwardState shouldBe Some(InitPlaceState())
+    worldMap.baseState.forwardState shouldBe Some(InitPlaceState(worldMap.players, worldMap.countries))
   }
 
   "The world map should NOT transition to the initial placement state if the initial placement complete flag is true" in {
 
-    val worldMap = new WorldMap(new CountryFactory){
+    val worldMap = new WorldMap(new CountryFactory, List(new Player(true), new Player(false))){
       _initialPlacementComplete = true
     }
     worldMap.baseState.update()
