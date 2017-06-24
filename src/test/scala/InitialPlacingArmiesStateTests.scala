@@ -96,7 +96,85 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers{
     }
   }
 
+  "A player should not be able to place a 2nd army on a country until all countries are owned" in {
+    val mockCountryFactory = new CountryFactory(){
+      override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
+        new Country(name, origPoints){
+          override def setClickAction(action:()=>Unit): Unit ={
+            _clickAction = action
+          }
+        }
+      }
+    }
+    val mockPlayer = new Player(true)
+    mockPlayer.addAvailableArmies(5)
 
+    val country1 = mockCountryFactory.newCountry("mock1", List())
+    country1.setOwner(mockPlayer)
+    val country2 = mockCountryFactory.newCountry("mock2", List())
+    val mockCountries = Map[String,Country]("mock1" -> country1, "mock2" -> country2)
+    val initialPlacementState = InitPlaceState(List(mockPlayer), mockCountries)
+
+    initialPlacementState.update()
+    country1.getClickAction()()
+
+    country1.armies shouldBe 0
+    mockPlayer.availableArmies shouldBe 5
+  }
+
+  "If all countries are owned, a player should" - {
+
+    "Be able to place an army on any country he owns" in {
+      val mockCountryFactory = new CountryFactory(){
+        override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
+          new Country(name, origPoints){
+            override def setClickAction(action:()=>Unit): Unit ={
+              _clickAction = action
+            }
+          }
+        }
+      }
+      val mockPlayer = new Player(true)
+      mockPlayer.addAvailableArmies(5)
+
+      val country1 = mockCountryFactory.newCountry("mock1", List())
+      country1.setOwner(mockPlayer)
+      country1.addArmies(1)
+      val mockCountries = Map[String,Country]("mock1" -> country1)
+      val initialPlacementState = InitPlaceState(List(mockPlayer), mockCountries)
+
+      initialPlacementState.update()
+      country1.getClickAction()()
+
+      country1.armies shouldBe 2
+      mockPlayer.availableArmies shouldBe 4
+    }
+
+    "Still end their turn after placing an army" in {
+      val mockCountryFactory = new CountryFactory(){
+        override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
+          new Country(name, origPoints){
+            override def setClickAction(action:()=>Unit): Unit ={
+              _clickAction = action
+            }
+          }
+        }
+      }
+      val mockPlayer = new Player(true)
+      mockPlayer.addAvailableArmies(5)
+      val compPlayer = new Player(false)
+
+      val country1 = mockCountryFactory.newCountry("mock1", List())
+      country1.setOwner(mockPlayer)
+      val mockCountries = Map[String,Country]("mock1" -> country1)
+      val initialPlacementState = InitPlaceState(List(mockPlayer, compPlayer), mockCountries)
+
+      initialPlacementState.update()
+      country1.getClickAction()()
+
+      initialPlacementState.activePlayer shouldBe compPlayer
+    }
+  }
 
 
   "If the active player has no available armies left, the state should activate the return transition" in {

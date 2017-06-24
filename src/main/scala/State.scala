@@ -75,8 +75,7 @@ case class InitPlaceState(players: List[Player], countries: Map[String, Country]
   }
 
   def isCountryOwned(country: Country): Boolean = country.owner.nonEmpty
-
-  def setCountriesOnClickToPlaceArmy() = {
+  def setNonOwnedCountriesOnClickToPlaceArmy() = {
     countries.foreach { case (name, country) =>
       if (!isCountryOwned(country)) {
         country.setClickAction(() => {
@@ -90,8 +89,30 @@ case class InitPlaceState(players: List[Player], countries: Map[String, Country]
     }
   }
 
-  val onClickPlaceArmyEvent = LogicEvent(List(() => activePlayer.isHuman), List(setCountriesOnClickToPlaceArmy))
+
+  def areAllCountriesOwned = countries.forall(_._2.owner.nonEmpty)
+  def setOwnedCountriesOnClickToPlaceArmy() = {
+    countries.foreach { case (name, country) =>
+      if (country.owner.getOrElse(new Player(false)) == activePlayer) {
+        country.setClickAction(() => {
+          country.addArmies(1)
+          activePlayer.removeAvailableArmies(1)
+          endPlayersTurn()
+        }
+        )
+      }
+    }
+  }
+
+
+
+
+
+  val onClickPlaceArmyEvent = LogicEvent(List(() => activePlayer.isHuman), List(setNonOwnedCountriesOnClickToPlaceArmy))
   lm.addEvent(onClickPlaceArmyEvent)
+  val ownedCountryPlaceArmyEvent = LogicEvent(List(()=>areAllCountriesOwned), List(setOwnedCountriesOnClickToPlaceArmy))
+  lm.addEvent(ownedCountryPlaceArmyEvent)
+
 
 
 
