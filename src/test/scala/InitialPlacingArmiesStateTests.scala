@@ -66,8 +66,50 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers{
       initialPlacementState.activePlayer shouldBe compPlayer
     }
 
+    "Not place a 2nd army if clicked multiple times" in {
+      val mockCountryFactory = new CountryFactory(){
+        override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
+          new Country(name, origPoints){
+            override def setClickAction(action:()=>Unit): Unit ={
+              _clickAction = action
+            }
+          }
+        }
+      }
+      val mockPlayer = new Player(true)
+      mockPlayer.addAvailableArmies(5)
 
+      val country1 = mockCountryFactory.newCountry("mock1", List())
+      val country2 = mockCountryFactory.newCountry("mock2", List())
+      val mockCountries = Map[String,Country]("mock1" -> country1, "mock2" -> country2)
+      val initialPlacementState = InitPlaceState(List(mockPlayer), mockCountries)
+
+      initialPlacementState.update()
+      country1.getClickAction()()
+      country1.getClickAction()()
+      country1.getClickAction()()
+      country1.getClickAction()()
+
+      country1.armies shouldBe 1
+      country1.owner shouldBe Some(mockPlayer)
+      mockPlayer.availableArmies shouldBe 4
+    }
   }
+
+
+
+
+  "If the active player has no available armies left, the state should activate the return transition" in {
+    val mockPlayer = new Player(true)
+    val mockCountries = Map[String,Country]()
+    val initialPlacementState = InitPlaceState(List(mockPlayer), mockCountries)
+
+    initialPlacementState.update()
+
+    initialPlacementState.returnState shouldBe true
+  }
+
+
 
 
 

@@ -64,27 +64,6 @@ case class InitPlaceState(players: List[Player], countries: Map[String, Country]
 
   var activePlayer = players.head
 
-    def isCountryOwned(country: Country): Boolean = country.owner.nonEmpty
-    def setCountriesOnClickToPlaceArmy() = {
-      countries.foreach { case (name, country) =>
-        if (!isCountryOwned(country)) {
-          country.setClickAction(() => {
-            country.setOwner(activePlayer)
-            country.addArmies(1)
-            activePlayer.removeAvailableArmies(1)
-            endPlayersTurn()
-          }
-          )
-        }
-      }
-    }
-
-    val onClickPlaceArmyEvent = LogicEvent(List(()=>activePlayer.isHuman), List(setCountriesOnClickToPlaceArmy))
-    lm.addEvent(onClickPlaceArmyEvent)
-
-
-  override val transitions: List[Transition] = Nil
-
   def endPlayersTurn(): Unit = {
     countries.foreach(_._2.setClickAction(() => {}))
 
@@ -95,4 +74,30 @@ case class InitPlaceState(players: List[Player], countries: Map[String, Country]
 
   }
 
+  def isCountryOwned(country: Country): Boolean = country.owner.nonEmpty
+
+  def setCountriesOnClickToPlaceArmy() = {
+    countries.foreach { case (name, country) =>
+      if (!isCountryOwned(country)) {
+        country.setClickAction(() => {
+          country.setOwner(activePlayer)
+          country.addArmies(1)
+          activePlayer.removeAvailableArmies(1)
+          endPlayersTurn()
+        }
+        )
+      }
+    }
+  }
+
+  val onClickPlaceArmyEvent = LogicEvent(List(() => activePlayer.isHuman), List(setCountriesOnClickToPlaceArmy))
+  lm.addEvent(onClickPlaceArmyEvent)
+
+
+
+
+
+
+  val returnTrans = ReturnTransition(List(()=>players.forall(_.availableArmies == 0)))
+  override val transitions: List[Transition] = List(returnTrans)
 }
