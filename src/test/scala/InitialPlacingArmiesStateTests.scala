@@ -187,14 +187,50 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers{
     initialPlacementState.returnState shouldBe true
   }
 
+  "When there are only 3 players, each player should start with 35 available armies" in {
+    val humanPlayer = new Player(true)
+    val compPlayer = new Player(false)
+    val compPlayer2 = new Player(false)
+    val countries = Map[String, Country]()
+    val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2), countries)
 
+    state.update()
 
+    humanPlayer.availableArmies shouldBe 35
+    compPlayer.availableArmies shouldBe 35
+    compPlayer2.availableArmies shouldBe 35
+  }
 
+  "When there are only 4 players, each player should start with 30 available armies" in {
+    val humanPlayer = new Player(true)
+    val compPlayer = new Player(false)
+    val compPlayer2 = new Player(false)
+    val compPlayer3 = new Player(false)
+    val countries = Map[String, Country]()
+    val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2, compPlayer3), countries)
 
+    state.update()
 
+    humanPlayer.availableArmies shouldBe 30
+    compPlayer.availableArmies shouldBe 30
+    compPlayer2.availableArmies shouldBe 30
+  }
 
+  "When there are only 5 players, each player should start with 25 available armies" in {
+    val humanPlayer = new Player(true)
+    val compPlayer = new Player(false)
+    val compPlayer2 = new Player(false)
+    val compPlayer3 = new Player(false)
+    val compPlayer4 = new Player(false)
+    val countries = Map[String, Country]()
+    val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2, compPlayer3, compPlayer4), countries)
 
+    state.update()
 
+    humanPlayer.availableArmies shouldBe 25
+    compPlayer.availableArmies shouldBe 25
+    compPlayer2.availableArmies shouldBe 25
+  }
 
 
   def initGraphics(root: Pane): Unit ={

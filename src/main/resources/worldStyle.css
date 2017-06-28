@@ -1,9 +1,27 @@
 
 
 
-.test {
+.worldMap {
     -fx-background-image: url('map.jpg');
     -fx-background-repeat: no-repeat;
-    -fx-border-color: red;
     -fx-background-size: stretch;
+    -fx-border-color: red;
+}
+
+.country{
+    -fx-border-color: red;
+}
+
+.polygon{
+    -fx-background-color: transparent;
+    -fx-border-color: yellow;
+}
+
+.armyDisplay{
+    -fx-background-color: linear-gradient(#ff5400, #be1d00);
+    -fx-background-radius: 30;
+    -fx-background-insets: 0;
+    -fx-border-width: 1;
+    -fx-border-color: black;
+    -fx-effect: dropshadow(gaussian, black, 20, .1, -2, -2);
 }

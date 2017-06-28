@@ -1,3 +1,4 @@
+import javafx.animation.AnimationTimer
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 
@@ -13,12 +14,18 @@ object Main extends JFXApp {
 
   val worldUI = new WorldMap(new CountryFactory, List(new Player(true), new Player(false)))
 
-
+  val gameLoop = new AnimationTimer() {
+    override def handle(now: Long): Unit = {
+      worldUI.baseState.update()
+    }
+  }
 
   stage = new PrimaryStage() {
     scene = new Scene(worldUI, 1000, 800)
   }
 
 
-
+  worldUI.init()
+  worldUI.enableDebug()
+  gameLoop.start()
 }
