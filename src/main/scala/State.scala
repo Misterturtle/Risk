@@ -139,12 +139,35 @@ case class InitPlaceState(players: List[Player], countries: Map[String, Country]
   lm.addEvent(ownedCountryPlaceArmyEvent)
 
 
-  val compPlayerTurnTrans = ForwardTransition(List(() => !isActivePlayerHuman), CompInitPlaceAIState(activePlayer, endPlayersTurn))
+  val compPlayerTurnTrans = ForwardTransition(List(() => !isActivePlayerHuman), CompInitPlaceAIState(activePlayer, endPlayersTurn, countries))
   val returnTrans = ReturnTransition(List(() => players.forall(_.availableArmies == 0), () => _setupComplete))
   override val transitions: List[Transition] = List(returnTrans, compPlayerTurnTrans)
 }
 
-case class CompInitPlaceAIState(player: Player, endTurn: EndTurnFunction) extends State {
+case class CompInitPlaceAIState(player: Player, endTurn: EndTurnFunction, countries: Map[String, Country]) extends State {
+
+  val areAllCountriesOwned = countries.forall(_._2.owner.nonEmpty)
+
+
+  def placeArmyOnNonOwnedCountry() = {
+    val nonOwnedCountry = countries.find(_._2.owner.isEmpty).get
+    nonOwnedCountry._2.addArmies(1)
+    nonOwnedCountry._2.setOwner(player)
+    player.removeAvailableArmies(1)
+  }
+
+  def placeArmyOnOwnedCountry() = {
+    val ownedCountry = countries.find(_._2.owner.contains(player)).get
+    ownedCountry._2.addArmies(1)
+    ownedCountry._2.setOwner(player)
+    player.removeAvailableArmies(1)
+  }
+
+
+  val nonOwnedCountryPlacementEvent = LogicEvent(List(()=> !areAllCountriesOwned), List(placeArmyOnNonOwnedCountry _))
+  lm.addEvent(nonOwnedCountryPlacementEvent)
+  val ownedCountryPlacementEvent = LogicEvent(List(() => areAllCountriesOwned), List(placeArmyOnOwnedCountry _))
+  lm.addEvent(ownedCountryPlacementEvent)
 
 
   override val transitions: List[Transition] = Nil

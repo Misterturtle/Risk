@@ -187,7 +187,7 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with Mockito
         state.update()
 
 
-        state.forwardState shouldBe Some(CompInitPlaceAIState(compPlayer, state.endPlayersTurn))
+        state.forwardState shouldBe Some(CompInitPlaceAIState(compPlayer, state.endPlayersTurn, Map[String,Country]()))
   }
 
 
