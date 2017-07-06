@@ -48,7 +48,6 @@ class StateTests extends FreeSpec with Matchers {
   "A state should not forward any longer if the forwarded state has a returnState of true" in {
 
     var forwardStateUpdated = false
-
     val forwardTransState = new TestState(Nil){
       _returnState = true
 
@@ -66,6 +65,20 @@ class StateTests extends FreeSpec with Matchers {
     ts.update()
 
     forwardStateUpdated shouldBe false
+  }
+
+  "When returning from a state, the _returnState flag should be reset" in {
+    val forwardTransState = new TestState(Nil){
+      _returnState = true
+    }
+    val ts = new TestState(Nil){
+      _forwardState = Some(forwardTransState)
+    }
+
+    ts.update()
+
+    ts.forwardState shouldBe None
+    forwardTransState.returnState shouldBe false
   }
 
   "When updating, A state should update it's logic machine after checking for state transitions" in {

@@ -1,9 +1,12 @@
-import javafx.event.EventHandler
-import javafx.scene.input.MouseEvent
+import javafx.embed.swing.JFXPanel
 
-import org.scalatest.{FreeSpec, Matchers}
+import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito._
+import org.mockito.invocation.InvocationOnMock
+import org.mockito.stubbing.Answer
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{Matchers, FreeSpec}
 
-import scala.collection.mutable.ListBuffer
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.Scene
 import scalafx.scene.layout.Pane
@@ -11,233 +14,198 @@ import scalafx.scene.layout.Pane
 /**
   * Created by Harambe on 6/18/2017.
   */
-class InitialPlacingArmiesStateTests extends FreeSpec with Matchers{
+class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with MockitoSugar {
+  val test = new JFXPanel()
 
-  "If a country is not owned during InitPlaceState and the active player is human, it should" - {
 
-    "Have an onClickAction to place an army from a player" in {
-      val mockCountryFactory = new CountryFactory(){
-        override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
-          new Country(name, origPoints){
-            override def setClickAction(action:()=>Unit): Unit ={
-              _clickAction = action
-            }
-          }
-        }
-      }
-      val mockPlayer = new Player(true)
-      mockPlayer.addAvailableArmies(5)
+  "If a country is not owned during InitPlaceState and the active player is human, when clicked it should" - {
 
-      val country1 = mockCountryFactory.newCountry("mock1", List())
-      val country2 = mockCountryFactory.newCountry("mock2", List())
-      val mockCountries = Map[String,Country]("mock1" -> country1, "mock2" -> country2)
-      val initialPlacementState = InitPlaceState(List(mockPlayer), mockCountries)
+    val mockPlayer = mock[HumanPlayer]
+    when(mockPlayer.availableArmies).thenReturn(35)
+    val mockPlayer2 = mock[HumanPlayer]
+    val mockPlayer3 = mock[ComputerPlayer]
+    val mockCountry = mock[Country]
+    when(mockCountry.owner).thenReturn(None)
+    interceptClickActions(mockCountry)
 
-      initialPlacementState.update()
-      country1.getClickAction()()
+    val mockCountries = Map[String, Country]("country1" -> mockCountry)
+    val initialPlacementState = InitPlaceState(List(mockPlayer, mockPlayer2, mockPlayer3), mockCountries)
 
-      country1.armies shouldBe 1
-      country1.owner shouldBe Some(mockPlayer)
-      mockPlayer.availableArmies shouldBe 4
+    initialPlacementState.setup()
+    initialPlacementState.update()
+    mockCountry.doClickAction()
+
+    "Remove an army from the player" in {
+      verify(mockPlayer, times(1)).removeAvailableArmies(1)
     }
 
+    "Set the countries owner to the player" in {
+      verify(mockCountry, times(1)).setOwner(mockPlayer)
+    }
+
+    "Add one to the countries armies" in {
+      verify(mockCountry, times(1)).addArmies(1)
+    }
 
     "End the turn after an army is placed" in {
-      val mockCountryFactory = new CountryFactory(){
-        override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
-          new Country(name, origPoints){
-            override def setClickAction(action:()=>Unit): Unit ={
-              _clickAction = action
-            }
-          }
-        }
-      }
-      val mockPlayer = new Player(true)
-      mockPlayer.addAvailableArmies(5)
-      val compPlayer = new Player(false)
-
-      val country1 = mockCountryFactory.newCountry("mock1", List())
-      val mockCountries = Map[String,Country]("mock1" -> country1)
-      val initialPlacementState = InitPlaceState(List(mockPlayer, compPlayer), mockCountries)
-
-      initialPlacementState.update()
-      country1.getClickAction()()
-
-      initialPlacementState.activePlayer shouldBe compPlayer
+      initialPlacementState.activePlayer shouldBe mockPlayer2
     }
 
     "Not place a 2nd army if clicked multiple times" in {
-      val mockCountryFactory = new CountryFactory(){
-        override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
-          new Country(name, origPoints){
-            override def setClickAction(action:()=>Unit): Unit ={
-              _clickAction = action
-            }
-          }
-        }
-      }
-      val mockPlayer = new Player(true)
-      mockPlayer.addAvailableArmies(5)
-
-      val country1 = mockCountryFactory.newCountry("mock1", List())
-      val country2 = mockCountryFactory.newCountry("mock2", List())
-      val mockCountries = Map[String,Country]("mock1" -> country1, "mock2" -> country2)
-      val initialPlacementState = InitPlaceState(List(mockPlayer), mockCountries)
-
-      initialPlacementState.update()
-      country1.getClickAction()()
-      country1.getClickAction()()
-      country1.getClickAction()()
-      country1.getClickAction()()
-
-      country1.armies shouldBe 1
-      country1.owner shouldBe Some(mockPlayer)
-      mockPlayer.availableArmies shouldBe 4
+      mockCountry.doClickAction()
+      verify(mockCountry, times(1)).setOwner(mockPlayer)
+      verify(mockCountry, times(1)).addArmies(1)
     }
   }
+
 
   "A player should not be able to place a 2nd army on a country until all countries are owned" in {
-    val mockCountryFactory = new CountryFactory(){
-      override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
-        new Country(name, origPoints){
-          override def setClickAction(action:()=>Unit): Unit ={
-            _clickAction = action
-          }
-        }
-      }
-    }
-    val mockPlayer = new Player(true)
-    mockPlayer.addAvailableArmies(5)
 
-    val country1 = mockCountryFactory.newCountry("mock1", List())
-    country1.setOwner(mockPlayer)
-    val country2 = mockCountryFactory.newCountry("mock2", List())
-    val mockCountries = Map[String,Country]("mock1" -> country1, "mock2" -> country2)
-    val initialPlacementState = InitPlaceState(List(mockPlayer), mockCountries)
-
+    val mockPlayer = mock[HumanPlayer]
+    when(mockPlayer.availableArmies).thenReturn(35)
+    val mockPlayer2 = mock[HumanPlayer]
+    val mockPlayer3 = mock[ComputerPlayer]
+    val mockCountry = mock[Country]
+    when(mockCountry.owner).thenReturn(Some(mockPlayer))
+    val mockCountry2 = mock[Country]
+    when(mockCountry2.owner).thenReturn(Some(mockPlayer))
+    val mockCountry3 = mock[Country]
+    when(mockCountry3.owner).thenReturn(None)
+    interceptClickActions(mockCountry)
+    interceptClickActions(mockCountry3)
+    val mockCountries = Map[String, Country]("country1" -> mockCountry, "country2" -> mockCountry2, "country3" -> mockCountry3)
+    val initialPlacementState = InitPlaceState(List(mockPlayer, mockPlayer2, mockPlayer3), mockCountries)
+    initialPlacementState.setup()
     initialPlacementState.update()
-    country1.getClickAction()()
 
-    country1.armies shouldBe 0
-    mockPlayer.availableArmies shouldBe 5
+    mockCountry.doClickAction()
+    mockCountry3.doClickAction()
+
+    verify(mockCountry, never()).addArmies(any())
+    verify(mockCountry3, times(1)).addArmies(any())
   }
 
-  "If all countries are owned, a player should" - {
+  "If all countries are owned, when attempting to click on a country a player should" - {
+
+    val mockPlayer = mock[HumanPlayer]
+    val mockPlayer2 = mock[HumanPlayer]
+    val mockCountry = mock[Country]
+    when(mockCountry.owner).thenReturn(Some(mockPlayer))
+    interceptClickActions(mockCountry)
+    val mockCountry2 = mock[Country]
+    when(mockCountry2.owner).thenReturn(Some(mockPlayer))
+    val mockCountries = Map[String, Country]("mock1" -> mockCountry, "mock2" -> mockCountry2)
+    val initialPlacementState = InitPlaceState(List(mockPlayer, mockPlayer2), mockCountries)
+    initialPlacementState.update()
+    mockCountry.doClickAction()
 
     "Be able to place an army on any country he owns" in {
-      val mockCountryFactory = new CountryFactory(){
-        override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
-          new Country(name, origPoints){
-            override def setClickAction(action:()=>Unit): Unit ={
-              _clickAction = action
-            }
-          }
-        }
-      }
-      val mockPlayer = new Player(true)
-      mockPlayer.addAvailableArmies(5)
-
-      val country1 = mockCountryFactory.newCountry("mock1", List())
-      country1.setOwner(mockPlayer)
-      country1.addArmies(1)
-      val mockCountries = Map[String,Country]("mock1" -> country1)
-      val initialPlacementState = InitPlaceState(List(mockPlayer), mockCountries)
-
-      initialPlacementState.update()
-      country1.getClickAction()()
-
-      country1.armies shouldBe 2
-      mockPlayer.availableArmies shouldBe 4
+      verify(mockCountry, times(1)).addArmies(1)
+      verify(mockPlayer, times(1)).removeAvailableArmies(1)
     }
 
     "Still end their turn after placing an army" in {
-      val mockCountryFactory = new CountryFactory(){
-        override def newCountry(name: String, origPoints: List[(Double, Double)]) : Country = {
-          new Country(name, origPoints){
-            override def setClickAction(action:()=>Unit): Unit ={
-              _clickAction = action
-            }
-          }
-        }
-      }
-      val mockPlayer = new Player(true)
-      mockPlayer.addAvailableArmies(5)
-      val compPlayer = new Player(false)
-
-      val country1 = mockCountryFactory.newCountry("mock1", List())
-      country1.setOwner(mockPlayer)
-      val mockCountries = Map[String,Country]("mock1" -> country1)
-      val initialPlacementState = InitPlaceState(List(mockPlayer, compPlayer), mockCountries)
-
-      initialPlacementState.update()
-      country1.getClickAction()()
-
-      initialPlacementState.activePlayer shouldBe compPlayer
+      initialPlacementState.activePlayer shouldBe mockPlayer2
     }
   }
 
 
   "If the active player has no available armies left, the state should activate the return transition" in {
-    val mockPlayer = new Player(true)
-    val mockCountries = Map[String,Country]()
+    val mockPlayer = mock[HumanPlayer]
+    val mockCountries = Map[String, Country]()
     val initialPlacementState = InitPlaceState(List(mockPlayer), mockCountries)
+    initialPlacementState.setup()
 
     initialPlacementState.update()
 
     initialPlacementState.returnState shouldBe true
   }
 
-  "When there are only 3 players, each player should start with 35 available armies" in {
-    val humanPlayer = new Player(true)
-    val compPlayer = new Player(false)
-    val compPlayer2 = new Player(false)
-    val countries = Map[String, Country]()
-    val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2), countries)
 
-    state.update()
+  "On the first update cycle of the InitPlaceState, players should receive certain amounts of armies" - {
 
-    humanPlayer.availableArmies shouldBe 35
-    compPlayer.availableArmies shouldBe 35
-    compPlayer2.availableArmies shouldBe 35
-  }
+    "When there are only 3 players, each player should start with 35 available armies" in {
+      val humanPlayer = mock[HumanPlayer]
+      val compPlayer = mock[ComputerPlayer]
+      val compPlayer2 = mock[ComputerPlayer]
+      val countries = Map[String, Country]()
+      val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2), countries)
 
-  "When there are only 4 players, each player should start with 30 available armies" in {
-    val humanPlayer = new Player(true)
-    val compPlayer = new Player(false)
-    val compPlayer2 = new Player(false)
-    val compPlayer3 = new Player(false)
-    val countries = Map[String, Country]()
-    val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2, compPlayer3), countries)
+      state.update()
 
-    state.update()
+      verify(humanPlayer, times(1)).addAvailableArmies(35)
+      verify(compPlayer, times(1)).addAvailableArmies(35)
+      verify(compPlayer2, times(1)).addAvailableArmies(35)
+    }
 
-    humanPlayer.availableArmies shouldBe 30
-    compPlayer.availableArmies shouldBe 30
-    compPlayer2.availableArmies shouldBe 30
-  }
+    "When there are only 4 players, each player should start with 30 available armies" in {
+      val humanPlayer = mock[HumanPlayer]
+      val compPlayer = mock[ComputerPlayer]
+      val compPlayer2 = mock[ComputerPlayer]
+      val compPlayer3 = mock[ComputerPlayer]
+      val countries = Map[String, Country]()
+      val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2, compPlayer3), countries)
 
-  "When there are only 5 players, each player should start with 25 available armies" in {
-    val humanPlayer = new Player(true)
-    val compPlayer = new Player(false)
-    val compPlayer2 = new Player(false)
-    val compPlayer3 = new Player(false)
-    val compPlayer4 = new Player(false)
-    val countries = Map[String, Country]()
-    val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2, compPlayer3, compPlayer4), countries)
+      state.update()
 
-    state.update()
+      verify(humanPlayer, times(1)).addAvailableArmies(30)
+      verify(compPlayer, times(1)).addAvailableArmies(30)
+      verify(compPlayer2, times(1)).addAvailableArmies(30)
+      verify(compPlayer3, times(1)).addAvailableArmies(30)
+    }
 
-    humanPlayer.availableArmies shouldBe 25
-    compPlayer.availableArmies shouldBe 25
-    compPlayer2.availableArmies shouldBe 25
-  }
+    "When there are only 5 players, each player should start with 25 available armies" in {
+      val humanPlayer = mock[HumanPlayer]
+      val compPlayer = mock[ComputerPlayer]
+      val compPlayer2 = mock[ComputerPlayer]
+      val compPlayer3 = mock[ComputerPlayer]
+      val compPlayer4 = mock[ComputerPlayer]
+      val countries = Map[String, Country]()
+      val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2, compPlayer3, compPlayer4), countries)
 
+      state.update()
 
-  def initGraphics(root: Pane): Unit ={
-    new PrimaryStage{
-      scene = new Scene(root, 1000, 800)
+      verify(humanPlayer, times(1)).addAvailableArmies(25)
+      verify(compPlayer, times(1)).addAvailableArmies(25)
+      verify(compPlayer2, times(1)).addAvailableArmies(25)
+      verify(compPlayer3, times(1)).addAvailableArmies(25)
+      verify(compPlayer4, times(1)).addAvailableArmies(25)
     }
   }
 
+  "The _forward state of InitPlaceState should be CompInitPlaceAI if the active player is a computer player and has equal or more armies than another player" in {
+        val compPlayer = mock[ComputerPlayer]
+        when(compPlayer.availableArmies).thenReturn(35)
+        val compPlayer2 = mock[ComputerPlayer]
+        when(compPlayer2.availableArmies).thenReturn(35)
+        val compPlayer3 = mock[ComputerPlayer]
+        when(compPlayer3.availableArmies).thenReturn(35)
+        val countries = Map[String, Country]()
+        val state = InitPlaceState(List(compPlayer, compPlayer2, compPlayer3), countries)
+
+        state.setup()
+        state.update()
+
+
+        state.forwardState shouldBe Some(CompInitPlaceAIState(compPlayer, state.endPlayersTurn))
+  }
+
+
+
+  def interceptClickActions(mockCountry: Country): Unit = {
+    var onClickArgs = () => {}
+
+    doAnswer(new Answer[Unit] {
+      override def answer(invocation: InvocationOnMock): Unit = {
+        onClickArgs = invocation.getArgument(0).asInstanceOf[() => Unit]
+      }
+    }).when(mockCountry).setClickAction(any())
+
+    doAnswer(new Answer[Unit] {
+      override def answer(invocation: InvocationOnMock): Unit = {
+        onClickArgs()
+      }
+    }).when(mockCountry).doClickAction()
+  }
 
 }

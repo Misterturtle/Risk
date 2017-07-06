@@ -48,14 +48,12 @@ class armyDisplay(armies: SimpleIntegerProperty, countryWidth:ReadOnlyDoubleProp
   init()
 }
 
-class Country(val name: String, val origPoints: List[(Double, Double)]) extends StackPane {
+class Country(val name: String, val origPoints: List[(Double, Double)]) extends StackPane with Clickable {
 
-  val origWidth = origPoints.maxBy(_._1)._1 - origPoints.minBy(_._1)._1
-  val origHeight = origPoints.maxBy(_._2)._2 - origPoints.minBy(_._2)._2
+  val origWidth = if (origPoints.nonEmpty) origPoints.maxBy(_._1)._1 - origPoints.minBy(_._1)._1 else 0
+  val origHeight = if(origPoints.nonEmpty) origPoints.maxBy(_._2)._2 - origPoints.minBy(_._2)._2 else 0
   val xScale = new SimpleDoubleProperty()
   val yScale = new SimpleDoubleProperty()
-
-  protected var _clickAction = () => {}
 
   private var _owner:Option[Player] = None
   def owner = _owner
@@ -71,27 +69,25 @@ class Country(val name: String, val origPoints: List[(Double, Double)]) extends 
   val polygon = new Polygon(new javafx.scene.shape.Polygon())
 
 
-  def setClickAction(action: ()=>Unit): Unit ={
-    _clickAction = action
-    polygon.setOnMouseClicked(new EventHandler[MouseEvent] {
-      override def handle(event: MouseEvent): Unit = action()
-    })
-  }
-
-  def getClickAction(): ()=>Unit = _clickAction
-
   def initShape(parentXScale:SimpleDoubleProperty, parentYScale:SimpleDoubleProperty): Unit ={
     origPoints.foreach{case (x,y) => polygon.getPoints.addAll(x,y)}
-    children.add(polygon)
-    children.add(ad)
     xScale.bind(parentXScale)
     yScale.bind(parentYScale)
+
+
     styleClass.setAll("country")
-    polygon.setFill(Color.rgb(200,0,0,.3))
+    polygon.setFill(Color.Transparent)
+
     polygon.toFront()
     this.setShape(polygon)
     this.setPickOnBounds(false)
+    polygon.setOnMouseClicked(new EventHandler[MouseEvent] {
+      override def handle(event: MouseEvent): Unit = doClickAction()
+    })
+    children.add(polygon)
+    children.add(ad)
   }
+
 
   def resizePoly(): Unit ={
     polygon.getPoints.removeAll(polygon.points)
@@ -112,6 +108,4 @@ class Country(val name: String, val origPoints: List[(Double, Double)]) extends 
     )
     polygon.setFill(listOfColors(Random.nextInt(9)))
   }
-
-
 }

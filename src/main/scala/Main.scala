@@ -12,7 +12,7 @@ import scalafx.scene.layout.AnchorPane
   */
 object Main extends JFXApp {
 
-  val worldUI = new WorldMap(new CountryFactory, List(new Player(true), new Player(false)))
+  val worldUI = new WorldMap(new CountryFactory, List(new HumanPlayer(), new HumanPlayer()))
 
   val gameLoop = new AnimationTimer() {
     override def handle(now: Long): Unit = {

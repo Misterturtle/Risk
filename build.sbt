@@ -10,4 +10,10 @@ addCompilerPlugin("org.scalamacros" % "paradise_2.11.8" % "2.1.0")
 
 libraryDependencies += "org.scalafx" %% "scalafxml-core-sfx8" % "0.3"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4"
+// https://mvnrepository.com/artifact/org.mockito/mockito-core
+libraryDependencies += "org.mockito" % "mockito-core" % "2.8.9" % "test"
+
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+
+libraryDependencies += "org.testfx" % "testfx-core" % "4.0.4-alpha" % "test"
