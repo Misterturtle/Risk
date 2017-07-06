@@ -164,9 +164,9 @@ case class CompInitPlaceAIState(player: Player, endTurn: EndTurnFunction, countr
   }
 
 
-  val nonOwnedCountryPlacementEvent = LogicEvent(List(()=> !areAllCountriesOwned), List(placeArmyOnNonOwnedCountry _))
+  val nonOwnedCountryPlacementEvent = LogicEvent(List(()=> !areAllCountriesOwned), List(placeArmyOnNonOwnedCountry _, endTurn))
   lm.addEvent(nonOwnedCountryPlacementEvent)
-  val ownedCountryPlacementEvent = LogicEvent(List(() => areAllCountriesOwned), List(placeArmyOnOwnedCountry _))
+  val ownedCountryPlacementEvent = LogicEvent(List(() => areAllCountriesOwned), List(placeArmyOnOwnedCountry _, endTurn))
   lm.addEvent(ownedCountryPlacementEvent)
 
 
