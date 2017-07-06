@@ -38,6 +38,20 @@ class CompInitPlaceAITests extends FreeSpec with Matchers with MockitoSugar {
     turnEnded shouldBe true
   }
 
+  "After placing an army on a non-owned country, the return state should be active" in {
+    val mockPlayer = mock[ComputerPlayer]
+    val mockCountry = mock[Country]
+    when(mockCountry.owner).thenReturn(Some(mockPlayer))
+    val mockCountry2 = mock[Country]
+    when(mockCountry2.owner).thenReturn(None)
+    val mockCountries = Map[String,Country]("mock1" -> mockCountry, "mock2" -> mockCountry2)
+    val state = CompInitPlaceAIState(mockPlayer, ()=>{}, mockCountries)
+
+    state.update()
+
+    state.returnState shouldBe true
+  }
+
 
   "If all countries are owned, the comp player should place an army on a country the player owns" in {
     val mockPlayer = mock[ComputerPlayer]
@@ -71,6 +85,23 @@ class CompInitPlaceAITests extends FreeSpec with Matchers with MockitoSugar {
 
     turnEnded shouldBe true
   }
+
+
+  "After placing an army on an owned country, the return state should be active" in {
+    val mockPlayer = mock[ComputerPlayer]
+    val mockPlayer2 = mock[ComputerPlayer]
+    val mockCountry = mock[Country]
+    when(mockCountry.owner).thenReturn(Some(mockPlayer))
+    val mockCountry2 = mock[Country]
+    when(mockCountry2.owner).thenReturn(Some(mockPlayer2))
+    val mockCountries = Map[String,Country]("mock1" -> mockCountry, "mock2" -> mockCountry2)
+    val state = CompInitPlaceAIState(mockPlayer, ()=>{}, mockCountries)
+
+    state.update()
+
+    state.returnState shouldBe true
+  }
+
 
 
 

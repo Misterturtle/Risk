@@ -163,10 +163,12 @@ case class CompInitPlaceAIState(player: Player, endTurn: EndTurnFunction, countr
     player.removeAvailableArmies(1)
   }
 
+  def activateReturnState() = _returnState = true
 
-  val nonOwnedCountryPlacementEvent = LogicEvent(List(()=> !areAllCountriesOwned), List(placeArmyOnNonOwnedCountry _, endTurn))
+
+  val nonOwnedCountryPlacementEvent = LogicEvent(List(()=> !areAllCountriesOwned), List(placeArmyOnNonOwnedCountry _, endTurn, activateReturnState _))
   lm.addEvent(nonOwnedCountryPlacementEvent)
-  val ownedCountryPlacementEvent = LogicEvent(List(() => areAllCountriesOwned), List(placeArmyOnOwnedCountry _, endTurn))
+  val ownedCountryPlacementEvent = LogicEvent(List(() => areAllCountriesOwned), List(placeArmyOnOwnedCountry _, endTurn, activateReturnState _))
   lm.addEvent(ownedCountryPlacementEvent)
 
 
