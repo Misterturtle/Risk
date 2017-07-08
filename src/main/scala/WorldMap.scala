@@ -96,10 +96,13 @@ class WorldMap(countryFactory: CountryFactory, val players: List[Player]) extend
   }
 
 
+
+
   def init(): Unit = {
     styleMap()
     scaleMap()
     initCountries()
+    players.zipWithIndex.foreach{e => e._1.init(e._2 + 1)}
 
     //DEBUG
     enableDebug()

@@ -193,10 +193,13 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with Mockito
   "After forwarding the state to a CompInitPlaceAI, the active player should change" in {
     val compPlayer = mock[ComputerPlayer]
     when(compPlayer.availableArmies).thenReturn(35)
+    //when(compPlayer.playerNumber).thenReturn(1)
     val compPlayer2 = mock[ComputerPlayer]
     when(compPlayer2.availableArmies).thenReturn(35)
+    //when(compPlayer2.playerNumber).thenReturn(2)
     val compPlayer3 = mock[ComputerPlayer]
     when(compPlayer3.availableArmies).thenReturn(35)
+    //when(compPlayer3.playerNumber).thenReturn(3)
     val country1 = mock[Country]
     when(country1.owner).thenReturn(None)
     val countries = Map[String,Country]("Country1" -> country1)
@@ -204,13 +207,16 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with Mockito
 
     state.setup()
     state.update()
+    println(state.activePlayer)
     state.activePlayer shouldBe compPlayer
     state.update()
+    println(state.activePlayer)
     state.activePlayer shouldBe compPlayer2
     state.update()
-
-    state.update()
+    println(state.activePlayer)
     state.activePlayer shouldBe compPlayer3
+    state.update()
+    println(state.activePlayer)
     state.activePlayer shouldBe compPlayer
   }
 
