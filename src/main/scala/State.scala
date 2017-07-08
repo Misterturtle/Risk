@@ -86,10 +86,13 @@ case class InitPlaceState(players: List[Player], countries: Map[String, Country]
   val endPlayersTurn: EndTurnFunction = ()=>{
     countries.foreach(_._2.setClickAction(() => {}))
 
-    if (players.isDefinedAt(activePlayer.playerNumber + 1))
-      _activePlayer = players(activePlayer.playerNumber + 1)
-    else
-      _activePlayer = players.head
+    val nextPlayer = players.find(_.playerNumber == activePlayer.playerNumber + 1)
+    nextPlayer match {
+      case Some(player) =>
+        _activePlayer = player
+      case None =>
+        _activePlayer = players.head
+    }
   }
 
   def isCountryOwned(country: Country): Boolean = country.owner.nonEmpty

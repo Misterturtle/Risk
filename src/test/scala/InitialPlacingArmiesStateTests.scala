@@ -22,8 +22,11 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with Mockito
 
     val mockPlayer = mock[HumanPlayer]
     when(mockPlayer.availableArmies).thenReturn(35)
+    when(mockPlayer.playerNumber).thenReturn(1)
     val mockPlayer2 = mock[HumanPlayer]
+    when(mockPlayer2.playerNumber).thenReturn(2)
     val mockPlayer3 = mock[ComputerPlayer]
+    when(mockPlayer3.playerNumber).thenReturn(3)
     val mockCountry = mock[Country]
     when(mockCountry.owner).thenReturn(None)
     interceptClickActions(mockCountry)
@@ -88,7 +91,9 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with Mockito
   "If all countries are owned, when attempting to click on a country a player should" - {
 
     val mockPlayer = mock[HumanPlayer]
+    when(mockPlayer.playerNumber).thenReturn(1)
     val mockPlayer2 = mock[HumanPlayer]
+    when(mockPlayer2.playerNumber).thenReturn(2)
     val mockCountry = mock[Country]
     when(mockCountry.owner).thenReturn(Some(mockPlayer))
     interceptClickActions(mockCountry)
@@ -193,13 +198,13 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with Mockito
   "After forwarding the state to a CompInitPlaceAI, the active player should change" in {
     val compPlayer = mock[ComputerPlayer]
     when(compPlayer.availableArmies).thenReturn(35)
-    //when(compPlayer.playerNumber).thenReturn(1)
+    when(compPlayer.playerNumber).thenReturn(1)
     val compPlayer2 = mock[ComputerPlayer]
     when(compPlayer2.availableArmies).thenReturn(35)
-    //when(compPlayer2.playerNumber).thenReturn(2)
+    when(compPlayer2.playerNumber).thenReturn(2)
     val compPlayer3 = mock[ComputerPlayer]
     when(compPlayer3.availableArmies).thenReturn(35)
-    //when(compPlayer3.playerNumber).thenReturn(3)
+    when(compPlayer3.playerNumber).thenReturn(3)
     val country1 = mock[Country]
     when(country1.owner).thenReturn(None)
     val countries = Map[String,Country]("Country1" -> country1)
@@ -207,16 +212,12 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with Mockito
 
     state.setup()
     state.update()
-    println(state.activePlayer)
     state.activePlayer shouldBe compPlayer
     state.update()
-    println(state.activePlayer)
     state.activePlayer shouldBe compPlayer2
     state.update()
-    println(state.activePlayer)
     state.activePlayer shouldBe compPlayer3
     state.update()
-    println(state.activePlayer)
     state.activePlayer shouldBe compPlayer
   }
 
