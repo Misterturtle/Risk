@@ -8,16 +8,16 @@ trait Transition {
   val conditions: List[() => Boolean]
 }
 
-case class ForwardTransition(conditions: List[() => Boolean], forwardTransState: State) extends Transition
+case class ForwardTransition(conditions: List[() => Boolean], forwardTransState: ()=>State) extends Transition
 
 case class ReturnTransition(conditions: List[() => Boolean]) extends Transition
 
 abstract class State(protected val lm: LogicMachine = new LogicMachine()) {
 
-  protected var _forwardState: Option[State] = None
+  protected var _forwardState: Option[()=>State] = None
   protected var _returnState: Boolean = false
 
-  def forwardState: Option[State] = _forwardState
+  def forwardState: Option[()=>State] = _forwardState
 
   val transitions: List[Transition]
 
@@ -27,7 +27,7 @@ abstract class State(protected val lm: LogicMachine = new LogicMachine()) {
     checkReactivation()
     _forwardState match {
       case Some(state) =>
-        state.update()
+        state().update()
 
       case None =>
         checkTransitions()
@@ -35,8 +35,8 @@ abstract class State(protected val lm: LogicMachine = new LogicMachine()) {
   }
 
   private def checkReactivation(): Unit = {
-    if (_forwardState.exists(_.returnState)) {
-      _forwardState.get._returnState = false
+    if (_forwardState.exists(_().returnState)) {
+      _forwardState.get()._returnState = false
       _forwardState = None
     }
 
@@ -62,7 +62,7 @@ class TestState(val transitions: List[Transition], lm: LogicMachine = new LogicM
 case class WorldMapState(initPlaceComp: () => Boolean, players: List[Player], countries: Map[String, Country]) extends State() {
 
 
-  val transToInitPlace = ForwardTransition(List(() => !initPlaceComp()), InitPlaceState(players, countries))
+  val transToInitPlace = ForwardTransition(List(() => !initPlaceComp()), ()=>InitPlaceState(players, countries))
   val transitions = List[Transition](transToInitPlace)
 }
 
@@ -139,7 +139,7 @@ case class InitPlaceState(players: List[Player], countries: Map[String, Country]
   lm.addEvent(ownedCountryPlaceArmyEvent)
 
 
-  val compPlayerTurnTrans = ForwardTransition(List(() => !isActivePlayerHuman), CompInitPlaceAIState(activePlayer, endPlayersTurn, countries))
+  val compPlayerTurnTrans = ForwardTransition(List(() => !isActivePlayerHuman), ()=>CompInitPlaceAIState(activePlayer, endPlayersTurn, countries))
   val returnTrans = ReturnTransition(List(() => players.forall(_.availableArmies == 0), () => _setupComplete))
   override val transitions: List[Transition] = List(returnTrans, compPlayerTurnTrans)
 }

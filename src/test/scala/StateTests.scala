@@ -1,62 +1,43 @@
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, Matchers}
+import org.mockito.Mockito._
 
 /**
   * Created by Harambe on 6/22/2017.
   */
-class StateTests extends FreeSpec with Matchers {
+class StateTests extends FreeSpec with Matchers with MockitoSugar {
 
   "A state should be able to forward activity to another state" in {
-
-    var hasForwarded = false
-    val forwardState = new TestState(Nil){
-      override def update(): Unit = {
-        hasForwarded = true
-      }
-    }
-
-
+    val forwardState = mock[TestState]
     val forwardConditions = List(()=>true)
-    val forwardTrans = new ForwardTransition(forwardConditions, forwardState)
+    val forwardTrans = new ForwardTransition(forwardConditions, () =>forwardState)
     val ts = new TestState(List(forwardTrans))
-    hasForwarded shouldBe false
+    verify(forwardState, times(0)).update()
 
     ts.update()
     ts.update()
 
-    hasForwarded shouldBe true
+    verify(forwardState, times(1)).update()
   }
 
   "A state should not forward activity when no transition conditions are met" in {
-    var hasForwarded = false
-    val forwardState = new TestState(Nil){
-      override def update(): Unit = {
-        hasForwarded = true
-      }
-    }
-
+    val forwardState = mock[TestState]
     val forwardConditions = List(()=>false)
-    val forwardTrans = new ForwardTransition(forwardConditions, forwardState)
+    val forwardTrans = new ForwardTransition(forwardConditions, ()=>forwardState)
     val ts = new TestState(List(forwardTrans))
-    hasForwarded shouldBe false
+    verify(forwardState, times(0)).update()
 
     ts.update()
     ts.update()
 
-    hasForwarded shouldBe false
+    verify(forwardState, times(0)).update()
   }
 
   "A state should not forward any longer if the forwarded state has a returnState of true" in {
-
-    var forwardStateUpdated = false
-    val forwardTransState = new TestState(Nil){
-      _returnState = true
-
-      override def update():Unit = {
-        forwardStateUpdated = true
-      }
-    }
+    val forwardTransState = mock[TestState]
+    when(forwardTransState.returnState).thenReturn(true)
     val ts = new TestState(Nil){
-      _forwardState = Some(forwardTransState)
+      _forwardState = Some(()=>forwardTransState)
     }
 
     ts.update()
@@ -64,7 +45,7 @@ class StateTests extends FreeSpec with Matchers {
     ts.update()
     ts.update()
 
-    forwardStateUpdated shouldBe false
+    verify(forwardTransState, times(0)).update()
   }
 
   "When returning from a state, the _returnState flag should be reset" in {
@@ -72,7 +53,7 @@ class StateTests extends FreeSpec with Matchers {
       _returnState = true
     }
     val ts = new TestState(Nil){
-      _forwardState = Some(forwardTransState)
+      _forwardState = Some(()=>forwardTransState)
     }
 
     ts.update()
@@ -104,7 +85,7 @@ class StateTests extends FreeSpec with Matchers {
         updateCounter += 1
       }
     }
-    val trans = ForwardTransition(List(()=>true), new TestState(Nil))
+    val trans = ForwardTransition(List(()=>true), ()=>new TestState(Nil))
     val ts = new TestState(List(trans), mockLM)
 
     ts.update()
