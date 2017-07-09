@@ -178,6 +178,22 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with Mockito
     }
   }
 
+  "The setup should only run on the first cycle of the initPlaceState" in {
+    val humanPlayer = mock[HumanPlayer]
+    val compPlayer = mock[ComputerPlayer]
+    val compPlayer2 = mock[ComputerPlayer]
+    val countries = Map[String, Country]()
+    val state = InitPlaceState(List(humanPlayer, compPlayer, compPlayer2), countries)
+
+    state.update()
+    state.update()
+    state.update()
+
+    verify(humanPlayer, times(1)).addAvailableArmies(35)
+    verify(compPlayer, times(1)).addAvailableArmies(35)
+    verify(compPlayer2, times(1)).addAvailableArmies(35)
+  }
+
   "The _forward state of InitPlaceState should be CompInitPlaceAI if the active player is a computer player and has equal or more armies than another player" in {
         val compPlayer = mock[ComputerPlayer]
         when(compPlayer.availableArmies).thenReturn(35)
@@ -192,7 +208,7 @@ class InitialPlacingArmiesStateTests extends FreeSpec with Matchers with Mockito
         state.update()
 
 
-        state.forwardState.get() shouldBe CompInitPlaceAIState(compPlayer, state.endPlayersTurn, Map[String,Country]())
+        state.forwardState shouldBe Some(CompInitPlaceAIState(compPlayer, state.endPlayersTurn, Map[String,Country]()))
   }
 
   "After forwarding the state to a CompInitPlaceAI, the active player should change" in {

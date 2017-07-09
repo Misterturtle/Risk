@@ -14,10 +14,10 @@ case class ReturnTransition(conditions: List[() => Boolean]) extends Transition
 
 abstract class State(protected val lm: LogicMachine = new LogicMachine()) {
 
-  protected var _forwardState: Option[()=>State] = None
+  protected var _forwardState: Option[State] = None
   protected var _returnState: Boolean = false
 
-  def forwardState: Option[()=>State] = _forwardState
+  def forwardState: Option[State] = _forwardState
 
   val transitions: List[Transition]
 
@@ -27,7 +27,7 @@ abstract class State(protected val lm: LogicMachine = new LogicMachine()) {
     checkReactivation()
     _forwardState match {
       case Some(state) =>
-        state().update()
+        state.update()
 
       case None =>
         checkTransitions()
@@ -35,8 +35,8 @@ abstract class State(protected val lm: LogicMachine = new LogicMachine()) {
   }
 
   private def checkReactivation(): Unit = {
-    if (_forwardState.exists(_().returnState)) {
-      _forwardState.get()._returnState = false
+    if (_forwardState.exists(_.returnState)) {
+      _forwardState.get._returnState = false
       _forwardState = None
     }
 
@@ -45,7 +45,7 @@ abstract class State(protected val lm: LogicMachine = new LogicMachine()) {
   private def checkTransitions(): Unit = {
     transitions.find(_.conditions.forall(_ ())) match {
       case Some(forwardTrans: ForwardTransition) =>
-        _forwardState = Some(forwardTrans.forwardTransState)
+        _forwardState = Some(forwardTrans.forwardTransState())
 
       case Some(returnTrans: ReturnTransition) =>
         _returnState = true
@@ -68,6 +68,14 @@ case class WorldMapState(initPlaceComp: () => Boolean, players: List[Player], co
 
 case class InitPlaceState(players: List[Player], countries: Map[String, Country]) extends State {
 
+  //Players are mutable
+  //Countries are mutable
+
+  //Active Player
+  //Setup Complete
+
+  //Need a way to update parent forward state to new copy of this state with slight change
+
   def activePlayer = _activePlayer
 
   private var _activePlayer = players.head
@@ -75,10 +83,7 @@ case class InitPlaceState(players: List[Player], countries: Map[String, Country]
 
   def setup(): Unit = {
     val startingArmies = 35 - (players.size - 3) * 5
-    players.foreach {
-      _.addAvailableArmies(startingArmies)
-    }
-
+    players.foreach (_.addAvailableArmies(startingArmies))
 
     _setupComplete = true
   }

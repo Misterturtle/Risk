@@ -37,7 +37,7 @@ class StateTests extends FreeSpec with Matchers with MockitoSugar {
     val forwardTransState = mock[TestState]
     when(forwardTransState.returnState).thenReturn(true)
     val ts = new TestState(Nil){
-      _forwardState = Some(()=>forwardTransState)
+      _forwardState = Some(forwardTransState)
     }
 
     ts.update()
@@ -53,7 +53,7 @@ class StateTests extends FreeSpec with Matchers with MockitoSugar {
       _returnState = true
     }
     val ts = new TestState(Nil){
-      _forwardState = Some(()=>forwardTransState)
+      _forwardState = Some(forwardTransState)
     }
 
     ts.update()
