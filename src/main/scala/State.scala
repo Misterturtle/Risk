@@ -82,6 +82,7 @@ case class InitPlaceState(players: List[Player], countries: Map[String, Country]
   private var _setupComplete = false
 
   def setup(): Unit = {
+
     val startingArmies = 35 - (players.size - 3) * 5
     players.foreach (_.addAvailableArmies(startingArmies))
 
