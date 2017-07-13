@@ -1,4 +1,4 @@
-import _root_.WorldMap.WorldMapState
+import WorldMap.WorldMapState
 
 sealed case class StateStamp(id:Int)
 

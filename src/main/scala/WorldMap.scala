@@ -1,6 +1,3 @@
-
-import _root_.WorldMap.WorldMapState
-
 import scalaz._
 import Scalaz._
 

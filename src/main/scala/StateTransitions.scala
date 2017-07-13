@@ -1,4 +1,4 @@
-import _root_.WorldMap._
+import WorldMap._
 
 import scalaz.Scalaz._
 
@@ -8,7 +8,7 @@ import scalaz.Scalaz._
 object StateTransitions {
 
 
-  def begin(stateStamp: StateStamp, wm: WorldMap): Unit = {
+  def begin(wm: WorldMap): Unit = {
     val stateTrans = for {
       a <- init[WorldMap]
       b <- state(a.copy(stateStamp = SideEffectValidator.stamp))

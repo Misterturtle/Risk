@@ -13,16 +13,9 @@ case object Selectable extends Interaction
 case object Targetable extends Interaction
 case object NoInteraction extends Interaction
 
-case class Country(name: String, armies: Int, owner: Option[Player], GUI: Pane){
+case class Country(name: String, armies: Int, owner: Option[Player], onClickAction: () => Unit){
 
-  def setOnClick(action: ()=>Unit): Country ={
-    GUI.setOnMouseClicked(new EventHandler[MouseEvent] {
-      override def handle(event: MouseEvent): Unit = action()
-    })
-      copy()
-  }
-
-
+  def setOnClick(action: ()=>Unit): Country = copy(onClickAction = action)
   def removeArmies(amount:Int): Country = copy(armies = armies - amount)
   def addArmies(amount:Int):Country = copy(armies = armies + amount)
   def setOwner(player:Player):Country = copy(owner = Some(player))
