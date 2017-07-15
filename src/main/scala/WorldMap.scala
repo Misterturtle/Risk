@@ -84,6 +84,8 @@ object WorldMap {
 
 
 
+
+
   def allocateTurnArmies(wm:WorldMap):WorldMap = {
     val armiesFromTerritories = calculateArmiesFromTerritories(wm.getActivePlayer.get, wm.countries)
     val armiesFromContinents = calculateArmiesFromContinents(wm.getActivePlayer.get, wm.countries)

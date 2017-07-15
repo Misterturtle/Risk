@@ -13,8 +13,7 @@
 }
 
 .polygon{
-    -fx-background-color: transparent;
-    -fx-border-color: black;
+    /*-fx-background-color: transparent;*/
 }
 
 .armyDisplay{

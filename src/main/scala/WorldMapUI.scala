@@ -17,6 +17,8 @@ class WorldMapUI(wm: WorldMap) extends AnchorPane {
 
   var countriesUI = initCountries(wm.countries)
 
+  val
+
 
   this.widthProperty().addListener(new ChangeListener[Number] {
     override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
@@ -44,6 +46,7 @@ class WorldMapUI(wm: WorldMap) extends AnchorPane {
       AnchorPane.setTopAnchor(ui, ui.origPoints.minBy(_._2)._2 * bgYScale.get())
       AnchorPane.setLeftAnchor(ui, ui.origPoints.minBy(_._1)._1 * bgXScale.get())
       ui.resizePoly()
+      ui.drawDebug()
       (c.name, ui)
     }.toMap
   }
@@ -69,6 +72,8 @@ class WorldMapUI(wm: WorldMap) extends AnchorPane {
         println("(" + event.getX * (1 / bgXScale.get()) + "," + event.getY * (1 / bgYScale.get()) + "),")
       }
     })
+
+
   }
 
   def updateWorldMap(worldMap:WorldMap): Unit = {
@@ -77,4 +82,5 @@ class WorldMapUI(wm: WorldMap) extends AnchorPane {
 
   styleMap()
   scaleMap()
+  enableDebug()
 }

@@ -26,9 +26,14 @@ class armyDisplay(armies: String, color:String, countryWidth: ReadOnlyDoubleProp
     circlePane.styleClass.add(1, color+"Background")
 
     circlePane.shape = Circle.apply(1)
-    circlePane.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
+
+    circlePane.maxHeightProperty().bind(countryWidth.add(countryHeight).divide(7))
+    circlePane.maxWidthProperty().bind(countryWidth.add(countryHeight).divide(7))
+
     circlePane.prefHeightProperty().bind(countryWidth.add(countryHeight).divide(7))
     circlePane.prefWidthProperty().bind(countryWidth.add(countryHeight).divide(7))
+
+    //circlePane.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE)
     circlePane.alignment = Pos.Center
     children.add(circlePane)
 
@@ -45,6 +50,7 @@ class armyDisplay(armies: String, color:String, countryWidth: ReadOnlyDoubleProp
 
     circlePane.styleClass.remove(1)
     circlePane.styleClass.add(1, color+"Background")
+    cpText.text = armies.toString
   }
 
   private def init(): Unit = {
@@ -72,7 +78,7 @@ class CountryUI(val country: Country, val origPoints: List[(Double, Double)]) ex
   val ad = new armyDisplay(country.armies.toString, country.owner.map(_.color).getOrElse("gray"), this.widthProperty(), this.heightProperty())
   val polygon = new Polygon(new javafx.scene.shape.Polygon())
 
-  def update(country: Country): Unit ={
+  def update(country: Country): Unit = {
     ad.update(country.armies, country.owner.map(_.color).getOrElse("gray"))
     polygon.onMouseClicked = new EventHandler[MouseEvent] {
       override def handle(event: MouseEvent): Unit = country.onClickAction()
@@ -87,7 +93,6 @@ class CountryUI(val country: Country, val origPoints: List[(Double, Double)]) ex
 
 
     styleClass.setAll("country")
-    polygon.styleClass.setAll("polygon")
     polygon.setFill(Color.Transparent)
 
     polygon.toFront()
@@ -120,6 +125,7 @@ class CountryUI(val country: Country, val origPoints: List[(Double, Double)]) ex
     )
     polygon.setFill(listOfColors(Random.nextInt(9)))
   }
+
 }
 
 

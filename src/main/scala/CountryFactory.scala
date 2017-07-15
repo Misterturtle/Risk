@@ -77,7 +77,7 @@ object CountryFactory {
 
 
   def getBlankCountries: List[Country] = {
-    northAmerica
+    northAmerica ++ southAmerica ++ africa ++ asia ++ europe ++ australia
   }
 
 
