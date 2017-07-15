@@ -15,12 +15,12 @@ class WorldMapUI(wm: WorldMap) extends AnchorPane {
   val bgXScale = new SimpleDoubleProperty()
   val bgYScale = new SimpleDoubleProperty()
 
-  val countriesUI = initCountries(wm.countries)
+  var countriesUI = initCountries(wm.countries)
 
 
   this.widthProperty().addListener(new ChangeListener[Number] {
     override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
-      countriesUI.foreach { c =>
+      countriesUI.foreach {case (name, c) =>
         AnchorPane.setLeftAnchor(c, c.origPoints.minBy(_._1)._1 * bgXScale.get())
         c.resizePoly()
       }
@@ -29,14 +29,14 @@ class WorldMapUI(wm: WorldMap) extends AnchorPane {
 
   this.heightProperty().addListener(new ChangeListener[Number] {
     override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
-      countriesUI.foreach { c =>
+      countriesUI.foreach {case  (name,c) =>
         AnchorPane.setTopAnchor(c, c.origPoints.minBy(_._2)._2 * bgYScale.get)
         c.resizePoly()
       }
     }
   })
 
-  def initCountries(countries: List[Country]): List[CountryUI] = {
+  def initCountries(countries: List[Country]): Map[String,CountryUI] = {
     countries.map { c =>
       val ui = new CountryUI(c, PixelDatabase.lookup(c.name))
       this.children.add(ui)
@@ -44,8 +44,8 @@ class WorldMapUI(wm: WorldMap) extends AnchorPane {
       AnchorPane.setTopAnchor(ui, ui.origPoints.minBy(_._2)._2 * bgYScale.get())
       AnchorPane.setLeftAnchor(ui, ui.origPoints.minBy(_._1)._1 * bgXScale.get())
       ui.resizePoly()
-      ui
-    }
+      (c.name, ui)
+    }.toMap
   }
 
   def styleMap(): Unit = {
@@ -71,8 +71,8 @@ class WorldMapUI(wm: WorldMap) extends AnchorPane {
     })
   }
 
-  def update(): Unit = {
-    initCountries(wm.countries)
+  def updateWorldMap(worldMap:WorldMap): Unit = {
+    worldMap.countries.foreach{c => countriesUI(c.name).update(c)}
   }
 
   styleMap()

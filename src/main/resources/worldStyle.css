@@ -14,14 +14,53 @@
 
 .polygon{
     -fx-background-color: transparent;
-    -fx-border-color: yellow;
+    -fx-border-color: black;
 }
 
 .armyDisplay{
-    -fx-background-color: linear-gradient(#ff5400, #be1d00);
     -fx-background-radius: 30;
     -fx-background-insets: 0;
     -fx-border-width: 1;
     -fx-border-color: black;
     -fx-effect: dropshadow(gaussian, black, 20, .1, -2, -2);
 }
+
+.grayBackground{
+    -fx-background-color: gray;
+}
+
+.redBackground{
+    -fx-background-color: red;
+}
+
+.greenBackground{
+    -fx-background-color: green;
+}
+
+.blueBackground{
+    -fx-background-color: blue;
+}
+
+.orangeBackground{
+    -fx-background-color: orange;
+}
+
+.purpleBackground{
+    -fx-background-color: purple;
+}
+
+.brownBackground{
+    -fx-background-color: brown;
+}
+
+.yellowBackground{
+    -fx-background-color: yellow;
+}
+
+.whiteBackground{
+    -fx-background-color: whitesmoke;
+}
+
+
+
+

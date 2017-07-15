@@ -19,7 +19,7 @@ object PixelDatabase {
     (356.8, 180.5)
   )
 
-  val greenLand = List[(Double, Double)](
+  val greenland = List[(Double, Double)](
     (246.4, 134.1),
     (422.4, 34.5),
     (652.8, 26.5),
@@ -134,7 +134,7 @@ object PixelDatabase {
   val lookup = Map[String, List[(Double, Double)]](
     "alaska" -> alaska,
     "nwTerritory" -> nwTerritory,
-    "greenLand" -> greenLand,
+    "greenland" -> greenland,
     "alberta" -> alberta,
     "ontario" -> ontario,
     "quebec" -> quebec,

@@ -1,3 +1,5 @@
+import scalafx.scene.paint.Color
+
 /**
   * Created by Harambe on 7/10/2017.
   */
@@ -5,6 +7,7 @@
 trait Player{
   val playerNumber:Int
   val armies:Int
+  val color: String
 
   def addArmies(amount:Int): Player = {
     this match {
@@ -21,6 +24,6 @@ trait Player{
   }
 }
 
-case class HumanPlayer(playerNumber:Int, armies:Int) extends Player
+case class HumanPlayer(playerNumber:Int, armies:Int, color:String) extends Player
 
-case class ComputerPlayer(playerNumber:Int, armies:Int) extends Player
+case class ComputerPlayer(playerNumber:Int, armies:Int, color:String) extends Player
