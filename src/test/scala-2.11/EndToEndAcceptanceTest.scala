@@ -183,7 +183,7 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
     clickOnCountry(wmCont.getCurrentWorldMap, "alaska")}
 
   //Should transition to attack phase
-  wmCont.getCurrentWorldMap.phase shouldBe Attacking(None, None)
+  wmCont.getCurrentWorldMap.phase shouldBe Attacking(None)
 
 
 

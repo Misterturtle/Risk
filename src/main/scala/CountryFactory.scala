@@ -3,80 +3,136 @@
   */
 object CountryFactory {
 
-  def blankCountry(name: String): Country = Country(name, 0, None)
 
   //North America
-  val alaska = blankCountry("alaska")
-  val nwTerritory = blankCountry("nwTerritory")
-  val greenland = blankCountry("greenland")
-  val alberta = blankCountry("alberta")
-  val ontario = blankCountry("ontario")
-  val quebec = blankCountry("quebec")
-  val westernUS = blankCountry("westernUS")
-  val easternUS = blankCountry("easternUS")
-  val centralAmerica = blankCountry("centralAmerica")
+  val alaska = "alaska"
+  val nwTerritory = "nwTerritory"
+  val greenland = "greenland"
+  val alberta = "alberta"
+  val ontario = "ontario"
+  val quebec = "quebec"
+  val westernUS = "westernUS"
+  val easternUS = "easternUS"
+  val centralAmerica = "centralAmerica"
 
-  val northAmerica = List[Country](alaska, nwTerritory, greenland, alberta, ontario, quebec, westernUS,
-    easternUS, centralAmerica)
+
+
 
   //South America
-  val venezuela = blankCountry("venezuela")
-  val peru = blankCountry("peru")
-  val brazil = blankCountry("brazil")
-  val argentina = blankCountry("argentina")
+  val venezuela = "venezuela"
+  val peru = "peru"
+  val brazil = "brazil"
+  val argentina = "argentina"
 
-  val southAmerica = List[Country](venezuela, peru, brazil, argentina)
+
+
 
   //Africa
-  val northAfrica = blankCountry("northAfrica")
-  val congo = blankCountry("congo")
-  val southAfrica = blankCountry("southAfrica")
-  val madagascar = blankCountry("madagascar")
-  val eastAfrica = blankCountry("eastAfrica")
-  val egypt = blankCountry("egypt")
+  val northAfrica = "northAfrica"
+  val congo = "congo"
+  val southAfrica = "southAfrica"
+  val madagascar = "madagascar"
+  val eastAfrica = "eastAfrica"
+  val egypt = "egypt"
 
-  val africa = List[Country](northAfrica, congo, southAfrica, madagascar, eastAfrica, egypt)
 
 
   //Europe
-  val iceland = blankCountry("iceland")
-  val britain = blankCountry("britain")
-  val westEurope = blankCountry("westEurope")
-  val northEurope = blankCountry("northEurope")
-  val southEurope = blankCountry("southEurope")
-  val scandinavia = blankCountry("scandinavia")
-  val ukraine = blankCountry("ukraine")
+  val iceland = "iceland"
+  val britain = "britain"
+  val westEurope = "westEurope"
+  val northEurope = "northEurope"
+  val southEurope = "southEurope"
+  val scandinavia = "scandinavia"
+  val ukraine = "ukraine"
 
-  val europe = List[Country](iceland, britain, westEurope, northEurope, southEurope, scandinavia, ukraine)
+
 
 
   //Asia
-  val ural = blankCountry("ural")
-  val kazakhstan = blankCountry("kazakhstan")
-  val middleEast = blankCountry("middleEast")
-  val india = blankCountry("india")
-  val siam = blankCountry("siam")
-  val china = blankCountry("china")
-  val mongolia = blankCountry("mongolia")
-  val irkutsk = blankCountry("irkutsk")
-  val siberia = blankCountry("siberia")
-  val yakutsk = blankCountry("yakutsk")
-  val kamchatka = blankCountry("kamchatka")
-  val japan = blankCountry("japan")
+  val ural = "ural"
+  val kazakhstan = "kazakhstan"
+  val middleEast = "middleEast"
+  val india = "india"
+  val siam = "siam"
+  val china = "china"
+  val mongolia = "mongolia"
+  val irkutsk = "irkutsk"
+  val siberia = "siberia"
+  val yakutsk = "yakutsk"
+  val kamchatka = "kamchatka"
+  val japan = "japan"
 
-  val asia = List[Country](ural, kazakhstan, middleEast, india, siam, china, mongolia, irkutsk, siberia, yakutsk, kamchatka, japan)
 
 
   //Australia
-  val indonesia = blankCountry("indonesia")
-  val papuaNewGuinea = blankCountry("papuaNewGuinea")
-  val westernAustralia = blankCountry("westernAustralia")
-  val easternAustralia = blankCountry("easternAustralia")
+  val indonesia = "indonesia"
+  val papuaNewGuinea = "papuaNewGuinea"
+  val westernAustralia = "westernAustralia"
+  val easternAustralia = "easternAustralia"
 
+
+
+
+
+  lazy val adjacentCountriesLookup = Map[String, List[String]](
+    alaska -> List(nwTerritory, alberta, kamchatka),
+    nwTerritory -> List(alaska, greenland, alberta, ontario),
+    greenland -> List(quebec, nwTerritory, iceland),
+    alberta -> List(alaska, ontario, nwTerritory, westernUS),
+    ontario -> List(nwTerritory, alberta, westernUS, easternUS, quebec),
+    quebec -> List(greenland, easternUS, ontario),
+    westernUS -> List(centralAmerica, easternUS, ontario, alberta),
+    easternUS -> List(quebec, ontario, alberta, westernUS, centralAmerica),
+    centralAmerica -> List(westernUS, easternUS, argentina),
+    venezuela -> List(peru, brazil),
+    peru -> List(argentina, venezuela, brazil),
+    brazil -> List(peru, argentina, venezuela, northAfrica),
+    argentina -> List(peru, brazil, centralAmerica),
+    northAfrica -> List(westEurope, southEurope, egypt, eastAfrica, congo, brazil),
+    congo -> List(northAfrica, eastAfrica, southAfrica),
+    southAfrica -> List(madagascar, congo, eastAfrica),
+    madagascar -> List(southAfrica, eastAfrica),
+    eastAfrica -> List(madagascar, southAfrica, congo, northAfrica, egypt, middleEast),
+    egypt -> List(southEurope, middleEast, eastAfrica, northAfrica),
+    //Europe
+    iceland -> List(greenland, scandinavia, britain),
+    britain -> List(iceland, scandinavia, westEurope, northEurope),
+    westEurope -> List(britain, northAfrica, southEurope, northEurope),
+    northEurope -> List(britain, westEurope, southEurope, ukraine, scandinavia),
+    southEurope -> List(northAfrica, westEurope, egypt, ukraine, northEurope),
+    scandinavia -> List(ukraine, northEurope, britain, iceland),
+    ukraine -> List(scandinavia, northEurope, southEurope, middleEast, kazakhstan, ural),
+    //Asia
+    ural -> List(siberia, china, kazakhstan, ukraine),
+    kazakhstan -> List(ural, ukraine, middleEast, india, china),
+    middleEast -> List(india, kazakhstan, ukraine, southEurope, egypt, eastAfrica),
+    india -> List(middleEast, kazakhstan, china, siam),
+    siam -> List(india, china, indonesia),
+    china -> List(siam, india, kazakhstan, ural, siberia, mongolia),
+    mongolia -> List(china, japan, siberia, irkutsk, kamchatka),
+    irkutsk -> List(yakutsk, kamchatka, mongolia, siberia),
+    siberia -> List(yakutsk, irkutsk, mongolia, china, ural),
+    yakutsk -> List(kamchatka, irkutsk, siberia),
+    kamchatka -> List(yakutsk, irkutsk, mongolia, alaska),
+    japan -> List(mongolia, kamchatka),
+    indonesia -> List(siam, westernAustralia, papuaNewGuinea),
+    westernAustralia -> List(easternAustralia, indonesia, papuaNewGuinea),
+    easternAustralia -> List(westernAustralia, papuaNewGuinea),
+    papuaNewGuinea -> List(indonesia, westernAustralia, easternAustralia)
+  )
+
+  val northAmerica = List[Country](alaska, nwTerritory, greenland, alberta, ontario, quebec, westernUS,
+    easternUS, centralAmerica)
+  val africa = List[Country](northAfrica, congo, southAfrica, madagascar, eastAfrica, egypt)
+  val asia = List[Country](ural, kazakhstan, middleEast, india, siam, china, mongolia, irkutsk, siberia, yakutsk, kamchatka, japan)
   val australia = List[Country](indonesia, papuaNewGuinea, westernAustralia, easternAustralia)
+  val europe = List[Country](iceland, britain, westEurope, northEurope, southEurope, scandinavia, ukraine)
+  val southAmerica = List[Country](venezuela, peru, brazil, argentina)
 
 
-  def getBlankCountries: List[Country] = {
+
+  def getCountries: List[Country] = {
     northAmerica ++ southAmerica ++ africa ++ asia ++ europe ++ australia
   }
 
@@ -89,4 +145,7 @@ object CountryFactory {
     "asia" -> asia.map(_.name),
     "australia" -> australia.map(_.name)
   )
+
+  implicit def blankCountry(name:String): Country = Country(name, 0, None, adjacentCountriesLookup(name))
+
 }

@@ -13,10 +13,11 @@ case object TurnPlacement extends Phase
 
 case object Transition extends Phase
 
-case class Attacking(source:Option[Country], target:Option[Country]) extends Phase {
+case class Attacking(source:Option[Country]) extends Phase {
   def setSource(country:Country) = copy(source = Some(country))
-  def setTarget(country:Country) = copy(target = Some(country))
 }
+
+case class Battle(source:Country, target:Country) extends Phase
 
 case object Reinforcement extends Phase
 
@@ -119,7 +120,7 @@ object TurnPlacePhase{
 
 
   def endTurnPlacementPhase(wm: WorldMap): WorldMap = {
-    wm.copy(phase = Attacking(None, None))
+    wm.copy(phase = Attacking(None))
   }
 }
 
@@ -131,12 +132,25 @@ object AttackingPhase {
     else wm
   }
 
+  def deselectSource(wm:WorldMap):WorldMap = {
+    wm.copy(phase = Attacking(None))
+  }
 
-  def selectTarget(wm:WorldMap, country:Country):WorldMap = {
-    if(!country.isOwnedBy(wm.activePlayerNumber))
-      wm.setPhase(wm.phase.asInstanceOf[Attacking].setTarget(country))
+
+  def beginBattle(wm:WorldMap, country:Country):WorldMap = {
+    if(isValidAttackTarget(wm.phase.asInstanceOf[Attacking].source.get, country)){
+      val source = wm.phase.asInstanceOf[Attacking].source.get
+      wm.setPhase(Battle(source, country))
+    }
     else wm
   }
+
+  def isValidAttackTarget(source:Country, target:Country) :Boolean = {
+    source.owner != target.owner && source.adjacentCountries.contains(target.name)
+  }
+}
+
+object BattlePhase{
 
 
 

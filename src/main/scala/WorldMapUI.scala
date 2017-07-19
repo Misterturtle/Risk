@@ -59,7 +59,7 @@ class WorldMapUI(wm: WorldMap, wmInputHandler:WorldMapInputHandler) extends Anch
         turnDisplayText.text = player.map(_.name).getOrElse("Waiting")
         phaseDisplayText.text = "Turn Placement - Armies Remaining: " + player.map(_.armies).getOrElse(-1)
 
-      case Attacking(s, t) =>
+      case Attacking(s) =>
         turnDisplayText.text = player.map(_.name).getOrElse("Waiting")
         phaseDisplayText.text = "Attacking"
 
@@ -113,7 +113,7 @@ class WorldMapUI(wm: WorldMap, wmInputHandler:WorldMapInputHandler) extends Anch
 
 
   private def scaleMap(): Unit = {
-    val origImage = new Image("map.jpg")
+    val origImage = new Image("oldMap.jpg")
     val origX = origImage.width.value
     val origY = origImage.height.value
     bgXScale.bind(width.delegate.divide(origX))

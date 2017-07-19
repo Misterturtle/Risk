@@ -12,7 +12,7 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
 
   val mockUI = mock[WorldMapUI]
   val players = List[Player](HumanPlayer("Turtle", 1, 1, "red"), HumanPlayer("Boy Wonder", 2, 1, "blue"), ComputerPlayer("Some Scrub", 3, 1, "green"))
-  var mutableCountries = CountryFactory.getBlankCountries
+  var mutableCountries = CountryFactory.getCountries
   var mutableWorldMap = new WorldMap(mutableCountries, players, 1, InitialPlacement)
 
   for (a <- 1 to 14) {
@@ -68,7 +68,7 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
       val ownedCountry = wm.countries.find(_.owner.map(_.playerNumber).contains(1)).get
       val attackPhaseWM = Effects.getCountryClickedEffect(lastPlacementWM, ownedCountry).eval(StateStamp(-1))
 
-      attackPhaseWM.phase shouldBe Attacking(None, None)
+      attackPhaseWM.phase shouldBe Attacking(None)
     }
   }
 }

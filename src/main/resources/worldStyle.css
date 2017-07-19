@@ -2,7 +2,7 @@
 
 
 .worldMap {
-    -fx-background-image: url('map.jpg');
+    -fx-background-image: url('oldMap.jpg');
     -fx-background-repeat: no-repeat;
     -fx-background-size: stretch;
 }
