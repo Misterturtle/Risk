@@ -48,7 +48,6 @@ object Effects {
 
   def countryClickedDuringAttackingPhase(wm:WorldMap, countryClicked:Country):Effect[WorldMap] = {
     val effect = init[StateStamp]
-
     wm.phase match {
       case Attacking(None) =>
         effect.flatMap(_ => state(AttackingPhase.selectSource(wm, countryClicked)))
@@ -59,8 +58,11 @@ object Effects {
         else
           effect.flatMap(_ => state(AttackingPhase.beginBattle(wm, countryClicked)))
     }
+  }
 
-
+  def countryClickedDuringBattlePhase(wm:WorldMap):Effect[WorldMap] = {
+    val effect = init[StateStamp]
+    effect.flatMap(_ => state(wm))
   }
 
   def getCountryClickedEffect(worldMap: WorldMap, country:Country): Effect[WorldMap] = {
@@ -71,10 +73,13 @@ object Effects {
         countryClickedDuringTurnPlace(worldMap, country)
       case Attacking(s) =>
         countryClickedDuringAttackingPhase(worldMap, country)
-
+      case Battle(s,t) =>
+        countryClickedDuringBattlePhase(worldMap)
 
     }
   }
+
+
 }
 
 class SideEffectManager(setWM: (WorldMap) => Unit) {

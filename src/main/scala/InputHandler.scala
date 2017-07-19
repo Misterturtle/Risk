@@ -7,6 +7,7 @@ import Scalaz._
   */
 trait Input
 case class CountryClicked(country:Country) extends Input
+case class ConfirmBattle(source:Country, target:Country, armiesAttacking:Int) extends Input
 
 trait InputHandler[A] {
   def receiveInput(input:Input): Unit
@@ -19,6 +20,9 @@ class WorldMapInputHandler(val get:()=>WorldMap, sideEffectManager: SideEffectMa
     input match {
       case CountryClicked(country) =>
         sideEffectManager.performEffect(Effects.getCountryClickedEffect(get(), country))
+      case ConfirmBattle(source:Country, target:Country, armiesAttacking:Int) =>
+
+
     }
   }
 

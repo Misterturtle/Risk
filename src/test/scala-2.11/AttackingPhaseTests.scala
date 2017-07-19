@@ -20,7 +20,7 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
   }
 
   mutableWorldMap = mutableWorldMap.setPhase(Attacking(None))
-  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alaska").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1)))
+  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alaska").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 5))
   mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alberta").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1)))
   mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("nwTerritory").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(2)))
   mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("westernUS").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(2)))
@@ -45,6 +45,13 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
     val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("alaska")).eval(StateStamp(-1))
 
     newWM.phase shouldBe Attacking(None)
+  }
+
+  "Selecting a country with only 1 army should do nothing" in {
+    val oneArmyWM = beginAttackPhase.updateSingleCountry(beginAttackPhase.getCountry("alaska").copy(armies = 1))
+    val newWM = Effects.getCountryClickedEffect(oneArmyWM, oneArmyWM.getCountry("alaska")).eval(StateStamp(-1))
+
+    newWM shouldBe oneArmyWM
   }
 
   "Selecting an owned country when a source is already selected does nothing" in {
