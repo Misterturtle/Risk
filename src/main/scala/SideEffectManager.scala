@@ -46,12 +46,30 @@ object Effects {
     else effect.flatMap(_ => state(wm2))
   }
 
+  def countryClickedDuringAttackingPhase(wm:WorldMap, countryClicked:Country):Effect[WorldMap] = {
+    val effect = init[StateStamp]
+
+    wm.phase match {
+      case Attacking(None, None) =>
+        effect.flatMap(_ => state(AttackingPhase.selectSource(wm, countryClicked)))
+
+//      case Attacking(s:Some[Country], None) =>
+//        //effect.flatMap(_ => state(AttackingPhase.selectTarget(wm, countryClicked)))
+//
+//      case Attacking(s:Some[Country], t:Some[Country]) =>
+    }
+
+
+  }
+
   def getCountryClickedEffect(worldMap: WorldMap, country:Country): Effect[WorldMap] = {
     worldMap.phase match {
       case InitialPlacement =>
         countryClickedDuringInitPlace(worldMap, country)
       case TurnPlacement =>
         countryClickedDuringTurnPlace(worldMap, country)
+      case Attacking(s,r) =>
+        countryClickedDuringAttackingPhase(worldMap, country)
 
 
     }

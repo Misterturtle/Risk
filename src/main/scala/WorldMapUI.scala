@@ -59,7 +59,7 @@ class WorldMapUI(wm: WorldMap, wmInputHandler:WorldMapInputHandler) extends Anch
         turnDisplayText.text = player.map(_.name).getOrElse("Waiting")
         phaseDisplayText.text = "Turn Placement - Armies Remaining: " + player.map(_.armies).getOrElse(-1)
 
-      case Attacking =>
+      case Attacking(s, t) =>
         turnDisplayText.text = player.map(_.name).getOrElse("Waiting")
         phaseDisplayText.text = "Attacking"
 
