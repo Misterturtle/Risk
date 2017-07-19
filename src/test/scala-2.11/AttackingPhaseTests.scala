@@ -18,33 +18,37 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
       mutableWorldMap = mutableWorldMap.updateSingleCountry(unownedCountry.copy(armies = 1, owner = Some(players(b))))
     }
   }
-  mutableWorldMap = mutableWorldMap.copy(phase = Attacking(None, None))
+
+  mutableWorldMap = mutableWorldMap.setPhase(Attacking(None, None))
+  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alaska").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1)))
+  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alberta").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1)))
+  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("nwTerritory").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(2)))
 
   "During a human player's Attacking phase" - {
 
     val beginAttackPhase = mutableWorldMap
 
     "Selecting a non owned country when no attacking source does nothing" in {
-      val nonOwnedCountry = beginAttackPhase.countries.find(_.owner.map(_.playerNumber).contains(2)).get
-      val newWM = Effects.getCountryClickedEffect(beginAttackPhase, nonOwnedCountry).eval(StateStamp(-1))
+      val newWM = Effects.getCountryClickedEffect(beginAttackPhase, beginAttackPhase.getCountry("nwTerritory")).eval(StateStamp(-1))
 
       newWM shouldBe beginAttackPhase
     }
 
     "Selecting an owned country sets the Attacking Phase source to that country" in {
-      val ownedCountry = beginAttackPhase.countries.find(_.owner.map(_.playerNumber).contains(1)).get
-      val newWM = Effects.getCountryClickedEffect(beginAttackPhase, ownedCountry).eval(StateStamp(-1))
+      val newWM = Effects.getCountryClickedEffect(beginAttackPhase, beginAttackPhase.getCountry("alaska")).eval(StateStamp(-1))
 
-      newWM.phase shouldBe Attacking(Some(ownedCountry), None)
+      newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("alaska")), None)
+    }
+
+    "Selecting an owned country when a source is already selected does nothing" in {
+      val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska")), None))
+      val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("alberta")).eval(StateStamp(-1))
+
+      newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("alaska")), None)
     }
 
 
-
-
-
-
   }
-
 
 
 }

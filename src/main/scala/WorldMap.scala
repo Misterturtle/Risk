@@ -13,7 +13,10 @@ case object TurnPlacement extends Phase
 
 case object Transition extends Phase
 
-case class Attacking(source:Option[Country], target:Option[Country]) extends Phase
+case class Attacking(source:Option[Country], target:Option[Country]) extends Phase {
+  def setSource(country:Country) = copy(source = Some(country))
+  def setTarget(country:Country) = copy(target = Some(country))
+}
 
 case object Reinforcement extends Phase
 
@@ -124,11 +127,16 @@ object AttackingPhase {
 
   def selectSource(wm:WorldMap, country:Country):WorldMap = {
     if(country.isOwnedBy(wm.activePlayerNumber))
-      wm.copy(phase = Attacking(Some(country), None))
+      wm.setPhase(wm.phase.asInstanceOf[Attacking].setSource(country))
     else wm
   }
 
 
+  def selectTarget(wm:WorldMap, country:Country):WorldMap = {
+    if(!country.isOwnedBy(wm.activePlayerNumber))
+      wm.setPhase(wm.phase.asInstanceOf[Attacking].setTarget(country))
+    else wm
+  }
 
 
 

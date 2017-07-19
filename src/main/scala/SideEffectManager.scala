@@ -53,8 +53,8 @@ object Effects {
       case Attacking(None, None) =>
         effect.flatMap(_ => state(AttackingPhase.selectSource(wm, countryClicked)))
 
-//      case Attacking(s:Some[Country], None) =>
-//        //effect.flatMap(_ => state(AttackingPhase.selectTarget(wm, countryClicked)))
+      case Attacking(s:Some[Country], None) =>
+        effect.flatMap(_ => state(AttackingPhase.selectTarget(wm, countryClicked)))
 //
 //      case Attacking(s:Some[Country], t:Some[Country]) =>
     }
