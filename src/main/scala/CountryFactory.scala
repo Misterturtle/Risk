@@ -3,7 +3,7 @@
   */
 object CountryFactory {
 
-  def blankCountry(name: String): Country = Country(name, 0, None, () => {})
+  def blankCountry(name: String): Country = Country(name, 0, None)
 
   //North America
   val alaska = blankCountry("alaska")

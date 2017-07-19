@@ -5,7 +5,6 @@
     -fx-background-image: url('map.jpg');
     -fx-background-repeat: no-repeat;
     -fx-background-size: stretch;
-    -fx-border-color: red;
 }
 
 .country{
@@ -13,7 +12,7 @@
 }
 
 .polygon{
-    /*-fx-background-color: transparent;*/
+    -fx-background-color: transparent;
 }
 
 .armyDisplay{
@@ -22,6 +21,17 @@
     -fx-border-width: 1;
     -fx-border-color: black;
     -fx-effect: dropshadow(gaussian, black, 20, .1, -2, -2);
+}
+
+.turnDisplay{
+    -fx-background-radius: 30;
+    -fx-background-insets: 0;
+    -fx-effect: dropshadow(gaussian, black, 20, .1, -2, -2);
+}
+
+.whiteText{
+    -fx-fill: white;
+
 }
 
 .grayBackground{

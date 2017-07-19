@@ -8,6 +8,7 @@ trait Player{
   val playerNumber:Int
   val armies:Int
   val color: String
+  val name: String
 
   def addArmies(amount:Int): Player = {
     this match {
@@ -24,6 +25,6 @@ trait Player{
   }
 }
 
-case class HumanPlayer(playerNumber:Int, armies:Int, color:String) extends Player
+case class HumanPlayer(name:String, playerNumber:Int, armies:Int, color:String) extends Player
 
-case class ComputerPlayer(playerNumber:Int, armies:Int, color:String) extends Player
+case class ComputerPlayer(name: String, playerNumber:Int, armies:Int, color:String) extends Player

@@ -68,20 +68,21 @@ class armyDisplay(armies: String, color:String, countryWidth: ReadOnlyDoubleProp
 }
 
 
-class CountryUI(val country: Country, val origPoints: List[(Double, Double)]) extends StackPane {
+class CountryUI(startingCountry:Country, val origPoints: List[(Double, Double)], wmInputHandler: WorldMapInputHandler) extends StackPane {
+
 
   val origWidth = if (origPoints.nonEmpty) origPoints.maxBy(_._1)._1 - origPoints.minBy(_._1)._1 else 0
   val origHeight = if (origPoints.nonEmpty) origPoints.maxBy(_._2)._2 - origPoints.minBy(_._2)._2 else 0
   val xScale = new SimpleDoubleProperty()
   val yScale = new SimpleDoubleProperty()
 
-  val ad = new armyDisplay(country.armies.toString, country.owner.map(_.color).getOrElse("gray"), this.widthProperty(), this.heightProperty())
+  val ad = new armyDisplay(startingCountry.armies.toString, startingCountry.owner.map(_.color).getOrElse("gray"), this.widthProperty(), this.heightProperty())
   val polygon = new Polygon(new javafx.scene.shape.Polygon())
 
   def update(country: Country): Unit = {
     ad.update(country.armies, country.owner.map(_.color).getOrElse("gray"))
     polygon.onMouseClicked = new EventHandler[MouseEvent] {
-      override def handle(event: MouseEvent): Unit = country.onClickAction()
+      override def handle(event: MouseEvent): Unit =  wmInputHandler.receiveInput(CountryClicked(country))
     }
   }
 
@@ -99,7 +100,7 @@ class CountryUI(val country: Country, val origPoints: List[(Double, Double)]) ex
     this.setShape(polygon)
     this.setPickOnBounds(false)
     polygon.setOnMouseClicked(new EventHandler[MouseEvent] {
-      override def handle(event: MouseEvent): Unit = country.onClickAction()
+      override def handle(event: MouseEvent): Unit = wmInputHandler.receiveInput(CountryClicked(startingCountry))
     })
     children.add(polygon)
     children.add(ad)
