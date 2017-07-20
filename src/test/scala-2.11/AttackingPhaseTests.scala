@@ -74,4 +74,11 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
     newWM shouldBe wmWithSourceSelected
   }
+
+  "If the EndAttackPhase input is received, the phase should transition to the Transfer phase" in {
+    val wm = beginAttackPhase
+    val newWM = Effects.endAttackPhase(wm).eval(StateStamp(-1))
+
+    newWM.phase shouldBe Reinforcement(None,None)
+  }
 }

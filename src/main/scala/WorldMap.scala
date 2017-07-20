@@ -13,15 +13,13 @@ case object InitialPlacement extends Phase
 
 case object TurnPlacement extends Phase
 
-case object Transition extends Phase
-
 case class Attacking(source:Option[Country]) extends Phase {
   def setSource(country:Country) = copy(source = Some(country))
 }
 
-case class Battle(source:Country, target:Country, previousBattle:Option[BattleResult] = None) extends Phase
+case class Battle(source:Country, target:Country, previousBattle:Option[BattleResult] = None, isTransferring:Boolean = false) extends Phase
 
-case class BattleResult(offRolls:List[Int] = Nil, defRolls:List[Int] = Nil, rGen: RandomFactory = new RandomFactory()){
+case class BattleResult(offRolls:List[Int] = Nil, defRolls:List[Int] = Nil, rGen: RandomFactory){
   import Scalaz._
 
   private val _offRolls: ListBuffer[Int] = ListBuffer[Int]()
@@ -54,7 +52,7 @@ case class BattleResult(offRolls:List[Int] = Nil, defRolls:List[Int] = Nil, rGen
 
 }
 
-case object Reinforcement extends Phase
+case class Reinforcement(source:Option[Country], target:Option[Country]) extends Phase
 
 
 
@@ -192,6 +190,36 @@ object AttackingPhase {
 object BattlePhase{
 
 
+  def calculateDefensiveArmies(offArmies:Int, defensiveCountry: Country) = {
+    if(offArmies == 1)
+      1
+    else if (defensiveCountry.armies == 1)
+      1
+    else 2
+  }
+
+
+  def recordResults(wm:WorldMap, battleResult: BattleResult): WorldMap = {
+    wm.copy(phase = wm.phase.asInstanceOf[Battle].copy(previousBattle = Some(battleResult)))
+  }
+
+  def removeDeadArmies(wm:WorldMap): WorldMap = {
+    val battle = wm.phase.asInstanceOf[Battle]
+    val newSourceCountry = battle.source.removeArmies(battle.previousBattle.get.offDefArmiesLost()._1)
+    val newTargetCountry = battle.target.removeArmies(battle.previousBattle.get.offDefArmiesLost()._2)
+    val newBattle = battle.copy(source = newSourceCountry, target = newTargetCountry)
+
+    wm.copy(phase = newBattle).updateSomeCountries(List(newSourceCountry, newTargetCountry))
+  }
+
+  def handleIfCountryConquered(wm:WorldMap):WorldMap = {
+    val battle = wm.phase.asInstanceOf[Battle]
+    if(battle.target.armies == 0){
+      val conqueredCountry = battle.target.copy(owner = wm.getActivePlayer)
+      wm.setPhase(battle.copy(target = conqueredCountry, isTransferring = true)).updateSingleCountry(conqueredCountry)
+    }
+    else wm
+  }
 
 
 }
@@ -218,6 +246,8 @@ case class WorldMap(countries: List[Country], players: List[Player], activePlaye
     copy(countries = countries.map(c => (c.name == country.name) ? country | c))
   }
 
+  def transferArmies(source:Country, target:Country, amount:Int):WorldMap = updateSomeCountries(List(source.removeArmies(amount), target.addArmies(amount)))
+
   def updateCountryAndPlayer(country: Country, player: Player) = updateSingleCountry(country).updatePlayer(player)
 
   def updatePlayer(newPlayer: Player): WorldMap = {
@@ -226,10 +256,10 @@ case class WorldMap(countries: List[Country], players: List[Player], activePlaye
   }
 
   def updateSomeCountries(updatedCountries: List[Country]): WorldMap = {
-    val cMap = countries.map(c => (c.name, c)).toMap
-    val ncMap = updatedCountries.map(c => (c.name, c)).toMap
-    val ncList = (cMap ++ ncMap).values.toList
-    copy(countries = ncList)
+    val countryMap = countries.map(c => (c.name, c)).toMap
+    val updatedCountryMap = updatedCountries.map(c => (c.name, c)).toMap
+    val newCountriesList = (countryMap ++ updatedCountryMap).values.toList
+    copy(countries = newCountriesList)
   }
 
   def placeArmies(country: Country, player: Player, amount: Int): WorldMap = updateSingleCountry(country.addArmies(amount).setOwner(player)).updatePlayer(player.removeArmies(amount))

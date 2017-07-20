@@ -63,7 +63,7 @@ class WorldMapUI(wm: WorldMap, wmInputHandler:WorldMapInputHandler) extends Anch
         turnDisplayText.text = player.map(_.name).getOrElse("Waiting")
         phaseDisplayText.text = "Attacking"
 
-      case Reinforcement =>
+      case Reinforcement(s,t) =>
         turnDisplayText.text = player.map(_.name).getOrElse("Waiting")
         phaseDisplayText.text = "Reinforcing"
     }

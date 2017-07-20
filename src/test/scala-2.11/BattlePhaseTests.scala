@@ -72,7 +72,68 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
     battleResult.attack(3,1).offDefArmiesLost() shouldBe (0,1)
   }
 
+  "When the ConfirmAttack input is received," - {
+
+    val wm = beginBattlePhase.updateSingleCountry(beginBattlePhase.getCountry("nwTerritory").copy(armies = 5))
+    val preBattle = wm.setPhase(Battle(wm.getCountry("alaska"), wm.getCountry("nwTerritory")))
+    val mockRandom = mock[RandomFactory]
+    when(mockRandom.roll()).thenReturn(1, 1, 5, 4, 2)
+    val battle = preBattle.phase.asInstanceOf[Battle]
+    val postBattle = Effects.executeBattle(preBattle, ConfirmBattle(battle.source, battle.target, 3), mockRandom).eval(StateStamp(-1))
+
+    "it should record the battle" in {
+      postBattle.phase.asInstanceOf[Battle].previousBattle shouldBe Some(BattleResult(List(1, 1, 5), List(4, 2), mockRandom))
+    }
+
+    "it should remove the armies lost from the attacking country" in {
+      postBattle.getCountry("alaska").armies shouldBe preBattle.getCountry("alaska").armies - 1
+    }
+
+    "it should remove the armies lost from the defending country" in {
+      postBattle.getCountry("nwTerritory").armies shouldBe 4
+    }
+  }
 
 
+  "If the attack reduces the defending armies to zero, " - {
+    val wm = beginBattlePhase.updateSingleCountry(beginBattlePhase.getCountry("nwTerritory").copy(armies = 1))
+    val preBattle = wm.setPhase(Battle(wm.getCountry("alaska"), wm.getCountry("nwTerritory")))
+    val mockRandom = mock[RandomFactory]
+    when(mockRandom.roll()).thenReturn(1, 1, 5, 1)
+    val battle = preBattle.phase.asInstanceOf[Battle]
+    val postBattle = Effects.executeBattle(preBattle, ConfirmBattle(battle.source, battle.target, 3), mockRandom).eval(StateStamp(-1))
 
+
+    "The phase should active the transferring flag" in {
+      postBattle.phase.asInstanceOf[Battle].isTransferring shouldBe true
+    }
+
+    "The target country should have it's owner set to the attacking player" in {
+      postBattle.getCountry("nwTerritory").owner.map(_.playerNumber).contains(postBattle.activePlayerNumber)
+    }
+  }
+
+  "If the ConfirmTransfer input is received while the isTransferring flag is set to true" - {
+    val source = beginBattlePhase.getCountry("alaska").copy(armies = 25)
+    val target = beginBattlePhase.getCountry("nwTerritory").copy(armies = 0, owner = beginBattlePhase.getActivePlayer)
+    val wm = beginBattlePhase.setPhase(Battle(source, target, None, true))
+    val postTransfer = Effects.executeBattleTransfer(wm, ConfirmTransfer(10)).eval(StateStamp(-1))
+
+
+   "The amount of armies should be transferred" in {
+     postTransfer.getCountry("alaska").armies shouldBe 15
+     postTransfer.getCountry("nwTerritory").armies shouldBe 10
+   }
+
+    "The phase should be set back to Attacking" in {
+      postTransfer.phase shouldBe Attacking(None)
+    }
+  }
+
+  "If the Retreat input is received, the phase should go back to Attacking" in {
+    val wm = beginBattlePhase
+    val postRetreat = Effects.retreatFromBattle(wm).eval(StateStamp(-1))
+
+    postRetreat.phase shouldBe Attacking(None)
+  }
 }
