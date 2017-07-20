@@ -47,9 +47,6 @@ case class BattleResult(offRolls:List[Int] = Nil, defRolls:List[Int] = Nil, rGen
 
     (offArmiesLost, defArmiesLost)
   }
-
-
-
 }
 
 case class Reinforcement(source:Option[Country], target:Option[Country]) extends Phase
@@ -58,6 +55,15 @@ case class Reinforcement(source:Option[Country], target:Option[Country]) extends
 
 object InitPlacePhase{
   import WorldMap._
+
+  def beginTurn(wm:WorldMap):WorldMap ={
+    wm.getActivePlayer match {
+      case Some(p:HumanPlayer) =>
+        wm
+      case Some(c:ComputerPlayer) =>
+        beginComputerTurn(wm)
+    }
+  }
 
   def allocateInitArmies(wm: WorldMap): WorldMap = {
     val armies = 35 - (5 * (wm.players.size - 3))
@@ -73,22 +79,19 @@ object InitPlacePhase{
     }
   }
 
-  def nextInitPlaceTurn(wm: WorldMap): WorldMap = {
+  def nextTurn(wm: WorldMap): WorldMap = {
     if (checkForEndOfInitPlace(wm))
       endInitPhase(wm)
     else{
-      beginActivePlayerTurn(setNextActivePlayer(wm))
+      beginTurn(wm.setNextActivePlayer())
     }
 
   }
 
-  def checkForEndOfInitPlace(wm:WorldMap): Boolean = {
-    wm.phase == InitialPlacement && wm.noArmiesToPlace
-  }
 
-  def endInitPhase(wm: WorldMap): WorldMap = {
-    val wm2 = wm.copy(activePlayerNumber = 1, phase = TurnPlacement)
-    beginActivePlayerTurn(wm2)
+  def beginComputerTurn(wm: WorldMap): WorldMap = {
+    val wm2 = initPlaceCompAI(wm)
+    nextTurn(wm2)
   }
 
 
@@ -104,10 +107,33 @@ object InitPlacePhase{
     }
   }
 
+
+  def checkForEndOfInitPlace(wm:WorldMap): Boolean = {
+    wm.phase == InitialPlacement && wm.noArmiesToPlace
+  }
+
+  def endInitPhase(wm: WorldMap): WorldMap = {
+    val wm2 = wm.copy(activePlayerNumber = 1, phase = TurnPlacement)
+    TurnPlacePhase.beginTurn(wm2)
+  }
+
+
+
 }
 
 object TurnPlacePhase{
   import WorldMap._
+
+  def beginTurn(wm:WorldMap):WorldMap = {
+    val wm2 = allocateTurnArmies(wm)
+
+    wm2.getActivePlayer match {
+      case Some(p:HumanPlayer) =>
+        wm2
+      case Some(c:ComputerPlayer) =>
+        beginCompTurn(wm2)
+    }
+  }
 
   def allocateTurnArmies(wm: WorldMap): WorldMap = {
     val armiesFromTerritories = calculateArmiesFromTerritories(wm.getActivePlayer.get, wm.countries)
@@ -145,6 +171,22 @@ object TurnPlacePhase{
     if(country.isOwnedBy(wm.activePlayerNumber))
       wm.placeArmies(country, wm.getActivePlayer.get, 1)
     else wm
+  }
+
+  def beginCompTurn(wm:WorldMap):WorldMap = {
+    val wm2 = compPlacementAI(wm)
+    ReinforcementPhase.nextTurn(wm2)
+  }
+
+  def compPlacementAI(wm:WorldMap):WorldMap = {
+    val ownedCountries = wm.getCountriesOwnedByPlayer(wm.getActivePlayer.get)
+    var mutatingWorldMap = wm
+
+    for(a<-0 until wm.getActivePlayer.map(_.armies).getOrElse(0)){
+      val chosenCountry = ownedCountries(Random.nextInt(ownedCountries.size))
+      mutatingWorldMap = mutatingWorldMap.placeArmies(chosenCountry, wm.getActivePlayer.get, 1)
+    }
+    mutatingWorldMap
   }
 
   def checkEndOfTurnPlacement(wm: WorldMap): Boolean = {
@@ -189,7 +231,6 @@ object AttackingPhase {
 
 object BattlePhase{
 
-
   def calculateDefensiveArmies(offArmies:Int, defensiveCountry: Country) = {
     if(offArmies == 1)
       1
@@ -220,14 +261,54 @@ object BattlePhase{
     }
     else wm
   }
+}
 
 
+object ReinforcementPhase {
+
+
+  def setReinformentSource(wm: WorldMap, country: Country):WorldMap = wm.copy(phase = wm.phase.asInstanceOf[Reinforcement].copy(source = Some(country)))
+
+  def setReinformentTarget(wm: WorldMap, country: Country):WorldMap = wm.copy(phase = wm.phase.asInstanceOf[Reinforcement].copy(target = Some(country)))
+
+  def isValidSource(wm:WorldMap, country:Country):Boolean = {
+    val phase = wm.phase.asInstanceOf[Reinforcement]
+    phase.source.isEmpty && country.owner == wm.getActivePlayer
+  }
+
+  def isValidTarget(wm: WorldMap, country: Country): Boolean = {
+    val phase = wm.phase.asInstanceOf[Reinforcement]
+    if(phase.source.isEmpty)
+      false
+    else
+      phase.source.map(_.adjacentCountries).get.contains(country.name) && country.owner == wm.getActivePlayer
+  }
+
+  def nextTurn(wm:WorldMap) :WorldMap = {
+    val wm2 = wm.setNextActivePlayer().setPhase(TurnPlacement)
+    TurnPlacePhase.beginTurn(wm2)
+  }
 }
 
 
 
 
 case class WorldMap(countries: List[Country], players: List[Player], activePlayerNumber: Int, phase: Phase) {
+
+  def setNextActivePlayer(): WorldMap = {
+    if(activePlayerNumber == players.size)
+      copy(activePlayerNumber = 1)
+    else copy(activePlayerNumber = activePlayerNumber + 1)
+  }
+
+  def getNonOwnedCountries(): List[Country] = {
+    countries.filter(_.owner.isEmpty)
+  }
+
+  def getCountriesOwnedByPlayer(player: Player): List[Country] = {
+    countries.filter(_.owner.map(_.playerNumber).contains(player.playerNumber))
+  }
+
   def areAllCountriesOwned: Boolean = countries.forall(c => c.owner.nonEmpty)
 
   def getPlayerByPlayerNumber(playerNumber: Int): Option[Player] = players.find(_.playerNumber == playerNumber)
@@ -267,59 +348,3 @@ case class WorldMap(countries: List[Country], players: List[Player], activePlaye
 
 
 
-object WorldMap {
-  import InitPlacePhase._
-  import TurnPlacePhase._
-
-  type WorldMapState[A] = State[WorldMap, A]
-
-
-  def nextTurn(wm: WorldMap): WorldMap = {
-    wm.phase match {
-      case InitialPlacement => nextInitPlaceTurn(wm)
-    }
-  }
-
-  def setNextActivePlayer(wm:WorldMap): WorldMap = {
-    if(wm.activePlayerNumber == wm.players.size)
-      wm.copy(activePlayerNumber = 1)
-    else wm.copy(activePlayerNumber = wm.activePlayerNumber + 1)
-  }
-
-
-
-  def beginActivePlayerTurn(wm: WorldMap): WorldMap = {
-    wm.getActivePlayer match {
-      case Some(p: HumanPlayer) => beginHumanTurn(wm)
-      case Some(c: ComputerPlayer) => beginComputerTurn(wm)
-    }
-  }
-
-  def beginHumanTurn(wm: WorldMap): WorldMap = {
-    wm.phase match {
-      case InitialPlacement =>
-        wm
-      case TurnPlacement =>
-        TurnPlacePhase.allocateTurnArmies(wm)
-    }
-  }
-
-  def getNonOwnedCountries(countries: List[Country]): List[Country] = {
-    countries.filter(_.owner.isEmpty)
-  }
-
-  def getCountriesOwnedByPlayer(player: Player, countries: List[Country]): List[Country] = {
-    countries.filter(_.owner.map(_.playerNumber).contains(player.playerNumber))
-  }
-
-  def beginComputerTurn(wm: WorldMap): WorldMap = {
-    val wm2 = computerPlaceArmy(wm)
-    nextTurn(wm2)
-  }
-
-  def computerPlaceArmy(wm: WorldMap): WorldMap = {
-    wm.phase match {
-      case InitialPlacement => InitPlacePhase.initPlaceCompAI(wm)
-    }
-  }
-}
