@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.transform.*?>
+<?import javafx.scene.effect.*?>
+
+<Group id='_root' xmlns:fx="http://javafx.com/fxml" xmlns:fxsvg="http://efxclipse.org/fxml-svg">
+	<children>
+		<SVGPath
+			content="M70.359,19.868c9.706,9.704,9.706,29.308,0,39.013h11.188  c9.705-9.705,9.705-29.309,0-39.013H70.359z"
+			opacity="1"
+			strokeMiterLimit="10.0"
+			>
+			<fill>
+				TRANSPARENT
+			</fill>
+			<stroke>
+				<Color>
+					<red>0.0</red>
+					<green>0.0</green>
+					<blue>0.0</blue>
+				</Color>
+			</stroke>
+			<styleClass>
+				<String fx:value="plusButton"/>
+			</styleClass>
+		</SVGPath>
+		<SVGPath
+			content="M28.716,58.882c-9.706-9.704-9.706-29.308,0-39.013H17.528  c-9.705,9.705-9.705,29.309,0,39.013H28.716z"
+			opacity="1"
+			strokeMiterLimit="10.0"
+			>
+			<fill>
+				TRANSPARENT
+			</fill>
+			<stroke>
+				<Color>
+					<red>0.0</red>
+					<green>0.0</green>
+					<blue>0.0</blue>
+				</Color>
+			</stroke>
+			<styleClass>
+				<String fx:value="minusButton"/>
+			</styleClass>
+		</SVGPath>
+		<SVGPath
+			content="M-9.75,49.25"
+			opacity="1"
+			strokeMiterLimit="10.0"
+			>
+			<fill>
+				TRANSPARENT
+			</fill>
+			<stroke>
+				<Color>
+					<red>0.0</red>
+					<green>0.0</green>
+					<blue>0.0</blue>
+				</Color>
+			</stroke>
+		</SVGPath>
+		<Circle
+			radius="25.0"
+			centerX="49.637"
+			centerY="39.375"
+			opacity="1"
+			strokeMiterLimit="10.0"
+			>
+			<fill>
+				TRANSPARENT
+			</fill>
+			<stroke>
+				<Color>
+					<red>0.0</red>
+					<green>0.0</green>
+					<blue>0.0</blue>
+				</Color>
+			</stroke>
+			<styleClass>
+				<String fx:value="displayCircle"/>
+			</styleClass>
+			
+		</Circle>
+		<SVGPath
+			content="M83.074,39.375"
+			opacity="1"
+			strokeMiterLimit="10.0"
+			>
+			<fill>
+				TRANSPARENT
+			</fill>
+			<stroke>
+				<Color>
+					<red>0.0</red>
+					<green>0.0</green>
+					<blue>0.0</blue>
+				</Color>
+			</stroke>
+		</SVGPath>
+		<!-- Unhandled type 'SvgLineElement' -->
+		<!-- Unhandled type 'SvgLineElement' -->
+		<!-- Unhandled type 'SvgLineElement' -->
+	</children>
+</Group>
