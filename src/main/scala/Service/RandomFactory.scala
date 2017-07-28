@@ -1,3 +1,5 @@
+package Service
+
 import scala.util.Random
 
 /**

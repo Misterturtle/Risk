@@ -1,3 +1,5 @@
+import GUI.{CustomColors, WorldMapUI}
+import Service._
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, Matchers}
@@ -11,7 +13,7 @@ import Scalaz._
 class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
 
   val mockUI = mock[WorldMapUI]
-  val players = List[Player](HumanPlayer("Turtle", 1, 1, "red"), HumanPlayer("Boy Wonder", 2, 1, "blue"), ComputerPlayer("Some Scrub", 3, 1, "green"))
+  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green))
   var mutableCountries = CountryFactory.getCountries
   var mutableWorldMap = new WorldMap(mutableCountries, players, 1, InitialPlacement)
 
@@ -27,7 +29,7 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
   mutableWorldMap = Effects.getCountryClickedEffect(mutableWorldMap, player1Country).eval(StateStamp(-1))
 
 
-  "Taking the last turn in the InitPlacePhase should transition to Turn Placement Phase" - {
+  "Taking the last turn in the InitPlacePhase should transition to Turn Placement Service.Phase" - {
 
     val turnPlaceWM = Effects.getCountryClickedEffect(mutableWorldMap, player2Country).eval(StateStamp(-1))
 
@@ -44,7 +46,7 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
     }
   }
 
-  "During a human player's Turn Placement Phase" - {
+  "During a human player's Turn Placement Service.Phase" - {
 
     val wm = Effects.getCountryClickedEffect(mutableWorldMap, player2Country).eval(StateStamp(-1))
 

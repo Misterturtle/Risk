@@ -1,9 +1,4 @@
-import javafx.event.EventHandler
-import javafx.scene.input.MouseEvent
-
-import scalafx.scene.layout.Pane
-import scalaz._
-import scalaz.Scalaz._
+package Service
 
 
 case class Country(name: String, armies: Int, owner: Option[Player], adjacentCountries: List[String]){

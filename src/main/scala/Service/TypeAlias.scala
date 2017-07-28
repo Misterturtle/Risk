@@ -1,3 +1,5 @@
+package Service
+
 import scalaz._
 
 /**

@@ -1,3 +1,5 @@
+import GUI.{CustomColors, WorldMapUI}
+import Service._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, Matchers}
 import org.mockito.Mockito._
@@ -9,7 +11,7 @@ import org.mockito.Mockito._
 class ReinforcementPhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
   val mockUI = mock[WorldMapUI]
-  val players = List[Player](HumanPlayer("Turtle", 1, 1, "red"), HumanPlayer("Boy Wonder", 2, 1, "blue"), ComputerPlayer("Some Scrub", 3, 1, "green"))
+  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green))
   var mutableCountries = CountryFactory.getCountries
   var mutableWorldMap = new WorldMap(mutableCountries, players, 1, InitialPlacement)
 
@@ -70,7 +72,7 @@ class ReinforcementPhaseTests extends FreeSpec with Matchers with MockitoSugar {
     wm2.phase.asInstanceOf[Reinforcement].target shouldBe Some(wm2.getCountry("alberta"))
   }
 
-  "If a ConfirmTransfer input is received" - {
+  "If a Service.ConfirmTransfer input is received" - {
     val source = beginReinforcementPhase.getCountry("alaska").copy(armies = 25)
     val target = beginReinforcementPhase.getCountry("alberta").copy(armies = 1)
     val wm = beginReinforcementPhase.setPhase(Reinforcement(Some(source), Some(target))).updateSomeCountries(List(source,target))

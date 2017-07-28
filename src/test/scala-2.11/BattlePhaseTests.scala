@@ -1,3 +1,5 @@
+import GUI.{CustomColors, WorldMapUI}
+import Service._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, Matchers}
 import org.mockito.Mockito._
@@ -10,7 +12,7 @@ import scala.util.Random
 class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
   val mockUI = mock[WorldMapUI]
-  val players = List[Player](HumanPlayer("Turtle", 1, 1, "red"), HumanPlayer("Boy Wonder", 2, 1, "blue"), ComputerPlayer("Some Scrub", 3, 1, "green"))
+  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green))
   var mutableCountries = CountryFactory.getCountries
   var mutableWorldMap = new WorldMap(mutableCountries, players, 1, InitialPlacement)
 
@@ -113,7 +115,7 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
     }
   }
 
-  "If the ConfirmTransfer input is received while the isTransferring flag is set to true" - {
+  "If the Service.ConfirmTransfer input is received while the isTransferring flag is set to true" - {
     val source = beginBattlePhase.getCountry("alaska").copy(armies = 25)
     val target = beginBattlePhase.getCountry("nwTerritory").copy(armies = 0, owner = beginBattlePhase.getActivePlayer)
     val wm = beginBattlePhase.setPhase(Battle(source, target, None, true))
@@ -125,12 +127,12 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
      postTransfer.getCountry("nwTerritory").armies shouldBe 10
    }
 
-    "The phase should be set back to Attacking" in {
+    "The phase should be set back to Service.Attacking" in {
       postTransfer.phase shouldBe Attacking(None)
     }
   }
 
-  "If the Retreat input is received, the phase should go back to Attacking" in {
+  "If the Retreat input is received, the phase should go back to Service.Attacking" in {
     val wm = beginBattlePhase
     val postRetreat = Effects.retreatFromBattle(wm).eval(StateStamp(-1))
 

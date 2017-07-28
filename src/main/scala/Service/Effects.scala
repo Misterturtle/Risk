@@ -1,16 +1,12 @@
-import TypeAlias._
+package Service
+
+import TypeAlias.Effect
 
 import scalaz.Scalaz._
-import scalaz.{Monad, State}
 
-
-case class StateStamp(id: Int)
-
-trait Validation
-case object Success extends Validation
-case object Failure extends Validation
-
-
+/**
+  * Created by Harambe on 7/20/2017.
+  */
 object Effects {
 
   def begin(wm: WorldMap): Effect[WorldMap] = {
@@ -146,33 +142,4 @@ object Effects {
   }
 
 
-}
-
-class SideEffectManager(setWM: (WorldMap) => Unit) {
-
-  private var mutations = 0
-  private def recordMutation() = mutations += 1
-
-  def performEffect(effect:Effect[WorldMap]) : Unit = {
-    val stampWithWM = effect.run(stamp)
-    validateStateStamp(stampWithWM._1) match {
-      case Success =>
-        recordMutation()
-        setWM(stampWithWM._2)
-
-
-      case Failure =>
-        println("Effect failed to validate state stamp")
-    }
-  }
-
-  private def stamp: StateStamp ={
-    StateStamp(mutations)
-  }
-
-  private def validateStateStamp(stateStamp: StateStamp): Validation = {
-    if(stateStamp.id == mutations)
-      Success
-    else Failure
-  }
 }

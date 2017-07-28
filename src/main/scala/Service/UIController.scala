@@ -1,23 +1,17 @@
-import TypeAlias.Effect
+package Service
 
-import scalaz._
-import Scalaz._
+import javafx.scene.paint.{Paint, Color}
+
 /**
-  * Created by Harambe on 7/17/2017.
+  * Created by Harambe on 7/20/2017.
   */
-trait Input
-case class CountryClicked(country:Country) extends Input
-case class ConfirmBattle(source:Country, target:Country, offenseArmies:Int) extends Input
-case class ConfirmTransfer(amount:Int) extends Input
-case object Retreat extends Input
-case object EndAttackPhase extends Input
-
-trait InputHandler[A] {
+trait UIController[A] {
   def receiveInput(input:Input): Unit
   val get: () => A
 }
 
-class WorldMapInputHandler(val get:()=>WorldMap, sideEffectManager: SideEffectManager) extends InputHandler[WorldMap] {
+
+class WorldMapUIController(val get:()=>WorldMap, sideEffectManager: SideEffectManager) extends UIController[WorldMap] {
 
   def receiveInput(input:Input): Unit = {
     input match {
@@ -31,12 +25,21 @@ class WorldMapInputHandler(val get:()=>WorldMap, sideEffectManager: SideEffectMa
         sideEffectManager.performEffect(Effects.retreatFromBattle(get()))
       case EndAttackPhase =>
         sideEffectManager.performEffect(Effects.endAttackPhase(get()))
-
-
     }
   }
 
 
+  def getPlayersName: String = get().getActivePlayer.map(_.name).getOrElse("Invalid Player")
+
+  def getPlayersArmies: Int = get().getActivePlayer.map(_.armies).getOrElse(-1)
+
+  def getPlayersColor: Paint = get().getActivePlayer.map(_.color).getOrElse(Color.TRANSPARENT)
+
+  def getPlayersTerritories: Int = get().countries.count(_.owner == get().getActivePlayer)
+
+  def getCountries: List[Country] = get().countries
+
+  def getPhase: Phase = get().phase
 
 
 

@@ -1,6 +1,7 @@
 import javafx.embed.swing.JFXPanel
 import javax.swing.JPanel
 
+import Service._
 import org.scalatest.{FreeSpec, Matchers}
 
 /**
@@ -34,7 +35,7 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
     //    Each player should have 35 armies
     wm.players.forall(_.armies == 35)
 
-    //  The WorldMap should be in InitialPlacementPhase
+    //  The Service.WorldMap should be in InitialPlacementPhase
     wm.phase shouldBe InitialPlacement
 
     //    The active player should be the first player
@@ -152,7 +153,7 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
     //      Cycle back to the 1st players turn
     secondPlayerPlaced2ndArmyWm.activePlayerNumber shouldBe 1
 
-    //      Place armies until the Init Place Phase is over
+    //      Place armies until the Init Place Service.Phase is over
     val firstPlayersCountry = secondPlayerPlaced2ndArmyWm.getCountry("alaska")
     val secondPlayersCountry = secondPlayerPlaced2ndArmyWm.getCountry("argentina")
     for (a <- 1 to 20) {
@@ -195,7 +196,7 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
 
 
   def clickOnCountry(wm:WorldMap, countryName:String):Unit = {
-    wmCont.wmInputHandler.receiveInput(CountryClicked(wm.countries.find(_.name == countryName).get))
+    wmCont.wmUICont.receiveInput(CountryClicked(wm.countries.find(_.name == countryName).get))
   }
 
 

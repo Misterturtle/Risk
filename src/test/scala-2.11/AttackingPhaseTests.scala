@@ -1,3 +1,5 @@
+import GUI.{CustomColors, WorldMapUI}
+import Service._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, Matchers}
 import org.mockito.Mockito._
@@ -8,7 +10,7 @@ import org.mockito.Mockito._
 class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
   val mockUI = mock[WorldMapUI]
-  val players = List[Player](HumanPlayer("Turtle", 1, 1, "red"), HumanPlayer("Boy Wonder", 2, 1, "blue"), ComputerPlayer("Some Scrub", 3, 1, "green"))
+  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green))
   var mutableCountries = CountryFactory.getCountries
   var mutableWorldMap = new WorldMap(mutableCountries, players, 1, InitialPlacement)
 
@@ -34,7 +36,7 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
     newWM shouldBe beginAttackPhase
   }
 
-  "Selecting an owned country sets the Attacking Phase source to that country" in {
+  "Selecting an owned country sets the Service.Attacking Service.Phase source to that country" in {
     val newWM = Effects.getCountryClickedEffect(beginAttackPhase, beginAttackPhase.getCountry("alaska")).eval(StateStamp(-1))
 
     newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("alaska")))

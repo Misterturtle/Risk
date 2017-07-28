@@ -1,7 +1,6 @@
-import Main._
+package Service
 
-import scalafx.application.JFXApp.PrimaryStage
-import scalafx.scene.Scene
+import GUI.{CustomColors, WorldMapUI}
 
 /**
   * Created by Harambe on 7/18/2017.
@@ -10,14 +9,14 @@ class WorldMapController() {
 
   val sideEffectManager = new SideEffectManager(mutateWorldMapUnsafe)
 
-  val players = List[Player](HumanPlayer("Turtle", 1, 0, "red"), HumanPlayer("Boy Wonder", 2,0, "blue"), ComputerPlayer("Some Scrub", 3, 0, "green"))
+  val players = List[Player](HumanPlayer("Turtle", 1, 0, CustomColors.red), HumanPlayer("Boy Wonder", 2,0, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 0, CustomColors.green))
   private var mutableWorldMap = WorldMap(CountryFactory.getCountries, players, 0, NotInGame)
-  val wmInputHandler = new WorldMapInputHandler(getCurrentWorldMap _, sideEffectManager)
-  val worldMapUI = new WorldMapUI(mutableWorldMap, wmInputHandler)
+  val wmUICont = new WorldMapUIController(getCurrentWorldMap _, sideEffectManager)
+  val worldMapUI = new WorldMapUI(wmUICont)
 
   def mutateWorldMapUnsafe(wm:WorldMap) :Unit = {
     mutableWorldMap = wm
-    worldMapUI.updateWorldMap(wm, wmInputHandler)
+    worldMapUI.updateWorldMap(wmUICont)
   }
 
   def getCurrentWorldMap: WorldMap = mutableWorldMap
