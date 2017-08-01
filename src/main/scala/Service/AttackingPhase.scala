@@ -4,6 +4,8 @@ package Service
   * Created by Harambe on 7/20/2017.
   */
 object AttackingPhase {
+  //todo: Currently able to select my own country as a target
+
 
   def selectSource(wm:WorldMap, country:Country):WorldMap = {
     println("Source selected")

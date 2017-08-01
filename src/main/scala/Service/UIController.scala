@@ -29,15 +29,17 @@ class WorldMapUIController(val get:()=>WorldMap, sideEffectManager: SideEffectMa
   }
 
 
-  def getPlayersName: String = get().getActivePlayer.map(_.name).getOrElse("Invalid Player")
+  def getCurrPlayersName: String = get().getActivePlayer.map(_.name).getOrElse("Invalid Player")
 
-  def getPlayersArmies: Int = get().getActivePlayer.map(_.armies).getOrElse(-1)
+  def getCurrPlayersArmies: Int = get().getActivePlayer.map(_.armies).getOrElse(-1)
 
-  def getPlayersColor: Paint = get().getActivePlayer.map(_.color).getOrElse(Color.TRANSPARENT)
+  def getCurrPlayersColor: Paint = get().getActivePlayer.map(_.color).getOrElse(Color.TRANSPARENT)
 
-  def getPlayersTerritories: Int = get().countries.count(_.owner == get().getActivePlayer)
+  def getCurrPlayersTerritories: Int = get().countries.count(_.owner == get().getActivePlayer)
 
   def getCountries: List[Country] = get().countries
+
+  def getCountryByName(name:String) = get().getCountry(name)
 
   def getPhase: Phase = get().phase
 

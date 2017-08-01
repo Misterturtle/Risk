@@ -27,7 +27,7 @@ class PlayerDisplayUI(wmUICont:WorldMapUIController) extends VBox {
   //nameContainer.styleClass.add("redBackground")
   nameContainer.setBackground(bg)
 
-  val nameText = new Text(wmUICont.getPlayersName)
+  val nameText = new Text(wmUICont.getCurrPlayersName)
   nameText.styleClass.add("defaultText")
 
   nameContainer.alignment = Pos.Center
@@ -35,7 +35,7 @@ class PlayerDisplayUI(wmUICont:WorldMapUIController) extends VBox {
 
 
 
-  val statsBar = new StatsBar(wmUICont.getPlayersColor, wmUICont.getPlayersArmies, wmUICont.getPlayersArmies)
+  val statsBar = new StatsBar(wmUICont.getCurrPlayersColor, wmUICont.getCurrPlayersArmies, wmUICont.getCurrPlayersArmies)
   statsBar.enableScaling(this.prefHeightProperty(), this.prefWidthProperty())
 
 
@@ -47,11 +47,11 @@ class PlayerDisplayUI(wmUICont:WorldMapUIController) extends VBox {
 
 
   def update(): Unit ={
-    statsBar.update(wmUICont.getPlayersColor, wmUICont.getPlayersArmies, wmUICont.getPlayersTerritories)
-    nameText.setText(wmUICont.getPlayersName)
+    statsBar.update(wmUICont.getCurrPlayersColor, wmUICont.getCurrPlayersArmies, wmUICont.getCurrPlayersTerritories)
+    nameText.setText(wmUICont.getCurrPlayersName)
     val radii = nameContainer.getBackground.getFills.get(0).getRadii
     val insets = nameContainer.getBackground.getFills.get(0).getInsets
-    nameContainer.setBackground(new Background(new BackgroundFill(wmUICont.getPlayersColor, radii, insets)))
+    nameContainer.setBackground(new Background(new BackgroundFill(wmUICont.getCurrPlayersColor, radii, insets)))
   }
 }
 

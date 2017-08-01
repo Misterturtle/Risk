@@ -42,11 +42,11 @@ class CountryUI(startingCountry: Country, val origPoints: List[(Double, Double)]
   val armyDisplay = new SVGArmyDisplay(xScale, yScale)
   val polygon = new Polygon(new javafx.scene.shape.Polygon())
 
-  def update(country: Country): Unit = {
-    armyDisplay.update(country.owner.map(_.color).getOrElse(CustomColors.gray), country.armies, isSourceCountry(wmUICont.getPhase), wmUICont.getPhase.isInstanceOf[Attacking], wmUICont.getPhase.isInstanceOf[Reinforcement])
+  def update(): Unit = {
+    armyDisplay.update(startingCountry.name, wmUICont)
     polygon.onMouseClicked = new EventHandler[MouseEvent] {
       override def handle(event: MouseEvent): Unit = {
-        wmUICont.receiveInput(CountryClicked(country))
+        wmUICont.receiveInput(CountryClicked(wmUICont.getCountryByName(startingCountry.name)))
       }
     }
   }
