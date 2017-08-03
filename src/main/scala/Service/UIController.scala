@@ -19,7 +19,7 @@ class WorldMapUIController(val get:()=>WorldMap, sideEffectManager: SideEffectMa
         sideEffectManager.performEffect(Effects.getCountryClickedEffect(get(), country))
       case ConfirmBattle(source,target,offenseArmies) =>
         sideEffectManager.performEffect(Effects.executeBattle(get(), ConfirmBattle(source, target, offenseArmies)))
-      case ConfirmTransfer(amount) =>
+       case ConfirmTransfer(amount) =>
         sideEffectManager.performEffect(Effects.executeBattleTransfer(get(), ConfirmTransfer(amount)))
       case Retreat =>
         sideEffectManager.performEffect(Effects.retreatFromBattle(get()))

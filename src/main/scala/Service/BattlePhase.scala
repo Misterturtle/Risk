@@ -5,10 +5,8 @@ package Service
   */
 object BattlePhase{
 
-  def calculateDefensiveArmies(offArmies:Int, defensiveCountry: Country) = {
-    if(offArmies == 1)
-      1
-    else if (defensiveCountry.armies == 1)
+  def oneOrTwoDefensiveRolls(defensiveCountry: Country) = {
+    if (defensiveCountry.armies == 1)
       1
     else 2
   }

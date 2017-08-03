@@ -32,7 +32,7 @@ class SVGArmyDisplay(xScale: SimpleDoubleProperty, yScale: SimpleDoubleProperty)
   displayCircle.scaleX = .8
   displayCircle.scaleY = .8
 
-  val armyText = new Text("0")
+  val armyText = Animator.blockable(new Text("0"))
   armyText.setScaleX(2)
   armyText.setScaleY(2)
 

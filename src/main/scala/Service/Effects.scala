@@ -89,12 +89,13 @@ object Effects {
 
 
   def executeBattle(wm:WorldMap, battleConf: ConfirmBattle, rGen:RandomFactory = new RandomFactory): Effect[WorldMap] = {
+    import BattlePhase._
     val effect = init[StateStamp]
-    val defArmies = BattlePhase.calculateDefensiveArmies(battleConf.offenseArmies, battleConf.target)
+    val defArmies = oneOrTwoDefensiveRolls(battleConf.target)
     val battleResults = BattleResult(rGen = rGen).attack(battleConf.offenseArmies, defArmies)
-    val wm2 = BattlePhase.recordResults(wm, battleResults)
-    val wm3 = BattlePhase.removeDeadArmies(wm2)
-    val wm4 = BattlePhase.handleIfCountryConquered(wm3)
+    val wm2 = recordResults(wm, battleResults)
+    val wm3 = removeDeadArmies(wm2)
+    val wm4 = handleIfCountryConquered(wm3)
 
     effect.flatMap(_ => state(wm4))
   }

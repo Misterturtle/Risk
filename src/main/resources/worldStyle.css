@@ -59,7 +59,7 @@
 .displayConsole{
     -fx-background-repeat: no-repeat;
     -fx-background-size: stretch;
-    -fx-background-color: linear-gradient(rgba(211, 211, 211, 0.7) 0%, rgba(123, 123, 123, 0.7) 25%, rgba(123, 123, 123, 0.7) 75%, rgba(59, 59, 59, 0.7) 100%);
+    -fx-background-color: linear-gradient(rgba(211, 211, 211, 1) 0%, rgba(123, 123, 123, 1) 25%, rgba(123, 123, 123, 1) 75%, rgba(59, 59, 59, 1) 100%);
     -fx-background-radius: 10;
     -fx-border-color: black;
     -fx-border-radius: 10;

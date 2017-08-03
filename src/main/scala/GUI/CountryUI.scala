@@ -33,7 +33,7 @@ import scalafx.util.Duration
 
 class CountryUI(startingCountry: Country, val origPoints: List[(Double, Double)], wmUICont: WorldMapUIController) extends StackPane {
 
-
+  private val self = this
   val origWidth = if (origPoints.nonEmpty) origPoints.maxBy(_._1)._1 - origPoints.minBy(_._1)._1 else 0
   val origHeight = if (origPoints.nonEmpty) origPoints.maxBy(_._2)._2 - origPoints.minBy(_._2)._2 else 0
   val xScale = new SimpleDoubleProperty()
@@ -64,6 +64,23 @@ class CountryUI(startingCountry: Country, val origPoints: List[(Double, Double)]
         println("Clicked "+startingCountry.name)
       }
     })
+  }
+
+  def resizeXListener(windowXScale: SimpleDoubleProperty): ChangeListener[Number] ={
+
+    new ChangeListener[Number] {
+      override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
+        AnchorPane.setLeftAnchor(self, origPoints.minBy(_._1)._1 * windowXScale.get)
+      }
+    }
+  }
+
+  def resizeYListener(windowYScale: SimpleDoubleProperty): ChangeListener[Number] = {
+    new ChangeListener[Number] {
+      override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
+        AnchorPane.setTopAnchor(self, origPoints.minBy(_._2)._2 * windowYScale.get)
+      }
+    }
   }
 
   def isSourceCountry(phase:Phase): Boolean ={
