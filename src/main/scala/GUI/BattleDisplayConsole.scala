@@ -212,6 +212,7 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
     rollCycle.playFromStart()
   }
 
+
   def postInit(): Unit = {
     translateY.delegate.setValue(height.value * -1)
   }
