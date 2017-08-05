@@ -20,7 +20,7 @@ class SideEffectManager(setWM: (WorldMap) => Unit) {
   private var mutations = 0
   private def recordMutation() = mutations += 1
 
-  def performEffect(effect:Effect[WorldMap]) : Unit = {
+  def performServiceEffect(effect:Effect[WorldMap]) : Unit = {
     val stampWithWM = effect.run(stamp)
     validateStateStamp(stampWithWM._1) match {
       case Success =>
@@ -32,6 +32,7 @@ class SideEffectManager(setWM: (WorldMap) => Unit) {
         println("Effect failed to validate state stamp")
     }
   }
+
 
   private def stamp: StateStamp ={
     StateStamp(mutations)

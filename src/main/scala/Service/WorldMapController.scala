@@ -26,6 +26,6 @@ class WorldMapController() {
 
 
   //Entry Point
-  def begin() = sideEffectManager.performEffect(Effects.begin(mutableWorldMap))
+  def begin() = sideEffectManager.performServiceEffect(Effects.begin(mutableWorldMap))
 
 }

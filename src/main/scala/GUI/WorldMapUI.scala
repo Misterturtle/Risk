@@ -3,19 +3,22 @@ package GUI
 import java.lang.Boolean
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.value.{ChangeListener, ObservableValue}
-import javafx.event.EventHandler
+import javafx.event.{ActionEvent, EventHandler}
 import javafx.scene.input.MouseEvent
 
 import Service._
 
+import scalafx.animation.PauseTransition
 import scalafx.scene.Group
 import scalafx.scene.image.Image
 import scalafx.scene.layout._
 import scalafx.stage.Screen
+import scalafx.util.Duration
 
 
 class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
 
+  private val self = this
   val mapImage = new Image("map.png")
   val mapImageXScale = new SimpleDoubleProperty()
   mapImageXScale.bind(width.delegate.divide(mapImage.width.value))
@@ -29,13 +32,15 @@ class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
 
   var countriesUI = initCountries(wmUICont.getCountries)
   countriesUI.foreach { case (name, coun) =>
-    this.width.addListener(coun.resizeXListener(windowXScale))
-    this.height.addListener(coun.resizeYListener(windowYScale))
+    this.width.addListener(coun.resizeXListener(mapImageXScale))
+    this.height.addListener(coun.resizeYListener(mapImageYScale))
   }
 
   val battleDisplayConsole = new BattleDisplayConsole(wmUICont)
   battleDisplayConsole.prefHeight.bind(this.heightProperty().divide(4))
   battleDisplayConsole.prefWidth.bind(this.widthProperty().divide(10))
+  this.width.addListener(battleDisplayConsole.resizeXListener(width))
+  this.height.addListener(battleDisplayConsole.resizeYListener(height))
   battleDisplayConsole.contentGroup.scaleX.bind(windowXScale)
   battleDisplayConsole.contentGroup.scaleY.bind(windowYScale)
 

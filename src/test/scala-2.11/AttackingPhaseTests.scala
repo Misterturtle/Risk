@@ -21,9 +21,9 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
     }
   }
 
-  mutableWorldMap = mutableWorldMap.setPhase(Attacking(None))
+  mutableWorldMap = mutableWorldMap.setPhase(Attacking(None, None))
   mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alaska").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 5))
-  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alberta").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1)))
+  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alberta").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 5))
   mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("nwTerritory").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(2)))
   mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("westernUS").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(2)))
 
@@ -36,17 +36,17 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
     newWM shouldBe beginAttackPhase
   }
 
-  "Selecting an owned country sets the Service.Attacking Service.Phase source to that country" in {
+  "Selecting an owned country sets the Attacking Phase source to that country" in {
     val newWM = Effects.getCountryClickedEffect(beginAttackPhase, beginAttackPhase.getCountry("alaska")).eval(StateStamp(-1))
 
-    newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("alaska")))
+    newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("alaska")), None)
   }
 
   "Selecting the source country while it is selected should deselect it" in {
-    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska"))))
+    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska")), None))
     val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("alaska")).eval(StateStamp(-1))
 
-    newWM.phase shouldBe Attacking(None)
+    newWM.phase shouldBe Attacking(None, None)
   }
 
   "Selecting a country with only 1 army should do nothing" in {
@@ -57,21 +57,21 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
   }
 
   "Selecting an owned country when a source is already selected does nothing" in {
-    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska"))))
+    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska")), None))
     val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("alberta")).eval(StateStamp(-1))
 
-    newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("alaska")))
+    newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("alaska")), None)
   }
 
   "Selecting an adjacent non owned country when a source is already selected should begin a battle" in {
-    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska"))))
+    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska")), None))
     val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("nwTerritory")).eval(StateStamp(-1))
 
     newWM.phase shouldBe Battle(beginAttackPhase.getCountry("alaska"), beginAttackPhase.getCountry("nwTerritory"))
   }
 
   "Selecting a non owned country that is NOT adjacent to the source should not do anything" in {
-    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska"))))
+    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska")), None))
     val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("westernUS")).eval(StateStamp(-1))
 
     newWM shouldBe wmWithSourceSelected

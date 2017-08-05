@@ -81,6 +81,6 @@ object TurnPlacePhase{
 
 
   def endTurnPlacementPhase(wm: WorldMap): WorldMap = {
-    wm.copy(phase = Attacking(None))
+    wm.copy(phase = Attacking(None, None))
   }
 }

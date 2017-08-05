@@ -1,16 +1,17 @@
 package GUI
 
 import java.lang
-import javafx.beans.value.{ObservableValue, ChangeListener}
+import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.event.{ActionEvent, EventHandler}
 import javafx.scene.input.MouseEvent
 import javafx.scene.paint.Paint
 
 import Service._
 
+import scalaz.Scalaz._
 import scala.collection.mutable
 import scala.util.Random
-import scalafx.animation.{PauseTransition, TranslateTransition}
+import scalafx.animation.{Animation, PauseTransition, TranslateTransition}
 import scalafx.geometry.Pos
 import scalafx.scene.Group
 import scalafx.scene.layout._
@@ -23,7 +24,11 @@ import scalafx.util.Duration
   * Created by Harambe on 7/31/2017.
   */
 
-class Dice(val index: Int) {
+object Dice{
+
+  def setDiceDisplay(dice:Dice, numberRolled: Int): Unit ={
+    dice.shape.setContent(diceShapes(numberRolled - 1))
+  }
 
   val diceShapes = List(
     "M50.498,38.498c0,6.627-5.373,12-12,12H12.5c-6.629,0-12.001-5.373-12.001-12V12.499c0-6.627,5.372-12,12.001-12h25.998c6.627,0,12,5.373,12,12V38.498 M25.446,30.499c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H25.446z",
@@ -33,11 +38,14 @@ class Dice(val index: Int) {
     "M50.498,38.498c0,6.627-5.373,12-12,12H12.5c-6.629,0-12.001-5.373-12.001-12V12.499c0-6.627,5.372-12,12.001-12h25.998c6.627,0,12,5.373,12,12V38.498M12.947,18c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H12.947M25.446,30.499c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H25.446M12.946,42.999c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.511,5,5,5H12.946M37.946,17.999c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-4.999,2.512-4.999,5c0,2.487,2.511,5,4.999,5H37.946M37.947,43c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H37.947z",
     "M50.498,38.498c0,6.627-5.373,12-12,12H12.5c-6.629,0-12.001-5.373-12.001-12V12.499c0-6.627,5.372-12,12.001-12h25.998c6.627,0,12,5.373,12,12V38.498M12.947,16c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H12.947M12.947,30.499c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H12.947M35.947,30.499c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H35.947M12.947,45c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H12.947M35.947,16c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H35.947M35.947,45c2.488,0,5-2.512,5-5c0-2.487-2.512-5-5-5h0.105c-2.486,0-5,2.512-5,5c0,2.487,2.512,5,5,5H35.947z"
   )
+}
+
+class Dice(val index: Int) {
 
   var shape: SVGPath = new SVGPath()
   var isToggledOn: Boolean = true
 
-  shape.setContent(diceShapes.head)
+  shape.setContent(Dice.diceShapes.head)
   shape.setPickOnBounds(true)
 
   def toggleOn() = {
@@ -50,9 +58,8 @@ class Dice(val index: Int) {
     isToggledOn = false
   }
 
-  def toggle() = isToggledOn = !isToggledOn
+  def toggle() = isToggledOn ? toggleOff() | toggleOn()
 }
-
 
 
 class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsole {
@@ -78,7 +85,7 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
   confirmButton.setPickOnBounds(true)
   confirmButton.setOnMouseClicked(new EventHandler[MouseEvent] {
     override def handle(event: MouseEvent): Unit = {
-      rollAnim()
+      roll()
     }
   })
 
@@ -96,6 +103,24 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
 
   def update(attackingCountry: Country, defendingCountry: Country, previousBattle: Option[BattleResult]): Unit = {
     setDiceActions(attackingCountry.armies, defendingCountry.armies)
+    _attackingCountry = Some(attackingCountry)
+    _defendingCountry = Some(defendingCountry)
+    displayBattleResults(previousBattle)
+  }
+
+  def displayBattleResults(previousBattle: Option[BattleResult]): Unit ={
+    if(previousBattle.nonEmpty){
+      var offDiceCounter = 0
+      var defDiceCounter = 0
+      previousBattle.get.offRolls.foreach {d =>
+        Dice.setDiceDisplay(diceArray(offDiceCounter), d)
+        offDiceCounter += 1
+      }
+      previousBattle.get.defRolls.foreach {d =>
+        Dice.setDiceDisplay(diceArray(defDiceCounter+3), d)
+        defDiceCounter += 1
+      }
+    }
   }
 
 
@@ -117,8 +142,11 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
   }
 
   def endBattle(): Unit = {
-    println("Battle Ending")
-    diceArray.foreach(deactivateDice)
+    diceArray.foreach(_.shape.setOnMouseClicked(new EventHandler[MouseEvent] {
+      override def handle(event: MouseEvent) = {}
+    }))
+
+
     closeAnim()
   }
 
@@ -137,12 +165,12 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
     }
 
     if (defArmies == 1) {
-      diceArray(3).toggleOn
-      diceArray(4).toggleOff
+      diceArray(3).toggleOn()
+      diceArray(4).toggleOff()
     }
     if (defArmies > 1) {
-      diceArray(3).toggleOn
-      diceArray(3).toggleOn
+      diceArray(3).toggleOn()
+      diceArray(3).toggleOn()
     }
   }
 
@@ -150,7 +178,7 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
   def activateDice(dice: Dice): Unit = {
     dice.shape.setOnMouseClicked(new EventHandler[MouseEvent] {
       override def handle(event: MouseEvent): Unit = {
-        diceArray(dice.index) = dice.toggle
+        dice.toggle
       }
     })
   }
@@ -159,68 +187,45 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
     dice.shape.setOnMouseClicked(new EventHandler[MouseEvent] {
       override def handle(event: MouseEvent): Unit = {}
     })
-    if (dice.isToggledOn)
-      diceArray(dice.index) = dice.toggle
+    dice.toggleOff()
   }
 
-  def rollAnim(): Unit = {
+  def roll(): Unit = {
     println("Roll animation starting")
-    val dice = activeDice.toList.filter(_._2)
+    val dice = diceArray.toList.filter(_.isToggledOn)
     var currentRoll = 0
 
-    val roll = new PauseTransition()
-    roll.duration = new Duration(100)
-    roll.onFinished = new EventHandler[ActionEvent] {
+    val rollCycle = new PauseTransition()
+    rollCycle.duration = new Duration(100)
+    rollCycle.onFinished = new EventHandler[ActionEvent] {
       override def handle(event: ActionEvent): Unit = {
-        if (currentRoll < 20) {
-          println("Rolling within 20")
-          currentRoll += 1
-          dice.foreach(_._1.setContent(diceShapes(Random.nextInt(6))))
-          roll.playFromStart()
+        dice.foreach(d => d.shape.setContent(Dice.diceShapes(Random.nextInt(6))))
+        if(currentRoll == 20){
+          wmUICont.receiveInput(ConfirmBattle(_attackingCountry.get, _defendingCountry.get, diceArray.take(3).count(_.isToggledOn)))
         }
-        else {
-          println("Updating die correctly")
-          println(" Offensive Rolls: ")
-          wmUICont.receiveInput(ConfirmBattle(_attackingCountry.get, _defendingCountry.get, activeDice.take(3).count(_._2)))
-          wmUICont.getPhase match {
-            case Battle(_, _, _, trans) if trans =>
-
-
-            case Battle(_, _, pB, _) =>
-              pB.get.offRolls.foldLeft(0) { case (i, rollNum) =>
-                activeDice(i)._1.setContent(diceShapes(rollNum - 1))
-                println(s"Offensive dice $i: $rollNum")
-                i + 1
-              }
-
-              pB.get.defRolls.foldLeft(3) { case (i, rollNum) =>
-                activeDice(i)._1.setContent(diceShapes(rollNum - 1))
-                println(s"Defensive dice $i: $rollNum")
-                i + 1
-              }
-
-          }
+        else{
+          currentRoll += 1
+          rollCycle.playFromStart()
         }
       }
     }
-    roll.playFromStart()
-    roll.
+    rollCycle.playFromStart()
   }
 
   def postInit(): Unit = {
-    translateY.set(height.value * -1)
+    translateY.delegate.setValue(height.value * -1)
   }
 
 
   val attackingDieBox = new HBox()
   attackingDieBox.spacing = 10
   attackingDieBox.alignment = Pos.Center
-  attackingDieBox.children.addAll(new Group(diceArray(0).shape _), new Group(diceArray(1)), new Group(diceArray(2)))
+  attackingDieBox.children.addAll(new Group(diceArray(0).shape), new Group(diceArray(1).shape), new Group(diceArray(2).shape))
 
   val defendingDieBox = new HBox()
   defendingDieBox.spacing = 10
   defendingDieBox.alignment = Pos.Center
-  defendingDieBox.children.addAll(new Group(defDice1), new Group(defDice2))
+  defendingDieBox.children.addAll(new Group(diceArray(3).shape), new Group(diceArray(4).shape))
 
   val navigationBox = new HBox()
   navigationBox.spacing = 10

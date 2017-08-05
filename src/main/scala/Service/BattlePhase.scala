@@ -3,7 +3,7 @@ package Service
 /**
   * Created by Harambe on 7/20/2017.
   */
-object BattlePhase{
+object BattlePhase {
 
   def oneOrTwoDefensiveRolls(defensiveCountry: Country) = {
     if (defensiveCountry.armies == 1)
@@ -12,11 +12,11 @@ object BattlePhase{
   }
 
 
-  def recordResults(wm:WorldMap, battleResult: BattleResult): WorldMap = {
+  def recordResults(wm: WorldMap, battleResult: BattleResult): WorldMap = {
     wm.copy(phase = wm.phase.asInstanceOf[Battle].copy(previousBattle = Some(battleResult)))
   }
 
-  def removeDeadArmies(wm:WorldMap): WorldMap = {
+  def removeDeadArmies(wm: WorldMap): WorldMap = {
     val battle = wm.phase.asInstanceOf[Battle]
     val newSourceCountry = battle.source.removeArmies(battle.previousBattle.get.offDefArmiesLost()._1)
     val newTargetCountry = battle.target.removeArmies(battle.previousBattle.get.offDefArmiesLost()._2)
@@ -25,12 +25,24 @@ object BattlePhase{
     wm.copy(phase = newBattle).updateSomeCountries(List(newSourceCountry, newTargetCountry))
   }
 
-  def handleIfCountryConquered(wm:WorldMap):WorldMap = {
+  def checkForBattleEnd(wm: WorldMap): WorldMap = {
     val battle = wm.phase.asInstanceOf[Battle]
-    if(battle.target.armies == 0){
+    if (battle.target.armies <= 0) {
       val conqueredCountry = battle.target.copy(owner = wm.getActivePlayer)
       wm.setPhase(battle.copy(target = conqueredCountry, isTransferring = true)).updateSingleCountry(conqueredCountry)
     }
-    else wm
+    else {
+      if (battle.source.armies <= 1) {
+        wm.setPhase(Attacking(None, None))
+      }
+      else {
+        wm
+      }
+    }
   }
+
+
+
+
+
 }

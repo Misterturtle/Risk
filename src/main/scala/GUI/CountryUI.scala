@@ -66,26 +66,26 @@ class CountryUI(startingCountry: Country, val origPoints: List[(Double, Double)]
     })
   }
 
-  def resizeXListener(windowXScale: SimpleDoubleProperty): ChangeListener[Number] ={
+  def resizeXListener(mapImageXScale: SimpleDoubleProperty): ChangeListener[Number] ={
 
     new ChangeListener[Number] {
       override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
-        AnchorPane.setLeftAnchor(self, origPoints.minBy(_._1)._1 * windowXScale.get)
+        AnchorPane.setLeftAnchor(self, origPoints.minBy(_._1)._1 * mapImageXScale.get)
       }
     }
   }
 
-  def resizeYListener(windowYScale: SimpleDoubleProperty): ChangeListener[Number] = {
+  def resizeYListener(mapImageYScale: SimpleDoubleProperty): ChangeListener[Number] = {
     new ChangeListener[Number] {
       override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
-        AnchorPane.setTopAnchor(self, origPoints.minBy(_._2)._2 * windowYScale.get)
+        AnchorPane.setTopAnchor(self, origPoints.minBy(_._2)._2 * mapImageYScale.get)
       }
     }
   }
 
   def isSourceCountry(phase:Phase): Boolean ={
     phase match{
-      case Attacking(s) =>
+      case Attacking(s, _) =>
         s.map(_.name).getOrElse("None") == startingCountry.name
 
       case Battle(s,t, pB, trans) =>

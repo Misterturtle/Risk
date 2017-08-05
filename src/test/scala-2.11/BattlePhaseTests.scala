@@ -115,7 +115,21 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
     }
   }
 
-  "If the Service.ConfirmTransfer input is received while the isTransferring flag is set to true" - {
+  "If the attack reduces the attacking armies to one, " - {
+    val wm = beginBattlePhase.updateSingleCountry(beginBattlePhase.getCountry("nwTerritory").copy(armies = 1))
+    val preBattle = wm.setPhase(Battle(wm.getCountry("alaska"), wm.getCountry("nwTerritory")))
+    val mockRandom = mock[RandomFactory]
+    when(mockRandom.roll()).thenReturn(1, 1, 1, 6)
+    val battle = preBattle.phase.asInstanceOf[Battle]
+    val postBattle = Effects.executeBattle(preBattle, ConfirmBattle(battle.source, battle.target, 3), mockRandom).eval(StateStamp(-1))
+
+    "The attacking country should retreat" in {
+      postBattle.phase shouldBe Attacking(None, None)
+    }
+
+  }
+
+  "If the ConfirmTransfer input is received while the isTransferring flag is set to true" - {
     val source = beginBattlePhase.getCountry("alaska").copy(armies = 25)
     val target = beginBattlePhase.getCountry("nwTerritory").copy(armies = 0, owner = beginBattlePhase.getActivePlayer)
     val wm = beginBattlePhase.setPhase(Battle(source, target, None, true))
@@ -128,14 +142,14 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
    }
 
     "The phase should be set back to Service.Attacking" in {
-      postTransfer.phase shouldBe Attacking(None)
+      postTransfer.phase shouldBe Attacking(None, None)
     }
   }
 
-  "If the Retreat input is received, the phase should go back to Service.Attacking" in {
+  "If the Retreat input is received, the phase should go back to Attacking" in {
     val wm = beginBattlePhase
     val postRetreat = Effects.retreatFromBattle(wm).eval(StateStamp(-1))
 
-    postRetreat.phase shouldBe Attacking(None)
+    postRetreat.phase shouldBe Attacking(None, None)
   }
 }

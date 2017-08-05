@@ -32,7 +32,7 @@ class SVGArmyDisplay(xScale: SimpleDoubleProperty, yScale: SimpleDoubleProperty)
   displayCircle.scaleX = .8
   displayCircle.scaleY = .8
 
-  val armyText = Animator.blockable(new Text("0"))
+  val armyText = new Text("0")
   armyText.setScaleX(2)
   armyText.setScaleY(2)
 
@@ -78,7 +78,7 @@ class SVGArmyDisplay(xScale: SimpleDoubleProperty, yScale: SimpleDoubleProperty)
       case Battle(s,_,_,_) if s.name == countryName =>
         //Don't deactivate animation yet that began in Attacking Phase
 
-      case Attacking(s) if s.map(_.name).getOrElse("None") == countryName =>
+      case Attacking(s, _) if s.map(_.name).getOrElse("None") == countryName =>
         sourceCircle.setFill(s.map(_.owner.map(_.color).get).get)
         activateSourceCountryAnim()
 

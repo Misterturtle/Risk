@@ -18,6 +18,7 @@ object Main extends JFXApp {
     scene = new Scene(wmCont.worldMapUI, 1200,800)
   }
 
+
   wmCont.worldMapUI.postInit()
   wmCont.begin()
 

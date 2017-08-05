@@ -1,9 +1,10 @@
 package GUI
 
 import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.value.{ObservableValue, ChangeListener}
+import javafx.beans.value.{ChangeListener, ObservableValue}
 
 import scalafx.animation.TranslateTransition
+import scalafx.beans.property.{DoubleProperty, ReadOnlyDoubleProperty}
 import scalafx.scene.layout.{AnchorPane, VBox}
 import scalafx.util.Duration
 
@@ -12,8 +13,8 @@ import scalafx.util.Duration
   */
 trait DisplayConsole extends VBox {
 
-  private val descendAnim = new TranslateTransition(new Duration(1000), this)
-  private val ascendAnim = new TranslateTransition(new Duration(1000), this)
+  protected val descendAnim = new TranslateTransition(new Duration(1000), this)
+  protected val ascendAnim = new TranslateTransition(new Duration(1000), this)
   private var _isDisplayed = false
   def isDisplayed:Boolean = _isDisplayed
   AnchorPane.setTopAnchor(this, 0)
@@ -33,7 +34,7 @@ trait DisplayConsole extends VBox {
     ascendAnim.playFromStart()
   }
 
-  def resizeYListener(sceneHeight: SimpleDoubleProperty): ChangeListener[Number] = {
+  def resizeYListener(sceneHeight: ReadOnlyDoubleProperty): ChangeListener[Number] = {
     new ChangeListener[Number] {
       override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
         AnchorPane.setBottomAnchor(self, sceneHeight.get * .8)
@@ -44,7 +45,7 @@ trait DisplayConsole extends VBox {
     }
   }
 
-  def resizeXListener(sceneWidth: SimpleDoubleProperty): ChangeListener[Number] ={
+  def resizeXListener(sceneWidth: ReadOnlyDoubleProperty): ChangeListener[Number] ={
     new ChangeListener[Number] {
       override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
         AnchorPane.setLeftAnchor(self, sceneWidth.get * .4)

@@ -70,7 +70,7 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
       val ownedCountry = wm.countries.find(_.owner.map(_.playerNumber).contains(1)).get
       val attackPhaseWM = Effects.getCountryClickedEffect(lastPlacementWM, ownedCountry).eval(StateStamp(-1))
 
-      attackPhaseWM.phase shouldBe Attacking(None)
+      attackPhaseWM.phase shouldBe Attacking(None, None)
     }
   }
 }

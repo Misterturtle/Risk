@@ -15,13 +15,13 @@ object AttackingPhase {
   }
 
   def deselectSource(wm:WorldMap):WorldMap = {
-    wm.copy(phase = Attacking(None))
+    wm.copy(phase = Attacking(None, None))
   }
 
 
   def beginBattle(wm:WorldMap, country:Country):WorldMap = {
-    if(isValidAttackTarget(wm.phase.asInstanceOf[Attacking].source.get, country)){
-      val source = wm.phase.asInstanceOf[Attacking].source.get
+    val source = wm.phase.asInstanceOf[Attacking].source.get
+    if(isValidAttackTarget(source, country)){
       wm.setPhase(Battle(source, country))
     }
     else wm
@@ -32,6 +32,6 @@ object AttackingPhase {
   }
 
   def isValidAttackTarget(source:Country, target:Country) :Boolean = {
-    source.owner != target.owner && source.adjacentCountries.contains(target.name)
+    source.owner.map(_.playerNumber).get != target.owner.map(_.playerNumber).get && source.adjacentCountries.contains(target.name)
   }
 }

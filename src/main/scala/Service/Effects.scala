@@ -43,10 +43,10 @@ object Effects {
   def countryClickedDuringAttackingPhase(wm:WorldMap, countryClicked:Country):Effect[WorldMap] = {
     val effect = init[StateStamp]
     wm.phase match {
-      case Attacking(None) =>
+      case Attacking(None, _) =>
         effect.flatMap(_ => state(AttackingPhase.selectSource(wm, countryClicked)))
 
-      case Attacking(s:Some[Country]) =>
+      case Attacking(s:Some[Country], _) =>
         if(s.get.name == countryClicked.name)
           effect.flatMap(_ => state(AttackingPhase.deselectSource(wm)))
         else
@@ -75,7 +75,7 @@ object Effects {
         countryClickedDuringInitPlace(worldMap, country)
       case TurnPlacement =>
         countryClickedDuringTurnPlace(worldMap, country)
-      case Attacking(s) =>
+      case Attacking(s, _) =>
         countryClickedDuringAttackingPhase(worldMap, country)
       case Reinforcement(s,t)=>
         countryClickedDuringReinforcementPhase(worldMap, country)
@@ -95,7 +95,7 @@ object Effects {
     val battleResults = BattleResult(rGen = rGen).attack(battleConf.offenseArmies, defArmies)
     val wm2 = recordResults(wm, battleResults)
     val wm3 = removeDeadArmies(wm2)
-    val wm4 = handleIfCountryConquered(wm3)
+    val wm4 = checkForBattleEnd(wm3)
 
     effect.flatMap(_ => state(wm4))
   }
@@ -123,14 +123,14 @@ object Effects {
     val effect = init[StateStamp]
     val battle = wm.phase.asInstanceOf[Battle]
     val wm2 = wm.transferArmies(battle.source, battle.target, confTrans.amount)
-    val wm3 = wm2.setPhase(Attacking(None))
+    val wm3 = wm2.setPhase(Attacking(None, None))
 
     effect.flatMap(_ => state(wm3))
   }
 
   def retreatFromBattle(wm:WorldMap): Effect[WorldMap] = {
     val effect = init[StateStamp]
-    val wm2 = wm.setPhase(Attacking(None))
+    val wm2 = wm.setPhase(Attacking(None, None))
 
     effect.flatMap(_ => state(wm2))
   }

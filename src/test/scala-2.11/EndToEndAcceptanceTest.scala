@@ -19,7 +19,7 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
 
 
     // When a new game begins,
-    wmCont.sideEffectManager.performEffect(Effects.begin(wmCont.getCurrentWorldMap))
+    wmCont.sideEffectManager.performServiceEffect(Effects.begin(wmCont.getCurrentWorldMap))
     val wm = wmCont.getCurrentWorldMap
 
     //    No countries should be owned
@@ -189,7 +189,7 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
     }
 
     //Should transition to attack phase
-    wmCont.getCurrentWorldMap.phase shouldBe Attacking(None)
+    wmCont.getCurrentWorldMap.phase shouldBe Attacking(None, None)
   }
 
 
