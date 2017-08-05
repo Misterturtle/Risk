@@ -217,6 +217,7 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
   }
 
 
+
   val attackingDieBox = new HBox()
   attackingDieBox.spacing = 10
   attackingDieBox.alignment = Pos.Center
