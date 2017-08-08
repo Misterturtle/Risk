@@ -47,7 +47,7 @@ class WorldMapUIController(val get:()=>WorldMap, sideEffectManager: SideEffectMa
 
   def getCurrPlayersColor: Paint = get().getActivePlayer.map(_.color).getOrElse(Color.TRANSPARENT)
 
-  def getCurrPlayersTerritories: Int = get().countries.count(_.owner == get().getActivePlayer)
+  def getCurrPlayersTerritories: Int = get().countries.count(_.owner.map(_.name).getOrElse("No Owner") == get().getActivePlayer.map(_.name).getOrElse("No Active Player"))
 
   def getCountries: List[Country] = get().countries
 

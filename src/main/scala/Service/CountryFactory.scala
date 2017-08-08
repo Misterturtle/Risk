@@ -7,71 +7,71 @@ object CountryFactory {
 
 
   //North America
-  val alaska = "alaska"
-  val nwTerritory = "nwTerritory"
-  val greenland = "greenland"
-  val alberta = "alberta"
-  val ontario = "ontario"
-  val quebec = "quebec"
-  val westernUS = "westernUS"
-  val easternUS = "easternUS"
-  val centralAmerica = "centralAmerica"
+  val alaska = "Alaska"
+  val nwTerritory = "NW Territory"
+  val greenland = "Greenland"
+  val alberta = "Alberta"
+  val ontario = "Ontario"
+  val quebec = "Quebec"
+  val westernUS = "Western US"
+  val easternUS = "Eastern US"
+  val centralAmerica = "Central America"
 
 
 
 
   //South America
-  val venezuela = "venezuela"
-  val peru = "peru"
-  val brazil = "brazil"
-  val argentina = "argentina"
+  val venezuela = "Venezuela"
+  val peru = "Peru"
+  val brazil = "Brazil"
+  val argentina = "Argentina"
 
 
 
 
   //Africa
-  val northAfrica = "northAfrica"
-  val congo = "congo"
-  val southAfrica = "southAfrica"
-  val madagascar = "madagascar"
-  val eastAfrica = "eastAfrica"
-  val egypt = "egypt"
+  val northAfrica = "North Africa"
+  val congo = "Congo"
+  val southAfrica = "South Africa"
+  val madagascar = "Madagascar"
+  val eastAfrica = "East Africa"
+  val egypt = "Egypt"
 
 
 
   //Europe
-  val iceland = "iceland"
-  val britain = "britain"
-  val westEurope = "westEurope"
-  val northEurope = "northEurope"
-  val southEurope = "southEurope"
-  val scandinavia = "scandinavia"
-  val ukraine = "ukraine"
+  val iceland = "Iceland"
+  val britain = "Britain"
+  val westEurope = "West Europe"
+  val northEurope = "North Europe"
+  val southEurope = "South Europe"
+  val scandinavia = "Scandinavia"
+  val ukraine = "Ukraine"
 
 
 
 
   //Asia
-  val ural = "ural"
-  val kazakhstan = "kazakhstan"
-  val middleEast = "middleEast"
-  val india = "india"
-  val siam = "siam"
-  val china = "china"
-  val mongolia = "mongolia"
-  val irkutsk = "irkutsk"
-  val siberia = "siberia"
-  val yakutsk = "yakutsk"
-  val kamchatka = "kamchatka"
-  val japan = "japan"
+  val ural = "Ural"
+  val kazakhstan = "Kazakhstan"
+  val middleEast = "Middle East"
+  val india = "India"
+  val siam = "Siam"
+  val china = "China"
+  val mongolia = "Mongolia"
+  val irkutsk = "Irkutsk"
+  val siberia = "Siberia"
+  val yakutsk = "Yakutsk"
+  val kamchatka = "Kamchatka"
+  val japan = "Japan"
 
 
 
   //Australia
-  val indonesia = "indonesia"
-  val papuaNewGuinea = "papuaNewGuinea"
-  val westernAustralia = "westernAustralia"
-  val easternAustralia = "easternAustralia"
+  val indonesia = "Indonesia"
+  val papuaNewGuinea = "Papua New Guinea"
+  val westernAustralia = "Western Australia"
+  val easternAustralia = "Eastern Australia"
 
 
 
@@ -140,14 +140,13 @@ object CountryFactory {
 
 
   def continentLookup: Map[String, List[String]] = Map[String, List[String]](
-    "northAmerica" -> northAmerica.map(_.name),
-    "southAmerica" -> southAmerica.map(_.name),
-    "africa" -> africa.map(_.name),
-    "europe" -> europe.map(_.name),
-    "asia" -> asia.map(_.name),
-    "australia" -> australia.map(_.name)
+    "North America" -> northAmerica.map(_.name),
+    "South America" -> southAmerica.map(_.name),
+    "Africa" -> africa.map(_.name),
+    "Europe" -> europe.map(_.name),
+    "Asia" -> asia.map(_.name),
+    "Australia" -> australia.map(_.name)
   )
 
   implicit def blankCountry(name:String): Country = Country(name, 0, None, adjacentCountriesLookup(name))
-
 }

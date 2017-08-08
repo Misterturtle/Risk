@@ -36,12 +36,12 @@ object TurnPlacePhase{
   def calculateArmiesFromContinents(player: Player, countries: List[Country]): Int = {
     var totalArmies = 0
 
-    val isNorthAmericaOwned = countries.filter(c => CountryFactory.continentLookup("northAmerica").contains(c.name)).forall(_.owner.contains(player))
-    val isSouthAmericaOwned = countries.filter(c => CountryFactory.continentLookup("southAmerica").contains(c.name)).forall(_.owner.contains(player))
-    val isEuropeOwned = countries.filter(c => CountryFactory.continentLookup("europe").contains(c.name)).forall(_.owner.contains(player))
-    val isAfricaOwned = countries.filter(c => CountryFactory.continentLookup("africa").contains(c.name)).forall(_.owner.contains(player))
-    val isAsiaOwned = countries.filter(c => CountryFactory.continentLookup("asia").contains(c.name)).forall(_.owner.contains(player))
-    val isAustraliaOwned = countries.filter(c => CountryFactory.continentLookup("australia").contains(c.name)).forall(_.owner.contains(player))
+    val isNorthAmericaOwned = countries.filter(c => CountryFactory.continentLookup("North America").contains(c.name)).forall(_.owner.contains(player))
+    val isSouthAmericaOwned = countries.filter(c => CountryFactory.continentLookup("South America").contains(c.name)).forall(_.owner.contains(player))
+    val isEuropeOwned = countries.filter(c => CountryFactory.continentLookup("Europe").contains(c.name)).forall(_.owner.contains(player))
+    val isAfricaOwned = countries.filter(c => CountryFactory.continentLookup("Africa").contains(c.name)).forall(_.owner.contains(player))
+    val isAsiaOwned = countries.filter(c => CountryFactory.continentLookup("Asia").contains(c.name)).forall(_.owner.contains(player))
+    val isAustraliaOwned = countries.filter(c => CountryFactory.continentLookup("Australia").contains(c.name)).forall(_.owner.contains(player))
 
     if (isNorthAmericaOwned) totalArmies += 5
     if (isSouthAmericaOwned) totalArmies += 2

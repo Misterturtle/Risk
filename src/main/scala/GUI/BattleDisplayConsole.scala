@@ -1,15 +1,19 @@
 package GUI
 
 import java.lang
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.event.{ActionEvent, EventHandler}
+import javafx.geometry.Insets
 import javafx.scene.input.MouseEvent
+import javafx.scene.layout.{CornerRadii, BackgroundFill, Background}
 import javafx.scene.paint.Paint
 
 import Service._
 
+import scalafx.beans.property.ReadOnlyDoubleProperty
+import scalafx.geometry
 import scalaz.Scalaz._
-import scala.collection.mutable
 import scala.util.Random
 import scalafx.animation.{Animation, PauseTransition, TranslateTransition}
 import scalafx.geometry.Pos
@@ -17,7 +21,6 @@ import scalafx.scene.Group
 import scalafx.scene.layout._
 import scalafx.scene.paint.Color
 import scalafx.scene.shape.SVGPath
-import scalafx.stage.Screen
 import scalafx.util.Duration
 
 /**
@@ -27,7 +30,7 @@ import scalafx.util.Duration
 object Dice{
 
   def setDiceDisplay(dice:Dice, numberRolled: Int): Unit ={
-    dice.shape.setContent(diceShapes(numberRolled - 1))
+    dice.svgShape.setContent(diceShapes(numberRolled - 1))
   }
 
   val diceShapes = List(
@@ -40,36 +43,36 @@ object Dice{
   )
 }
 
-class Dice(val index: Int) {
+class Dice(val index: Int) extends HBox {
 
-  var shape: SVGPath = new SVGPath()
+  var svgShape: SVGPath = new SVGPath()
   var isToggledOn: Boolean = true
 
-  shape.setContent(Dice.diceShapes.head)
-  shape.setPickOnBounds(true)
+  svgShape.setContent(Dice.diceShapes.head)
+  svgShape.setPickOnBounds(true)
 
   def toggleOn() = {
-    shape.setOpacity(1)
+    this.setOpacity(1)
     isToggledOn = true
   }
 
   def toggleOff() = {
-    shape.setOpacity(.3)
+    this.setOpacity(.3)
     isToggledOn = false
   }
 
   def toggle() = isToggledOn ? toggleOff() | toggleOn()
+
+  children.add(svgShape)
+  this.setBackground(new Background(new BackgroundFill(javafx.scene.paint.Color.WHITE, CornerRadii.EMPTY, new Insets(5))))
 }
 
 
-class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsole {
+class BattleDisplayConsole(wmUICont: WorldMapUIController, val sceneWidth: ReadOnlyDoubleProperty, val sceneHeight: ReadOnlyDoubleProperty, val windowXScale:SimpleDoubleProperty, val windowYScale: SimpleDoubleProperty) extends DisplayConsole {
 
   private val self = this
   private var _attackingCountry: Option[Country] = None
   private var _defendingCountry: Option[Country] = None
-
-  //Dice 1-6 SvgPath commands
-
 
   val diceArray = new Array[Dice](5)
   diceArray(0) = new Dice(0)
@@ -125,12 +128,12 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
 
 
   def setDiceColor(attColor: Paint, defColor: Paint): Unit = {
-    diceArray(0).shape.setFill(attColor)
-    diceArray(1).shape.setFill(attColor)
-    diceArray(2).shape.setFill(attColor)
+    diceArray(0).svgShape.setFill(attColor)
+    diceArray(1).svgShape.setFill(attColor)
+    diceArray(2).svgShape.setFill(attColor)
 
-    diceArray(3).shape.setFill(defColor)
-    diceArray(4).shape.setFill(defColor)
+    diceArray(3).svgShape.setFill(defColor)
+    diceArray(4).svgShape.setFill(defColor)
   }
 
   def startBattle(attackingCountry: Country, defendingCountry: Country): Unit = {
@@ -138,15 +141,18 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
     setDiceActions(attackingCountry.armies, defendingCountry.armies)
     _attackingCountry = Some(attackingCountry)
     _defendingCountry = Some(defendingCountry)
+    val bg = new Background(new BackgroundFill(attackingCountry.owner.get.color, new CornerRadii(0,0,100,100,false), Insets.EMPTY))
+    this.setBackground(bg)
     openAnim()
+    ascendAnim.setOnFinished(new EventHandler[ActionEvent] {
+      override def handle(event: ActionEvent): Unit = {}
+    })
   }
 
   def endBattle(): Unit = {
-    diceArray.foreach(_.shape.setOnMouseClicked(new EventHandler[MouseEvent] {
+    diceArray.foreach(_.svgShape.setOnMouseClicked(new EventHandler[MouseEvent] {
       override def handle(event: MouseEvent) = {}
     }))
-
-
     closeAnim()
   }
 
@@ -176,22 +182,26 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
 
 
   def activateDice(dice: Dice): Unit = {
-    dice.shape.setOnMouseClicked(new EventHandler[MouseEvent] {
+    dice.svgShape.setOnMouseClicked(new EventHandler[MouseEvent] {
       override def handle(event: MouseEvent): Unit = {
         dice.toggle
       }
     })
+    dice.toggleOn()
   }
 
   def deactivateDice(dice: Dice): Unit = {
-    dice.shape.setOnMouseClicked(new EventHandler[MouseEvent] {
+    dice.svgShape.setOnMouseClicked(new EventHandler[MouseEvent] {
       override def handle(event: MouseEvent): Unit = {}
     })
     dice.toggleOff()
   }
 
   def roll(): Unit = {
-    println("Roll animation starting")
+    cancelButton.setOnMouseClicked(new EventHandler[MouseEvent] {
+      override def handle(event: MouseEvent): Unit = {}
+    })
+
     val dice = diceArray.toList.filter(_.isToggledOn)
     var currentRoll = 0
 
@@ -199,8 +209,14 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
     rollCycle.duration = new Duration(100)
     rollCycle.onFinished = new EventHandler[ActionEvent] {
       override def handle(event: ActionEvent): Unit = {
-        dice.foreach(d => d.shape.setContent(Dice.diceShapes(Random.nextInt(6))))
+        dice.foreach(d => d.svgShape.setContent(Dice.diceShapes(Random.nextInt(6))))
         if(currentRoll == 20){
+          cancelButton.setOnMouseClicked(new EventHandler[MouseEvent] {
+            override def handle(event: MouseEvent): Unit = {
+              wmUICont.receiveInput(Retreat)
+              closeAnim()
+            }
+          })
           wmUICont.receiveInput(ConfirmBattle(_attackingCountry.get, _defendingCountry.get, diceArray.take(3).count(_.isToggledOn)))
         }
         else{
@@ -213,36 +229,38 @@ class BattleDisplayConsole(wmUICont: WorldMapUIController) extends DisplayConsol
   }
 
 
-  def postInit(): Unit = {
-    translateY.delegate.setValue(height.value * -1)
-  }
 
 
 
-  val attackingDieBox = new HBox()
+
+  val attackingDieBox = new HBox(diceArray(0), diceArray(1), diceArray(2))
   attackingDieBox.spacing = 10
   attackingDieBox.alignment = Pos.Center
-  attackingDieBox.children.addAll(new Group(diceArray(0).shape), new Group(diceArray(1).shape), new Group(diceArray(2).shape))
 
-  val defendingDieBox = new HBox()
+  val defendingDieBox = new HBox(diceArray(3), diceArray(4))
   defendingDieBox.spacing = 10
   defendingDieBox.alignment = Pos.Center
-  defendingDieBox.children.addAll(new Group(diceArray(3).shape), new Group(diceArray(4).shape))
 
-  val navigationBox = new HBox()
-  navigationBox.spacing = 10
+  val diceBox = new VBox(attackingDieBox, defendingDieBox)
+  diceBox.spacing = 20
+  diceBox.alignment = Pos.Center
+
+  val navigationBox = new VBox()
+  navigationBox.spacing = 20
   navigationBox.alignment = Pos.Center
   navigationBox.children.addAll(confirmButton, cancelButton)
 
 
-  val layoutBox = new VBox()
+  val layoutBox = new HBox()
 
   layoutBox.spacing = 20
   layoutBox.alignment = Pos.Center
-  layoutBox.children.addAll(attackingDieBox, defendingDieBox, navigationBox)
+  layoutBox.children.addAll(diceBox, navigationBox)
+  layoutBox.styleClass.add("displayConsoleContent")
+
   val contentGroup = new Group(layoutBox)
 
-
+  scaleContent(windowXScale, windowYScale)
   this.alignment = Pos.Center
   this.styleClass.add("displayConsole")
   this.children.add(contentGroup)

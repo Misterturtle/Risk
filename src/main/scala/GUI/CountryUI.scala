@@ -1,27 +1,18 @@
 package GUI
 
-import javafx.beans.binding.Bindings
 import javafx.beans.property.{ReadOnlyDoubleProperty, SimpleDoubleProperty}
 import javafx.beans.value.{ObservableValue, ChangeListener}
 import javafx.event.EventHandler
-import javafx.fxml.FXMLLoader
 import javafx.scene.Group
 import javafx.scene.input.MouseEvent
 import javafx.scene.paint.{LinearGradient, Paint}
-import javafx.scene.shape.SVGPath
-import javax.swing.text.html.CSS
 
 import Service._
 
-import scala.util.Random
 import scalafx.animation.{FillTransition, TranslateTransition}
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.layout._
-import scalafx.scene.paint.Color
 import scalafx.scene.shape.{Circle, Polygon}
-import scalafx.scene.text.Text
-import scalafx.scene.web.WebView
-import scalafx.util.Duration
 
 
 

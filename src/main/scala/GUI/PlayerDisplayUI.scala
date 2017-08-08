@@ -1,31 +1,33 @@
 package GUI
 
 import javafx.beans.value.{ObservableValue, ChangeListener}
+import javafx.event.{ActionEvent, EventHandler}
 import javafx.geometry.Insets
 import javafx.scene.layout.{Background, BackgroundFill, CornerRadii}
 import javafx.scene.paint.{Paint, Color}
 
 import Service.{WorldMapUIController, WorldMap}
 
+import scalafx.animation.TranslateTransition
 import scalafx.geometry
 import scalafx.geometry.{Pos}
+import scalafx.scene.Group
 import scalafx.scene.image.{Image, ImageView}
 import scalafx.scene.layout.{Priority, HBox, VBox}
 import scalafx.scene.text.Text
+import scalafx.util.Duration
 
 /**
   * Created by Harambe on 7/20/2017.
   */
 class PlayerDisplayUI(wmUICont:WorldMapUIController) extends VBox {
 
-  val bg = new Background(new BackgroundFill(CustomColors.red, new CornerRadii(0,0,50,50, false), Insets.EMPTY))
-
   val nameContainer = new HBox()
   nameContainer.prefWidthProperty().bind(this.prefWidthProperty())
   nameContainer.prefHeightProperty().bind(this.prefHeightProperty().divide(2))
-  //nameContainer.styleClass.add("overlayBackground")
-  //nameContainer.styleClass.add("redBackground")
-  nameContainer.setBackground(bg)
+
+  private val displayAnim = new TranslateTransition(new Duration(300), this)
+
 
   val nameText = new Text(wmUICont.getCurrPlayersName)
   nameText.styleClass.add("defaultText")
@@ -33,31 +35,42 @@ class PlayerDisplayUI(wmUICont:WorldMapUIController) extends VBox {
   nameContainer.alignment = Pos.Center
   nameContainer.children.add(nameText)
 
-
-
   val statsBar = new StatsBar(wmUICont.getCurrPlayersColor, wmUICont.getCurrPlayersArmies, wmUICont.getCurrPlayersArmies)
-  statsBar.enableScaling(this.prefHeightProperty(), this.prefWidthProperty())
+  statsBar.alignment = Pos.CenterLeft
 
-
-
-
-  style = "-fx-padding: 10 0 0 0;"
-  alignment = Pos.Center
-  children.addAll(nameContainer, statsBar)
+  this.setTranslateX(-prefWidth.get)
+  alignment = Pos.TopLeft
+  children.addAll(nameContainer, new Group(statsBar))
 
 
   def update(): Unit ={
-    statsBar.update(wmUICont.getCurrPlayersColor, wmUICont.getCurrPlayersArmies, wmUICont.getCurrPlayersTerritories)
-    nameText.setText(wmUICont.getCurrPlayersName)
-    val radii = nameContainer.getBackground.getFills.get(0).getRadii
-    val insets = nameContainer.getBackground.getFills.get(0).getInsets
-    nameContainer.setBackground(new Background(new BackgroundFill(wmUICont.getCurrPlayersColor, radii, insets)))
+      statsBar.update(wmUICont.getCurrPlayersColor, wmUICont.getCurrPlayersArmies, wmUICont.getCurrPlayersTerritories)
+      nameText.setText(wmUICont.getCurrPlayersName)
+      nameContainer.setBackground(new Background(new BackgroundFill(wmUICont.getCurrPlayersColor, new CornerRadii(0,0,100,100, false), Insets.EMPTY)))
+  }
+
+  def openAnim(): Unit = {
+    displayAnim.setOnFinished(new EventHandler[ActionEvent] {
+      override def handle(event: ActionEvent): Unit = {}
+    })
+    displayAnim.setToX(0)
+    displayAnim.playFromStart()
+  }
+
+  def closeAnim(): Unit ={
+    displayAnim.setOnFinished(new EventHandler[ActionEvent] {
+      override def handle(event: ActionEvent): Unit = {
+        update()
+        openAnim()
+      }
+    })
+    displayAnim.setToX(-this.prefWidth.get)
+    displayAnim.playFromStart()
   }
 }
 
 
 class StatsBar(initColor:Paint, initArmyAmount:Int, initTerritoryAmount:Int) extends HBox{
-
 
   val redArmies = new Image(getClass.getResourceAsStream("/red_army.png"))
   val yellowArmies = new Image(getClass.getResourceAsStream("/yellow_army.png"))
@@ -80,29 +93,18 @@ class StatsBar(initColor:Paint, initArmyAmount:Int, initTerritoryAmount:Int) ext
 
 
   val armiesTab = new StatTab(colorMap(initColor), initArmyAmount)
-  armiesTab.enableScaling(this.heightProperty(), this.widthProperty())
+  armiesTab.prefHeight.bind(this.prefHeightProperty())
+  armiesTab.prefWidth.bind(this.prefWidthProperty())
+
   val territoriesTab = new StatTab(new Image(getClass().getResourceAsStream("/africa.png")), initTerritoryAmount)
-  territoriesTab.enableScaling(this.heightProperty(), this.widthProperty())
+  territoriesTab.prefHeight.bind(this.prefHeightProperty())
+  territoriesTab.prefWidth.bind(this.prefWidthProperty())
 
-
-
-  val leftSpacerBox = new HBox()
-
-  margin = new geometry.Insets(new Insets(10,0,0,0))
-  styleClass.add("grayBackground")
-  styleClass.add("statsBar")
-  children.addAll(leftSpacerBox, armiesTab, territoriesTab)
-
-
+  children.addAll(armiesTab, territoriesTab)
 
   def update(color:Paint, armyAmount: Int, territoryAmount: Int): Unit ={
     armiesTab.update(colorMap(color), armyAmount)
     territoriesTab.update(newValue = territoryAmount)
-  }
-
-  def enableScaling(heightProperty: javafx.beans.property.ReadOnlyDoubleProperty, widthProperty: javafx.beans.property.ReadOnlyDoubleProperty): Unit ={
-    //Parent is playerDisplayUI
-    this.prefHeightProperty().bind(heightProperty.divide(3))
   }
 }
 
@@ -110,45 +112,31 @@ class StatsBar(initColor:Paint, initArmyAmount:Int, initTerritoryAmount:Int) ext
 
 class StatTab(image:Image, value:Int) extends HBox {
 
-
   val tabImage = new ImageView(image)
   tabImage.preserveRatio = true
-  tabImage.fitHeight = 1
-  this.heightProperty().addListener(new ChangeListener[Number] {
-    override def changed(observable: ObservableValue[_ <: Number], oldValue: Number, newValue: Number): Unit = {
-      tabImage.fitHeight = newValue.doubleValue() - newValue.doubleValue()/5
-      println("Hi")
-    }
-  })
+  tabImage.fitHeight = 40
+
   val imageContainer = new HBox()
   imageContainer.children.add(tabImage)
   imageContainer.alignment = Pos.Center
-  imageContainer.style = "-fx-padding: 0 5 0 20"
+  imageContainer.padding = scalafx.geometry.Insets(0,20,0,0)
 
 
   val tabText = new Text(value.toString)
   tabText.styleClass.add("defaultText")
+  tabText.setScaleX(2)
+  tabText.setScaleY(2)
   val textContainer = new HBox()
   textContainer.alignment = Pos.Center
   textContainer.children.add(tabText)
-  textContainer.style = "-fx-padding: 0 20 0 5"
 
-
-  styleClass.add("statTab")
-  styleClass.add("grayBackground")
   alignment = Pos.Center
-
-
-  children.addAll(imageContainer, textContainer)
+  padding = scalafx.geometry.Insets(0,20,0,20)
+  children.addAll(imageContainer, new Group(textContainer))
 
   def update(newImage:Image = new Image(tabImage.getImage), newValue:Int): Unit = {
     tabImage.setImage(newImage)
     tabText.setText(newValue.toString)
-  }
-
-  def enableScaling(heightProperty: javafx.beans.property.ReadOnlyDoubleProperty, widthProperty: javafx.beans.property.ReadOnlyDoubleProperty) = {
-    this.prefHeightProperty().bind(heightProperty)
-    this.prefWidthProperty().bind(widthProperty.divide(5))
   }
 }
 

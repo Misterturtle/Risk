@@ -8,9 +8,6 @@
     -fx-background-radius: 0 0 10 10;
 }
 
-.statsBar{
-    -fx-background-radius: 0 20 20 0;
-}
 
 .defaultText{
     -fx-font-weight: bolder;
@@ -59,10 +56,16 @@
 .displayConsole{
     -fx-background-repeat: no-repeat;
     -fx-background-size: stretch;
-    -fx-background-color: linear-gradient(rgba(211, 211, 211, 1) 0%, rgba(123, 123, 123, 1) 25%, rgba(123, 123, 123, 1) 75%, rgba(59, 59, 59, 1) 100%);
-    -fx-background-radius: 10;
     -fx-border-color: black;
-    -fx-border-radius: 10;
+    -fx-border-radius: 0 0 100 100;
+    -fx-border-width: 2;
+
+}
+
+.displayConsoleContent{
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-padding: 10;
+    -fx-border-color: black;
     -fx-border-width: 2;
 }
 

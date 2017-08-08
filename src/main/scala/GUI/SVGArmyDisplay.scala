@@ -100,7 +100,6 @@ class SVGArmyDisplay(xScale: SimpleDoubleProperty, yScale: SimpleDoubleProperty)
   def activateSourceCountryAnim(): Unit = {
     if(!sourceCountryAnimActive){
 
-      println("Source Animation starting")
       sourceCountryAnimActive = true
 
       this.children.add(sourceCircleGroup)
@@ -117,10 +116,7 @@ class SVGArmyDisplay(xScale: SimpleDoubleProperty, yScale: SimpleDoubleProperty)
 
   def activateTargetCountryAnim(): Unit ={
     if(!targetCountryAnimActive){
-
-      println("Target Animation starting")
       targetCountryAnimActive = true
-
       this.children.add(targetCircleGroup)
 
       pulseCircleAnim.setNode(targetCircleGroup)
@@ -134,8 +130,6 @@ class SVGArmyDisplay(xScale: SimpleDoubleProperty, yScale: SimpleDoubleProperty)
   }
 
   def deactivateAnimations(): Unit ={
-    println("Deactivating Animations")
-
     if(sourceCountryAnimActive){
       sourceCountryAnimActive = false
       pulseCircleAnim.stop()

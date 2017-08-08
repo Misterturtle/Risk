@@ -8,12 +8,10 @@ import javafx.scene.input.MouseEvent
 
 import Service._
 
-import scalafx.animation.PauseTransition
-import scalafx.scene.Group
 import scalafx.scene.image.Image
 import scalafx.scene.layout._
 import scalafx.stage.Screen
-import scalafx.util.Duration
+import scalaz.Scalaz._
 
 
 class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
@@ -36,19 +34,19 @@ class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
     this.height.addListener(coun.resizeYListener(mapImageYScale))
   }
 
-  val battleDisplayConsole = new BattleDisplayConsole(wmUICont)
-  battleDisplayConsole.prefHeight.bind(this.heightProperty().divide(4))
-  battleDisplayConsole.prefWidth.bind(this.widthProperty().divide(10))
-  this.width.addListener(battleDisplayConsole.resizeXListener(width))
-  this.height.addListener(battleDisplayConsole.resizeYListener(height))
-  battleDisplayConsole.contentGroup.scaleX.bind(windowXScale)
-  battleDisplayConsole.contentGroup.scaleY.bind(windowYScale)
+  val placementDisplayConsole = new PlacementConsole(width, height, windowXScale, windowYScale)
+  val attackDisplayConsole = new AttackDisplayConsole(width, height, windowXScale, windowYScale)
+  val battleDisplayConsole = new BattleDisplayConsole(wmUICont,width, height, windowXScale, windowYScale)
+  val transferDisplayConsole = new TransferDisplayConsole(wmUICont,width, height, windowXScale, windowYScale)
 
-  val transferDisplayConsole = new TransferDisplayConsole(wmUICont)
+  val endAttackPhaseButton = new EndAttackPhaseButton(width, height, windowXScale, windowYScale)
+
 
   val playerDisplay = new PlayerDisplayUI(wmUICont)
   playerDisplay.prefHeightProperty().bind(this.heightProperty().divide(10))
   playerDisplay.prefWidthProperty().bind(this.widthProperty().divide(4))
+  playerDisplay.statsBar.scaleX.bind(windowXScale)
+  playerDisplay.statsBar.scaleY.bind(windowYScale)
 
   this.stylesheets.add("worldStyle.css")
   this.styleClass.add("worldMap")
@@ -57,24 +55,54 @@ class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
     override def handle(event: MouseEvent): Unit = requestFocus()
   })
   enableDebug()
-  children.addAll(playerDisplay, battleDisplayConsole, transferDisplayConsole)
+  children.addAll(playerDisplay, placementDisplayConsole, attackDisplayConsole, battleDisplayConsole, transferDisplayConsole, endAttackPhaseButton)
 
 
   private def updateDisplayConsole(wmUICont: WorldMapUIController): Unit = {
     wmUICont.getPhase match {
+      case InitialPlacement =>
+        placementDisplayConsole.checkAnimationUpdate(wmUICont)
+
+      case TurnPlacement =>
+        if (!placementDisplayConsole.isDisplayed)
+          placementDisplayConsole.openAnim()
+
+        placementDisplayConsole.checkAnimationUpdate(wmUICont)
+
+      case Attacking(_, _) =>
+        if (placementDisplayConsole.isDisplayed) {
+          placementDisplayConsole.setCloseAnimOnFinished(() => {
+            attackDisplayConsole.update(wmUICont)
+            attackDisplayConsole.openAnim()
+          })
+          placementDisplayConsole.closeAnim()
+        } else {
+          attackDisplayConsole.checkAnimationUpdate(wmUICont)
+        }
+
+
+        endAttackPhaseButton.checkAnimationUpdate(wmUICont)
+
+
       case Battle(s, t, _, trans) if trans =>
-        if (battleDisplayConsole.isDisplayed)
+        if (battleDisplayConsole.isDisplayed) {
           battleDisplayConsole.endBattle()
-        if (!transferDisplayConsole.isDisplayed) {
-          transferDisplayConsole.openAnim()
-          transferDisplayConsole.update(s, t)
+          battleDisplayConsole.setCloseAnimOnFinished(() => {
+            transferDisplayConsole.setCloseAnimOnFinished(() => attackDisplayConsole.checkAnimationUpdate(wmUICont))
+            transferDisplayConsole.startTransfer(s, t)
+          })
         }
 
       case Battle(s, t, pB, trans) =>
         if (!battleDisplayConsole.isDisplayed) {
+          attackDisplayConsole.setCloseAnimOnFinished(()=>{})
+          attackDisplayConsole.closeAnim()
+          endAttackPhaseButton.checkAnimationUpdate(wmUICont)
           battleDisplayConsole.startBattle(s, t)
         }
         battleDisplayConsole.update(s, t, pB)
+
+
 
       case _ =>
     }
@@ -95,8 +123,6 @@ class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
   private def enableDebug(): Unit = {
     this.setOnMouseClicked(new EventHandler[MouseEvent] {
       override def handle(event: MouseEvent): Unit = {
-        println("mapScale Pixels: (" + event.getX * (1 / mapImageXScale.get()) + "," + event.getY * (1 / mapImageYScale.get()) + "),")
-        println("screenScale Pixels: (" + event.getX + "," + event.getY + ")")
       }
     })
   }
@@ -104,11 +130,15 @@ class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
   def updateWorldMap(wmUICont: WorldMapUIController): Unit = {
     wmUICont.getCountries.foreach { c => countriesUI(c.name).update() }
     updateDisplayConsole(wmUICont)
-    playerDisplay.update()
+    (playerDisplay.nameText.getText != wmUICont.getCurrPlayersName) ? playerDisplay.closeAnim() | playerDisplay.update()
   }
 
   def postInit(): Unit = {
     this.layout()
     battleDisplayConsole.postInit()
+    transferDisplayConsole.postInit()
+    placementDisplayConsole.postInit()
+    attackDisplayConsole.postInit()
+    endAttackPhaseButton.postInit()
   }
 }
