@@ -54,7 +54,6 @@ class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
   this.setOnMousePressed(new EventHandler[MouseEvent] {
     override def handle(event: MouseEvent): Unit = requestFocus()
   })
-  enableDebug()
   children.addAll(playerDisplay, placementDisplayConsole, attackDisplayConsole, battleDisplayConsole, transferDisplayConsole, endAttackPhaseButton)
 
 
@@ -119,13 +118,6 @@ class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
     }.toMap
   }
 
-
-  private def enableDebug(): Unit = {
-    this.setOnMouseClicked(new EventHandler[MouseEvent] {
-      override def handle(event: MouseEvent): Unit = {
-      }
-    })
-  }
 
   def updateWorldMap(wmUICont: WorldMapUIController): Unit = {
     wmUICont.getCountries.foreach { c => countriesUI(c.name).update() }
