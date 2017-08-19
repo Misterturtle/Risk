@@ -1,31 +1,27 @@
 package GUI
 
-import javafx.beans.binding.{DoubleBinding}
-import javafx.beans.property.{ReadOnlyDoubleProperty}
+import javafx.beans.binding.DoubleBinding
+import javafx.beans.property.ReadOnlyDoubleProperty
 import javafx.beans.value.{ObservableValue, ChangeListener}
 import javafx.event.{ActionEvent, EventHandler}
 import javafx.scene.layout.{CornerRadii, BackgroundFill, Background}
-import javafx.scene.paint.Paint
 
 import Service._
 
 import scalafx.animation.TranslateTransition
-import scalafx.beans.property.{BooleanProperty, ReadOnlyObjectProperty, ObjectProperty}
 import scalafx.geometry.{Insets, Pos}
-import scalafx.scene.{Scene, Group}
-import scalafx.scene.layout.{StackPane, AnchorPane, VBox, HBox}
-import scalafx.scene.paint.Color
+import scalafx.scene.Group
+import scalafx.scene.layout.{AnchorPane, VBox}
 import scalafx.scene.text.Text
 import scalafx.util.Duration
-import scalaz.Scalaz._
 
+import scalaz.Scalaz._
 import Sugar.CustomSugar._
 
 /**
-  * Created by Harambe on 8/6/2017.
+  * Created by Harambe on 8/18/2017.
   */
-
-class PlacementConsole() extends VBox with Scaleable with PlayerListener with CountryListener with PhaseListener with UIController {
+class ReinforcementConsole(delayFromAttackCtrl: () => Duration, delayFromTransCtrl: () => Duration) extends VBox with Scaleable with PlayerListener with PhaseListener with UIController {
 
 
   private val self = this
@@ -38,10 +34,7 @@ class PlacementConsole() extends VBox with Scaleable with PlayerListener with Co
   def getTimeToFinish: Duration = (closeAnimation.currentTime.value.toMillis == closeAnimation.duration.value.toMillis) ? new Duration(closeAnimation.duration.value) | new Duration(closeAnimation.duration.value.subtract(closeAnimation.currentTime.value))
 
 
-  private var allCountriesAreOwned = false
-
-
-  private val phaseText = new Text()
+  private val phaseText = new Text("Reinforcement Phase")
   phaseText.setScaleX(3)
   phaseText.setScaleY(3)
   phaseText.styleClass.add("defaultText")
@@ -71,7 +64,7 @@ class PlacementConsole() extends VBox with Scaleable with PlayerListener with Co
   this.alignment = Pos.TopCenter
 
   private def openAnim(onFinish: () => Unit): Unit = {
-    openAnimation.setOnFinished(() => onFinish())
+    openAnimation.setOnFinished(onFinish)
     _isDisplayed = true
     openAnimation.setToY(0)
     openAnimation.playFromStart()
@@ -99,19 +92,11 @@ class PlacementConsole() extends VBox with Scaleable with PlayerListener with Co
 
   private def updateText(): Unit = {
     _phase.value match {
-      case InitialPlacement =>
-        if (!allCountriesAreOwned) {
-          phaseText.setText("Country Grab")
-          hintText.setText("Claim an unowned country!")
-        }
-        else {
-          phaseText.setText("Initial Placement")
-          hintText.setText("Place an army on an owned country!")
-        }
+      case Reinforcement(None,None) =>
+          hintText.setText("Choose a country to transfer from!")
 
-      case TurnPlacement =>
-        phaseText.setText("Turn Placement")
-        hintText.setText("Place all awarded armies!")
+      case Reinforcement(Some(_),None) =>
+        hintText.setText("Reinforce an adjacent friendly country!")
 
       case _ =>
     }
@@ -151,40 +136,82 @@ class PlacementConsole() extends VBox with Scaleable with PlayerListener with Co
   }
 
 
-  override def onPlayerChange(oldPlayer: Player, newPlayer: Player): () => Unit = () => {
-    _phase.value match {
-      case InitialPlacement | TurnPlacement =>
-        openAnimation.stop()
+  override def onPlayerChange(oldPlayer: Player, newPlayer: Player): () => Unit = () => {}
+
+  override def onPhaseChange(oldPhase: Phase, newPhase: Phase): () => Unit = {
+    def fromAttack:Boolean = {
+      val first = oldPhase match {case Attacking(_,_) => true case _=>false}
+      val second = newPhase match {case Reinforcement(_,_)=> true case _=> false}
+      first and second
+    }
+
+    def transferCanceled:Boolean = {
+      val first = oldPhase match {case Reinforcement(Some(_), Some(_)) => true case _=> false}
+      val second = newPhase match {case Reinforcement(None,None) => true case _=> false}
+      first and second
+    }
+
+    def toNextTurn:Boolean = {
+      val first = oldPhase match {case Reinforcement(_,_) => true case _=> false}
+      val second = newPhase match {case TurnPlacement => true case _=> false}
+      first and second
+    }
+
+    def sourceSelected:Boolean = {
+      val first = oldPhase match {case Reinforcement(None,None)=> true case _=> false}
+      val second = newPhase match {case Reinforcement(Some(_), None)=> true case _=> false}
+      first and second
+    }
+
+    def sourceDeselected:Boolean = {
+      val first = oldPhase match {case Reinforcement(Some(_), None)=> true case _=> false}
+      val second = newPhase match {case Reinforcement(None,None)=> true case _=> false}
+      first and second
+    }
+
+    def targetSelected:Boolean = {
+      val first = oldPhase match {case Reinforcement(Some(_),None)=> true case _=> false}
+      val second = newPhase match {case Reinforcement(Some(_), Some(_))=> true case _=> false}
+      first and second
+    }
+
+
+    Unit match {
+      case _ if fromAttack => () => {
+        openAnimation.setDelay(delayFromAttackCtrl())
+        updateColor()
+        updateText()
+        openAnim(()=>{openAnimation.setDelay(new Duration(0))})
+      }
+
+      case _ if transferCanceled => () => {
+        openAnimation.setDelay(delayFromTransCtrl())
+        updateText()
+        openAnim(() => openAnimation.setDelay(new Duration(0)))
+      }
+
+      case _ if toNextTurn => () => {
+        closeAnim(()=>{})
+      }
+
+      case _ if sourceSelected => () => {
         closeAnim(updateAndOpenWhenClosed)
+      }
 
-      case _ =>
-        if (_isDisplayed) {
-          closeAnim(() => {})
-        }
-    }
-  }
+      case _ if targetSelected => () => {
+        closeAnim(()=>{})
+      }
 
-
-  override def onCountryChange(oldCountries: List[Country], newCountries: List[Country]): () => Unit = { () => {
-    if (_countries.value.forall(_.owner.nonEmpty)) {
-      allCountriesAreOwned = true
-    } else {
-      allCountriesAreOwned = false
-    }
-  }
-  }
-
-  override def onPhaseChange(oldPhase: Phase, newPhase: Phase): () => Unit = { () => {
-    _phase.value match {
-      case InitialPlacement | TurnPlacement =>
-        openAnimation.stop()
+      case _ if sourceDeselected => () => {
         closeAnim(updateAndOpenWhenClosed)
+      }
 
-      case _ =>
-        if (_isDisplayed) {
-          closeAnim(() => {})
-        }
+      case _ => () => {}
+
+
+
     }
-  }
+
   }
 }
+

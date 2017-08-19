@@ -12,7 +12,7 @@ object ReinforcementPhase {
 
   def isValidSource(wm:WorldMap, country:Country):Boolean = {
     val phase = wm.phase.asInstanceOf[Reinforcement]
-    phase.source.isEmpty && country.owner == wm.getActivePlayer
+    phase.source.isEmpty && country.owner.get.name == wm.getActivePlayer.get.name && country.armies > 1
   }
 
   def isValidTarget(wm: WorldMap, country: Country): Boolean = {
@@ -20,7 +20,7 @@ object ReinforcementPhase {
     if(phase.source.isEmpty)
       false
     else
-      phase.source.map(_.adjacentCountries).get.contains(country.name) && country.owner == wm.getActivePlayer
+      phase.source.map(_.adjacentCountries).get.contains(country.name) && country.owner.get.playerNumber == wm.getActivePlayer.get.playerNumber
   }
 
   def nextTurn(wm:WorldMap) :WorldMap = {

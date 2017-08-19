@@ -22,66 +22,97 @@ class ReinforcementPhaseTests extends FreeSpec with Matchers with MockitoSugar {
     }
   }
 
-  mutableWorldMap = mutableWorldMap.setPhase(Reinforcement(None, None))
-  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alaska").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 25))
-  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alberta").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 10))
+  mutableWorldMap = mutableWorldMap
+    .setPhase(Reinforcement(None, None))
+    .updateSingleCountry(mutableWorldMap.getCountry("Alaska").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 25))
+    .updateSingleCountry(mutableWorldMap.getCountry("Alberta").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 10))
+    .updateSingleCountry(mutableWorldMap.getCountry("Greenland").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 1))
 
 
-  val beginReinforcementPhase = mutableWorldMap
+  val beginRP = mutableWorldMap
 
 
   "If a non-owned country is selected, nothing should happen" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry("nwTerritory")).eval(StateStamp(-1))
+    val wm = Effects.getCountryClickedEffect(beginRP, "NW Territory").eval(StateStamp(-1))
 
 
-    wm shouldBe beginReinforcementPhase
+    wm shouldBe beginRP
   }
 
-  "If a owned country is selected, the source should be set to that country" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry("alaska")).eval(StateStamp(-1))
+  "A source country with one army should not be a valid source country" in {
+    ReinforcementPhase.isValidSource(beginRP, beginRP.getCountry("Greenland")) shouldBe false
+  }
 
-    wm.phase.asInstanceOf[Reinforcement].source shouldBe Some(wm.getCountry("alaska"))
+  "If a valid source country is selected, the source should be set to that country" in {
+    val wm = Effects.getCountryClickedEffect(beginRP, "Alaska").eval(StateStamp(-1))
+
+    wm.phase.asInstanceOf[Reinforcement].source shouldBe Some(wm.getCountry("Alaska"))
+  }
+
+  "A country should be a valid source to select even if the player's data has changed" in {
+    val changedPlayer = beginRP.getActivePlayer.get.addArmies(5)
+    val wm = beginRP.updateSingleCountry(beginRP.getCountry("Alaska").copy(owner = Some(changedPlayer)))
+
+    ReinforcementPhase.isValidSource(wm, wm.getCountry("Alaska")) shouldBe true
+  }
+
+  "A country should be a valid target to select even if the player's data has changed" in {
+    val changedPlayer = beginRP.getActivePlayer.get.addArmies(5)
+    val wm = beginRP
+      .setPhase(Reinforcement(Some(beginRP.getCountry("Alaska")), None))
+      .updateSingleCountry(beginRP.getCountry("Alberta").copy(owner = Some(changedPlayer)))
+
+
+
+    ReinforcementPhase.isValidTarget(wm, wm.getCountry("Alberta")) shouldBe true
   }
 
   "If the source is selected a second time, it should deselect the source" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry("alaska")).eval(StateStamp(-1))
-    val wm2 = Effects.getCountryClickedEffect(wm, wm.getCountry("alaska")).eval(StateStamp(-1))
+    val wm = Effects.getCountryClickedEffect(beginRP, "Alaska").eval(StateStamp(-1))
+    val wm2 = Effects.getCountryClickedEffect(wm, "Alaska").eval(StateStamp(-1))
 
     wm2.phase.asInstanceOf[Reinforcement].source shouldBe None
   }
 
+  "If the source is selected a second time after the target has been selected, nothing should happen" in {
+    val wm = beginRP.setPhase(Reinforcement(Some(beginRP.getCountry("Alaska")), Some(beginRP.getCountry("Alberta"))))
+    val wm2 = Effects.getCountryClickedEffect(wm, "Alaska").eval(StateStamp(-1))
+
+    wm2.phase shouldBe Reinforcement(Some(beginRP.getCountry("Alaska")), Some(beginRP.getCountry("Alberta")))
+  }
+
   "If a non-owned country is selected as the target, nothing should happen" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry("alaska")).eval(StateStamp(-1))
-    val wm2 = Effects.getCountryClickedEffect(wm, wm.getCountry("nwTerritory")).eval(StateStamp(-1))
+    val wm = Effects.getCountryClickedEffect(beginRP, "Alaska").eval(StateStamp(-1))
+    val wm2 = Effects.getCountryClickedEffect(wm, "NW Territory").eval(StateStamp(-1))
 
     wm2.phase.asInstanceOf[Reinforcement].target shouldBe None
   }
 
   "If a non-adjacent owned country is selected as the target, nothing should happen" in {
-    val wm = beginReinforcementPhase.updateSingleCountry(beginReinforcementPhase.getCountry("ontario").setOwner(beginReinforcementPhase.getPlayerByPlayerNumber(1).get))
-    val wm2 = Effects.getCountryClickedEffect(wm, wm.getCountry("alaska")).eval(StateStamp(-1))
-    val wm3 = Effects.getCountryClickedEffect(wm2, wm2.getCountry("ontario")).eval(StateStamp(-1))
+    val wm = beginRP.updateSingleCountry(beginRP.getCountry("Ontario").setOwner(beginRP.getPlayerByPlayerNumber(1).get))
+    val wm2 = Effects.getCountryClickedEffect(wm, "Alaska").eval(StateStamp(-1))
+    val wm3 = Effects.getCountryClickedEffect(wm2, "Ontario").eval(StateStamp(-1))
 
     wm3.phase.asInstanceOf[Reinforcement].target shouldBe None
   }
 
   "If a adjacent owned country is selected as the target, the target should be set" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry("alaska")).eval(StateStamp(-1))
-    val wm2 = Effects.getCountryClickedEffect(wm, wm.getCountry("alberta")).eval(StateStamp(-1))
+    val wm = Effects.getCountryClickedEffect(beginRP, "Alaska").eval(StateStamp(-1))
+    val wm2 = Effects.getCountryClickedEffect(wm, "Alberta").eval(StateStamp(-1))
 
-    wm2.phase.asInstanceOf[Reinforcement].target shouldBe Some(wm2.getCountry("alberta"))
+    wm2.phase.asInstanceOf[Reinforcement].target shouldBe Some(wm2.getCountry("Alberta"))
   }
 
   "If a Service.ConfirmTransfer input is received" - {
-    val source = beginReinforcementPhase.getCountry("alaska").copy(armies = 25)
-    val target = beginReinforcementPhase.getCountry("alberta").copy(armies = 1)
-    val wm = beginReinforcementPhase.setPhase(Reinforcement(Some(source), Some(target))).updateSomeCountries(List(source,target))
+    val source = beginRP.getCountry("Alaska").copy(armies = 25)
+    val target = beginRP.getCountry("Alberta").copy(armies = 1)
+    val wm = beginRP.setPhase(Reinforcement(Some(source), Some(target))).updateSomeCountries(List(source,target))
     val confirmation = ConfirmTransfer(10)
     val wm2 = Effects.executeTransfer(wm, confirmation).eval(StateStamp(-1))
 
     "Transfer those armies" in {
-      wm2.getCountry("alaska").armies shouldBe 15
-      wm2.getCountry("alberta").armies shouldBe 11
+      wm2.getCountry("Alaska").armies shouldBe 15
+      wm2.getCountry("Alberta").armies shouldBe 11
     }
 
     "Begin the next player turn" in {
@@ -91,6 +122,38 @@ class ReinforcementPhaseTests extends FreeSpec with Matchers with MockitoSugar {
     "The phase should be set to TurnPlacement" in {
       wm2.phase shouldBe TurnPlacement
     }
+  }
+
+  "If a CancelTransfer input is received" - {
+    val source = beginRP.getCountry("Alaska").copy(armies = 25)
+    val target = beginRP.getCountry("Alberta").copy(armies = 1)
+    val wm = beginRP.setPhase(Reinforcement(Some(source), Some(target))).updateSomeCountries(List(source,target))
+    val wm2 = Effects.cancelReinforcementTransfer(wm).eval(StateStamp(-1))
+
+    "Transfer no armies" in {
+      wm2.getCountry("Alaska").armies shouldBe 25
+      wm2.getCountry("Alberta").armies shouldBe 1
+    }
+
+    "The phase should be reset to default Reinforcment" in {
+      wm2.phase shouldBe Reinforcement(None,None)
+    }
+  }
+
+
+  "If a EndTurn input is received" - {
+    val wm = beginRP.setPhase(Reinforcement(None, None))
+    val wm2 = Effects.endTurn(wm).eval(StateStamp(-1))
+
+    "Begin the next player turn" in {
+      wm2.activePlayerNumber shouldBe 2
+    }
+
+    "The phase should be set to TurnPlacement" in {
+      wm2.phase shouldBe TurnPlacement
+    }
+
+
   }
 
 

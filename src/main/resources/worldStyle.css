@@ -36,13 +36,11 @@
     -fx-background-size: stretch;
 }
 
-.country{
-}
-
 .polygon{
 
     -fx-fill: transparent;
 }
+
 
 .armyDisplay{
     -fx-background-radius: 30;

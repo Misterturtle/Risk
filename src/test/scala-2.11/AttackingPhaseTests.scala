@@ -22,57 +22,57 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
   }
 
   mutableWorldMap = mutableWorldMap.setPhase(Attacking(None, None))
-  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alaska").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 5))
-  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("alberta").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 5))
-  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("nwTerritory").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(2)))
-  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("westernUS").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(2)))
+  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("Alaska").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 5))
+  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("Alberta").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(1), armies = 5))
+  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("NW Territory").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(2)))
+  mutableWorldMap = mutableWorldMap.updateSingleCountry(mutableWorldMap.getCountry("Western US").copy(owner = mutableWorldMap.getPlayerByPlayerNumber(2)))
 
 
   val beginAttackPhase = mutableWorldMap
 
   "Selecting a non owned country when no attacking source does nothing" in {
-    val newWM = Effects.getCountryClickedEffect(beginAttackPhase, beginAttackPhase.getCountry("nwTerritory")).eval(StateStamp(-1))
+    val newWM = Effects.getCountryClickedEffect(beginAttackPhase, "NW Territory").eval(StateStamp(-1))
 
     newWM shouldBe beginAttackPhase
   }
 
   "Selecting an owned country sets the Attacking Phase source to that country" in {
-    val newWM = Effects.getCountryClickedEffect(beginAttackPhase, beginAttackPhase.getCountry("alaska")).eval(StateStamp(-1))
+    val newWM = Effects.getCountryClickedEffect(beginAttackPhase, "Alaska").eval(StateStamp(-1))
 
-    newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("alaska")), None)
+    newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("Alaska")), None)
   }
 
   "Selecting the source country while it is selected should deselect it" in {
-    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska")), None))
-    val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("alaska")).eval(StateStamp(-1))
+    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("Alaska")), None))
+    val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, "Alaska").eval(StateStamp(-1))
 
     newWM.phase shouldBe Attacking(None, None)
   }
 
   "Selecting a country with only 1 army should do nothing" in {
-    val oneArmyWM = beginAttackPhase.updateSingleCountry(beginAttackPhase.getCountry("alaska").copy(armies = 1))
-    val newWM = Effects.getCountryClickedEffect(oneArmyWM, oneArmyWM.getCountry("alaska")).eval(StateStamp(-1))
+    val oneArmyWM = beginAttackPhase.updateSingleCountry(beginAttackPhase.getCountry("Alaska").copy(armies = 1))
+    val newWM = Effects.getCountryClickedEffect(oneArmyWM, "Alaska").eval(StateStamp(-1))
 
     newWM shouldBe oneArmyWM
   }
 
   "Selecting an owned country when a source is already selected does nothing" in {
-    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska")), None))
-    val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("alberta")).eval(StateStamp(-1))
+    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("Alaska")), None))
+    val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, "Alberta").eval(StateStamp(-1))
 
-    newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("alaska")), None)
+    newWM.phase shouldBe Attacking(Some(beginAttackPhase.getCountry("Alaska")), None)
   }
 
   "Selecting an adjacent non owned country when a source is already selected should begin a battle" in {
-    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska")), None))
-    val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("nwTerritory")).eval(StateStamp(-1))
+    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("Alaska")), None))
+    val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, "NW Territory").eval(StateStamp(-1))
 
-    newWM.phase shouldBe Battle(beginAttackPhase.getCountry("alaska"), beginAttackPhase.getCountry("nwTerritory"))
+    newWM.phase shouldBe Battle(beginAttackPhase.getCountry("Alaska"), beginAttackPhase.getCountry("NW Territory"))
   }
 
   "Selecting a non owned country that is NOT adjacent to the source should not do anything" in {
-    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("alaska")), None))
-    val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, wmWithSourceSelected.getCountry("westernUS")).eval(StateStamp(-1))
+    val wmWithSourceSelected = beginAttackPhase.copy(phase = Attacking(Some(beginAttackPhase.getCountry("Alaska")), None))
+    val newWM = Effects.getCountryClickedEffect(wmWithSourceSelected, "Western US").eval(StateStamp(-1))
 
     newWM shouldBe wmWithSourceSelected
   }

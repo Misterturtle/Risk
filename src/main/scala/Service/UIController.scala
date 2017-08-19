@@ -2,13 +2,13 @@ package Service
 
 import javafx.scene.paint.{Paint, Color}
 
-/**
-  * Created by Harambe on 7/20/2017.
-  */
-trait UIController[A] {
-  def receiveInput(input:Input): Unit
-  val get: () => A
-}
+import GUI.Scaleable
+
+import scalafx.beans.property.ReadOnlyObjectProperty
+import scalafx.scene.Node
+
+
+trait UIController extends Node with Scaleable
 
 trait Input
 
@@ -16,44 +16,54 @@ case class ConfirmBattle(source:Country, target:Country, offenseArmies:Int) exte
 
 case class ConfirmTransfer(amount:Int) extends Input
 
-case class CountryClicked(country:Country) extends Input
+case object CancelTransfer extends Input
+
+case class CountryClicked(countryName:String) extends Input
 
 case object EndAttackPhase extends Input
 
 case object Retreat extends Input
 
+case object EndTurn extends Input
 
-class WorldMapUIController(val get:()=>WorldMap, sideEffectManager: SideEffectManager) extends UIController[WorldMap] {
+
+
+
+class WorldMapUIController(wm: ReadOnlyObjectProperty[WorldMap], sideEffectManager: SideEffectManager) {
 
   def receiveInput(input:Input): Unit = {
     input match {
-      case CountryClicked(country) =>
-        sideEffectManager.performServiceEffect(Effects.getCountryClickedEffect(get(), country))
+      case CountryClicked(countryName) =>
+        sideEffectManager.performServiceEffect(Effects.getCountryClickedEffect(wm.value, countryName))
       case ConfirmBattle(source,target,offenseArmies) =>
-        sideEffectManager.performServiceEffect(Effects.executeBattle(get(), ConfirmBattle(source, target, offenseArmies)))
+        sideEffectManager.performServiceEffect(Effects.executeBattle(wm.value, ConfirmBattle(source, target, offenseArmies)))
        case ConfirmTransfer(amount) =>
-        sideEffectManager.performServiceEffect(Effects.executeBattleTransfer(get(), ConfirmTransfer(amount)))
+        sideEffectManager.performServiceEffect(Effects.executeTransfer(wm.value, ConfirmTransfer(amount)))
+      case CancelTransfer =>
+        sideEffectManager.performServiceEffect(Effects.cancelReinforcementTransfer(wm.value))
       case Retreat =>
-        sideEffectManager.performServiceEffect(Effects.retreatFromBattle(get()))
+        sideEffectManager.performServiceEffect(Effects.retreatFromBattle(wm.value))
       case EndAttackPhase =>
-        sideEffectManager.performServiceEffect(Effects.endAttackPhase(get()))
+        sideEffectManager.performServiceEffect(Effects.endAttackPhase(wm.value))
+      case EndTurn =>
+        sideEffectManager.performServiceEffect(Effects.endTurn(wm.value))
     }
   }
 
 
-  def getCurrPlayersName: String = get().getActivePlayer.map(_.name).getOrElse("Invalid Player")
+  def getCurrPlayersName: String = wm.value.getActivePlayer.map(_.name).getOrElse("Invalid Player")
 
-  def getCurrPlayersArmies: Int = get().getActivePlayer.map(_.armies).getOrElse(-1)
+  def getCurrPlayersArmies: Int = wm.value.getActivePlayer.map(_.armies).getOrElse(-1)
 
-  def getCurrPlayersColor: Paint = get().getActivePlayer.map(_.color).getOrElse(Color.TRANSPARENT)
+  def getCurrPlayersColor: Paint = wm.value.getActivePlayer.map(_.color).getOrElse(Color.TRANSPARENT)
 
-  def getCurrPlayersTerritories: Int = get().countries.count(_.owner.map(_.name).getOrElse("No Owner") == get().getActivePlayer.map(_.name).getOrElse("No Active Player"))
+  def getCurrPlayersTerritories: Int = wm.value.countries.count(_.owner.map(_.name).getOrElse("No Owner") == wm.value.getActivePlayer.map(_.name).getOrElse("No Active Player"))
 
-  def getCountries: List[Country] = get().countries
+  def getCountries: List[Country] = wm.value.countries
 
-  def getCountryByName(name:String) = get().getCountry(name)
+  def getCountryByName(name:String) = wm.value.getCountry(name)
 
-  def getPhase: Phase = get().phase
+  def getPhase: Phase = wm.value.phase
 
 
 

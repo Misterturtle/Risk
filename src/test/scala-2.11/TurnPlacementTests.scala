@@ -24,8 +24,8 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
     }
   }
 
-  val player1Country = mutableWorldMap.countries.find(_.owner.map(_.playerNumber).contains(1)).get
-  val player2Country = mutableWorldMap.countries.find(_.owner.map(_.playerNumber).contains(2)).get
+  val player1Country = mutableWorldMap.countries.find(_.owner.map(_.playerNumber).contains(1)).get.name
+  val player2Country = mutableWorldMap.countries.find(_.owner.map(_.playerNumber).contains(2)).get.name
   mutableWorldMap = Effects.getCountryClickedEffect(mutableWorldMap, player1Country).eval(StateStamp(-1))
 
 
@@ -52,14 +52,14 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
 
     "Clicking on an unowned country should do nothing" in {
       val unownedCountry = wm.countries.find(_.owner.map(_.playerNumber).contains(2)).get
-      val newWM = Effects.getCountryClickedEffect(wm, unownedCountry).eval(StateStamp(-1))
+      val newWM = Effects.getCountryClickedEffect(wm, unownedCountry.name).eval(StateStamp(-1))
 
       newWM shouldBe wm
     }
 
     "Clicking on an owned country should place an army" in {
       val ownedCountry = wm.countries.find(_.owner.map(_.playerNumber).contains(1)).get
-      val newWM = Effects.getCountryClickedEffect(wm, ownedCountry).eval(StateStamp(-1))
+      val newWM = Effects.getCountryClickedEffect(wm, ownedCountry.name).eval(StateStamp(-1))
 
       newWM.getActivePlayer.get.armies shouldBe 3
       newWM.getCountry(ownedCountry.name).armies shouldBe ownedCountry.armies + 1
@@ -68,7 +68,7 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
     "Placing the last army should transition to the attack phase" in {
       val lastPlacementWM = wm.updatePlayer(wm.getActivePlayer.get.removeArmies(3))
       val ownedCountry = wm.countries.find(_.owner.map(_.playerNumber).contains(1)).get
-      val attackPhaseWM = Effects.getCountryClickedEffect(lastPlacementWM, ownedCountry).eval(StateStamp(-1))
+      val attackPhaseWM = Effects.getCountryClickedEffect(lastPlacementWM, ownedCountry.name).eval(StateStamp(-1))
 
       attackPhaseWM.phase shouldBe Attacking(None, None)
     }

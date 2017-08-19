@@ -57,19 +57,24 @@ object Effects {
   def countryClickedDuringReinforcementPhase(wm:WorldMap, country:Country): Effect[WorldMap] = {
     val effect = init[StateStamp]
 
-    if(ReinforcementPhase.isValidSource(wm, country)){
-      effect.flatMap(_ => state(ReinforcementPhase.setReinformentSource(wm,country)))
+    wm.phase.asInstanceOf[Reinforcement] match {
+
+      case Reinforcement(None,None) if ReinforcementPhase.isValidSource(wm, country) =>
+          effect.flatMap(_ => state(ReinforcementPhase.setReinformentSource(wm,country)))
+
+      case Reinforcement(Some(_), None) if ReinforcementPhase.isValidTarget(wm,country) =>
+        effect.flatMap(_ => state(ReinforcementPhase.setReinformentTarget(wm, country)))
+
+      case Reinforcement(Some(s), None) if s.name == country.name =>
+        effect.flatMap(_ => state(wm.setPhase(Reinforcement(None, None))))
+
+      case _ =>
+        effect.flatMap(_ => state(wm))
     }
-    else if (ReinforcementPhase.isValidTarget(wm,country)){
-     effect.flatMap(_ => state(ReinforcementPhase.setReinformentTarget(wm, country)))
-    } else if (wm.phase.asInstanceOf[Reinforcement].source.map(_.name).contains(country.name)) {
-      effect.flatMap(_ => state(wm.setPhase(Reinforcement(None, None))))
-    } else effect.flatMap(_ => state(wm))
-
-
   }
 
-  def getCountryClickedEffect(worldMap: WorldMap, country:Country): Effect[WorldMap] = {
+  def getCountryClickedEffect(worldMap: WorldMap, countryName:String): Effect[WorldMap] = {
+    val country = worldMap.countries.find(_.name == countryName).getOrElse(throw new Exception("Country Clicked input for an unknown country"))
     worldMap.phase match {
       case InitialPlacement =>
         countryClickedDuringInitPlace(worldMap, country)
@@ -77,13 +82,11 @@ object Effects {
         countryClickedDuringTurnPlace(worldMap, country)
       case Attacking(s, _) =>
         countryClickedDuringAttackingPhase(worldMap, country)
-      case Reinforcement(s,t)=>
+      case Reinforcement(_,_)=>
         countryClickedDuringReinforcementPhase(worldMap, country)
       case _ =>
         val effect = init[StateStamp]
         effect.flatMap(_ => state(worldMap))
-
-
     }
   }
 
@@ -118,6 +121,13 @@ object Effects {
     effect.flatMap(_ => state(wm3))
   }
 
+  def cancelReinforcementTransfer(wm:WorldMap) :Effect[WorldMap] = {
+    val effect = init[StateStamp]
+    val wm2 = wm.setPhase(Reinforcement(None,None))
+
+    effect.flatMap(_ => state(wm2))
+  }
+
 
   def executeBattleTransfer(wm:WorldMap, confTrans:ConfirmTransfer): Effect[WorldMap] = {
     val effect = init[StateStamp]
@@ -138,6 +148,13 @@ object Effects {
   def endAttackPhase(wm:WorldMap): Effect[WorldMap] = {
     val effect = init[StateStamp]
     val wm2 = wm.setPhase(Reinforcement(None, None))
+
+    effect.flatMap(_ => state(wm2))
+  }
+
+  def endTurn(wm:WorldMap) : Effect[WorldMap] = {
+    val effect = init[StateStamp]
+    val wm2 = ReinforcementPhase.nextTurn(wm)
 
     effect.flatMap(_ => state(wm2))
   }
