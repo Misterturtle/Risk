@@ -1,17 +1,21 @@
 package Service
 
+import scala.concurrent.Future
+
 /**
   * Created by Harambe on 7/20/2017.
   */
 object AttackingPhase {
-  //todo: Currently able to select my own country as a target
-
-
   def selectSource(wm:WorldMap, country:Country):WorldMap = {
-    println("Source selected")
     if(isValidSourceTarget(wm, country))
       wm.setPhase(wm.phase.asInstanceOf[Attacking].setSource(country))
     else wm
+  }
+
+  def computerSelectSourceAI(wm:WorldMap): (WorldMap, Future[CompInput]) = {
+    val compPlayer = wm.getActivePlayer.get.asInstanceOf[ComputerPlayer]
+
+    (ComputerAI.chooseAttackSource(wm), compPlayer.compAsyncDelay.attackTargetDelay(wm))
   }
 
   def deselectSource(wm:WorldMap):WorldMap = {

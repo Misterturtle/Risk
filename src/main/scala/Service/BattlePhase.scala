@@ -27,19 +27,31 @@ object BattlePhase {
 
   def checkForBattleEnd(wm: WorldMap): WorldMap = {
     val battle = wm.phase.asInstanceOf[Battle]
-    if (battle.target.armies <= 0) {
-      val conqueredCountry = battle.target.copy(owner = wm.getActivePlayer)
-      wm.setPhase(battle.copy(target = conqueredCountry, isTransferring = true)).updateSingleCountry(conqueredCountry)
-    }
-    else {
-      if (battle.source.armies <= 1) {
+    val isBattleWon = battle.target.armies <= 0
+    val isBattleLost = battle.source.armies <= 1
+
+    Unit match {
+      case _ if isBattleWon =>
+        countryConqueredEffects(wm)
+
+      case _ if isBattleLost =>
         wm.setPhase(Attacking(None, None))
-      }
-      else {
+
+      case _ =>
         wm
-      }
     }
   }
+
+  def countryConqueredEffects(wm:WorldMap):WorldMap = {
+    val battle = wm.phase.asInstanceOf[Battle]
+    val conqueredCountry = battle.target.copy(owner = wm.getActivePlayer)
+    wm
+      .setPhase(battle.copy(target = conqueredCountry, isTransferring = true))
+      .updateSingleCountry(conqueredCountry)
+      .updatePlayer(wm.getActivePlayer.get.setCountryTaken(true))
+  }
+
+
 
 
 

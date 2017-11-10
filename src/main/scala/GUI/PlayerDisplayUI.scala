@@ -1,42 +1,52 @@
 package GUI
 
-import javafx.beans.value.{ObservableValue, ChangeListener}
+import  javafx.beans.value.{ObservableValue, ChangeListener}
+import javafx.beans.binding.DoubleBinding
+import javafx.beans.property.ReadOnlyDoubleProperty
 import javafx.event.{ActionEvent, EventHandler}
 import javafx.geometry.Insets
 import javafx.scene.layout.{Background, BackgroundFill, CornerRadii}
 import javafx.scene.paint.{Paint, Color}
 
-import Service.{WorldMapUIController, WorldMap}
+import Service._
 
 import scalafx.animation.TranslateTransition
 import scalafx.geometry
 import scalafx.geometry.{Pos}
 import scalafx.scene.Group
 import scalafx.scene.image.{Image, ImageView}
-import scalafx.scene.layout.{Priority, HBox, VBox}
+import scalafx.scene.layout.{AnchorPane, Priority, HBox, VBox}
 import scalafx.scene.text.Text
 import scalafx.util.Duration
+
+import Sugar.CustomSugar._
 
 /**
   * Created by Harambe on 7/20/2017.
   */
-class PlayerDisplayUI(wmUICont:WorldMapUIController) extends VBox {
+class PlayerDisplayUI() extends VBox with PlayerListener with CountryListener with UIController{
 
-  val nameContainer = new HBox()
-  nameContainer.prefWidthProperty().bind(this.prefWidthProperty())
-  nameContainer.prefHeightProperty().bind(this.prefHeightProperty().divide(2))
+  val self = this
 
   private val displayAnim = new TranslateTransition(new Duration(300), this)
+  private var _isDisplayed = false
 
-
-  val nameText = new Text(wmUICont.getCurrPlayersName)
+  val nameText = new Text()
+  nameText.scaleX = 2
+  nameText.scaleY = 2
   nameText.styleClass.add("defaultText")
 
-  nameContainer.alignment = Pos.Center
-  nameContainer.children.add(nameText)
+  val nameContainer = new HBox()
+  nameContainer.prefWidth.bind(prefWidth)
+  nameContainer.prefHeight.bind(prefHeight.divide(2))
 
-  val statsBar = new StatsBar(wmUICont.getCurrPlayersColor, wmUICont.getCurrPlayersArmies, wmUICont.getCurrPlayersArmies)
+  nameContainer.alignment = Pos.Center
+  nameContainer.children.add(new Group(nameText))
+
+  val statsBar = new StatsBar(CustomColors.gray, 0, 0)
   statsBar.alignment = Pos.CenterLeft
+
+
 
   this.setTranslateX(-prefWidth.get)
   alignment = Pos.TopLeft
@@ -44,29 +54,61 @@ class PlayerDisplayUI(wmUICont:WorldMapUIController) extends VBox {
 
 
   def update(): Unit ={
-      statsBar.update(wmUICont.getCurrPlayersColor, wmUICont.getCurrPlayersArmies, wmUICont.getCurrPlayersTerritories)
-      nameText.setText(wmUICont.getCurrPlayersName)
-      nameContainer.setBackground(new Background(new BackgroundFill(wmUICont.getCurrPlayersColor, new CornerRadii(0,0,100,100, false), Insets.EMPTY)))
+      statsBar.update(_player.value.color, _player.value.armies, _countries.value.count(_.owner.map(_.playerNumber).contains(_player.value.playerNumber)), _player.value.cards.size)
+      nameText.setText(_player.value.name)
+      nameContainer.setBackground(new Background(new BackgroundFill(_player.value.color, new CornerRadii(0,0,100,100, false), Insets.EMPTY)))
   }
 
   def openAnim(): Unit = {
-    displayAnim.setOnFinished(new EventHandler[ActionEvent] {
-      override def handle(event: ActionEvent): Unit = {}
-    })
+    _isDisplayed = true
     displayAnim.setToX(0)
+    this.toFront()
     displayAnim.playFromStart()
   }
 
-  def closeAnim(): Unit ={
-    displayAnim.setOnFinished(new EventHandler[ActionEvent] {
-      override def handle(event: ActionEvent): Unit = {
-        update()
-        openAnim()
-      }
-    })
+  def closeAnim(onFinish: () => Unit): Unit ={
+    _isDisplayed = false
+    displayAnim.setOnFinished(onFinish)
     displayAnim.setToX(-this.prefWidth.get)
     displayAnim.playFromStart()
   }
+
+  override def onPlayerChange(oldPlayer: Player, newPlayer: Player): () => Unit = () => {
+    val nullOldPlayer = oldPlayer == null
+    val isDiffPlayer = if(!nullOldPlayer) oldPlayer.playerNumber != newPlayer.playerNumber else false
+    val isSamePlayer = if(!nullOldPlayer) oldPlayer.playerNumber == newPlayer.playerNumber else false
+
+    Unit match {
+
+      case _ if nullOldPlayer =>
+        update()
+
+      case _ if isDiffPlayer =>
+        closeAnim(() => {
+          update()
+          openAnim()
+        })
+
+      case _ if isSamePlayer =>
+        update()
+    }
+  }
+
+  override def onCountryChange(oldCountries: List[Country], newCountries: List[Country]): () => Unit = () => {}
+
+  override def anchorResize(sceneWidth: ReadOnlyDoubleProperty, sceneHeight: ReadOnlyDoubleProperty): Unit = {}
+
+  override def bindScale(windowScaleX: DoubleBinding, windowScaleY: DoubleBinding): Unit = {
+    statsBar.scaleX.bind(windowScaleX)
+    statsBar.scaleY.bind(windowScaleY)
+  }
+
+  override def bindPrefSize(sceneWidth: ReadOnlyDoubleProperty, sceneHeight: ReadOnlyDoubleProperty): Unit = {
+    prefHeight.bind(sceneHeight.divide(10))
+    prefWidth.bind(sceneWidth.divide(4))
+  }
+
+  override def init(sceneWidth: ReadOnlyDoubleProperty, sceneHeight: ReadOnlyDoubleProperty): Unit = {}
 }
 
 
@@ -88,6 +130,7 @@ class StatsBar(initColor:Paint, initArmyAmount:Int, initTerritoryAmount:Int) ext
     CustomColors.brown -> brownArmies,
     CustomColors.blue -> blueArmies,
     CustomColors.pink -> pinkArmies,
+    CustomColors.gray -> new Image(getClass.getResourceAsStream("/errorBox.png")),
     Color.TRANSPARENT -> new Image(getClass.getResourceAsStream("/errorBox.png"))
   )
 
@@ -96,15 +139,39 @@ class StatsBar(initColor:Paint, initArmyAmount:Int, initTerritoryAmount:Int) ext
   armiesTab.prefHeight.bind(this.prefHeightProperty())
   armiesTab.prefWidth.bind(this.prefWidthProperty())
 
-  val territoriesTab = new StatTab(new Image(getClass().getResourceAsStream("/africa.png")), initTerritoryAmount)
+  val territoriesTab = new StatTab(new Image(getClass.getResourceAsStream("/africa.png")), initTerritoryAmount)
   territoriesTab.prefHeight.bind(this.prefHeightProperty())
   territoriesTab.prefWidth.bind(this.prefWidthProperty())
 
-  children.addAll(armiesTab, territoriesTab)
 
-  def update(color:Paint, armyAmount: Int, territoryAmount: Int): Unit ={
+  val cardTab = new HBox()
+  cardTab.prefHeight.bind(this.prefHeightProperty())
+  cardTab.prefWidth.bind(this.prefWidthProperty())
+
+  val cardUI = new CardUI(new Card("Alaska", Infantry))
+  cardUI.scaleX = .15
+  cardUI.scaleY = .15
+  cardUI.alignment = Pos.Center
+
+  val cardText = new Text("0")
+  cardText.styleClass.add("defaultText")
+  cardText.setScaleX(2)
+  cardText.setScaleY(2)
+  val textContainer = new HBox()
+  textContainer.alignment = Pos.Center
+  textContainer.children.add(cardText)
+
+  cardTab.spacing = 20
+  cardTab.alignment = Pos.Center
+  cardTab.padding = scalafx.geometry.Insets(0,20,0,20)
+  cardTab.children.addAll(new Group(cardUI), new Group(textContainer))
+
+  children.addAll(armiesTab, territoriesTab, cardTab)
+
+  def update(color:Paint, armyAmount: Int, territoryAmount: Int, cardAmount: Int): Unit ={
     armiesTab.update(colorMap(color), armyAmount)
     territoriesTab.update(newValue = territoryAmount)
+    cardText.setText(cardAmount.toString)
   }
 }
 

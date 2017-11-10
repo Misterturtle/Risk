@@ -9,4 +9,6 @@ class RandomFactory {
   val rGen = new Random()
 
   def roll():Int = rGen.nextInt(6)+1
+
+  def cardIndex(deckSize:Int):Int = rGen.nextInt(deckSize)
 }

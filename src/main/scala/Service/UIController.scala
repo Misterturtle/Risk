@@ -12,13 +12,15 @@ trait UIController extends Node with Scaleable
 
 trait Input
 
+case class CountryClicked(countryName:String) extends Input
+
+case class TurnInCards(cards:List[Card]) extends Input
+
 case class ConfirmBattle(source:Country, target:Country, offenseArmies:Int) extends Input
 
 case class ConfirmTransfer(amount:Int) extends Input
 
 case object CancelTransfer extends Input
-
-case class CountryClicked(countryName:String) extends Input
 
 case object EndAttackPhase extends Input
 
@@ -29,42 +31,51 @@ case object EndTurn extends Input
 
 
 
-class WorldMapUIController(wm: ReadOnlyObjectProperty[WorldMap], sideEffectManager: SideEffectManager) {
+
+
+
+trait CompInput
+
+case object PlacementDelay extends CompInput
+
+case object AttackSourceDelay extends CompInput
+
+case object AttackTargetDelay extends CompInput
+
+
+class ServiceInputHandler(wm: () => WorldMap, sideEffectManager: () => SideEffectManager) {
 
   def receiveInput(input:Input): Unit = {
     input match {
       case CountryClicked(countryName) =>
-        sideEffectManager.performServiceEffect(Effects.getCountryClickedEffect(wm.value, countryName))
+        sideEffectManager().performServiceEffect(Effects.getCountryClickedEffect(wm(), countryName))
+      case TurnInCards(cards)=>
+        sideEffectManager().performServiceEffect(Effects.turnInCards(wm(), cards))
       case ConfirmBattle(source,target,offenseArmies) =>
-        sideEffectManager.performServiceEffect(Effects.executeBattle(wm.value, ConfirmBattle(source, target, offenseArmies)))
+        sideEffectManager().performServiceEffect(Effects.executeBattle(wm(), ConfirmBattle(source, target, offenseArmies)))
        case ConfirmTransfer(amount) =>
-        sideEffectManager.performServiceEffect(Effects.executeTransfer(wm.value, ConfirmTransfer(amount)))
+        sideEffectManager().performServiceEffect(Effects.executeTransfer(wm(), ConfirmTransfer(amount)))
       case CancelTransfer =>
-        sideEffectManager.performServiceEffect(Effects.cancelReinforcementTransfer(wm.value))
+        sideEffectManager().performServiceEffect(Effects.cancelReinforcementTransfer(wm()))
       case Retreat =>
-        sideEffectManager.performServiceEffect(Effects.retreatFromBattle(wm.value))
+        sideEffectManager().performServiceEffect(Effects.retreatFromBattle(wm()))
       case EndAttackPhase =>
-        sideEffectManager.performServiceEffect(Effects.endAttackPhase(wm.value))
+        sideEffectManager().performServiceEffect(Effects.endAttackPhase(wm()))
       case EndTurn =>
-        sideEffectManager.performServiceEffect(Effects.endTurn(wm.value))
+        sideEffectManager().performServiceEffect(Effects.endTurn(wm()))
     }
   }
 
-
-  def getCurrPlayersName: String = wm.value.getActivePlayer.map(_.name).getOrElse("Invalid Player")
-
-  def getCurrPlayersArmies: Int = wm.value.getActivePlayer.map(_.armies).getOrElse(-1)
-
-  def getCurrPlayersColor: Paint = wm.value.getActivePlayer.map(_.color).getOrElse(Color.TRANSPARENT)
-
-  def getCurrPlayersTerritories: Int = wm.value.countries.count(_.owner.map(_.name).getOrElse("No Owner") == wm.value.getActivePlayer.map(_.name).getOrElse("No Active Player"))
-
-  def getCountries: List[Country] = wm.value.countries
-
-  def getCountryByName(name:String) = wm.value.getCountry(name)
-
-  def getPhase: Phase = wm.value.phase
-
-
-
+  def receiveComputerDelay(input: CompInput): Unit = {
+    input match{
+      case PlacementDelay =>
+        val (effect, future) = Effects.compPlacement(wm())
+        sideEffectManager().performServiceEffect(effect)
+        future.map(ci => this.receiveComputerDelay(ci))
+      case AttackSourceDelay =>
+        val (effect, future) = Effects.compAttackSource(wm())
+        sideEffectManager().performServiceEffect(effect)
+        future.map(ci => this.receiveComputerDelay(ci))
+    }
+  }
 }

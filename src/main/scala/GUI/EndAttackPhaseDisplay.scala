@@ -24,7 +24,7 @@ import Sugar.CustomSugar._
 /**
   * Created by Harambe on 8/8/2017.
   */
-class EndAttackPhaseConsole(messageService: (Input) => Unit) extends VBox with Scaleable with PlayerListener with PhaseListener with UIController {
+class EndAttackPhaseDisplay(messageService: (Input) => Unit) extends VBox with Scaleable with PlayerListener with PhaseListener with UIController {
 
   val self = this
 
@@ -51,6 +51,7 @@ class EndAttackPhaseConsole(messageService: (Input) => Unit) extends VBox with S
     openAnimation.setOnFinished(onFinish)
     _isDisplayed = true
     openAnimation.setToY(0)
+    this.toFront()
     openAnimation.playFromStart()
   }
 

@@ -17,35 +17,42 @@ object Main extends JFXApp {
   val root = new AnchorPane()
 
   stage = new PrimaryStage{
-    scene = new Scene(root, 1200,800)
+    scene = new Scene(root, 1281.6, 851.52)
   }
 
-
-  val service = new Service()
-  val wmUICont = new WorldMapUIController(service.getWorldMapProperty, service.sideEffectManager)
-  val wmUI = new WorldMapUI(wmUICont, wmUICont.receiveInput)
+  val servInpHand = new ServiceInputHandler(service.getWorldMapCopy, service.getSideEffectManager)
+  val service = new Service(servInpHand)
+  val wmUI = new WorldMapUI(servInpHand.receiveInput)
   val placeCons = new PlacementConsole()
   val attackCons:AttackConsole = new AttackConsole(placeCons.getTimeToFinish _, battleCons.getTimeToFinish _)
   val reinforcementCons:ReinforcementConsole = new ReinforcementConsole(attackCons.getTimeToFinish _, transferCons.getTimeToFinish _)
-  val battleCons = new BattleConsole(attackCons.getTimeToFinish _, wmUICont.receiveInput)
-  val transferCons = new TransferConsole(wmUICont.receiveInput, attackCons.getTimeToFinish _, battleCons.getTimeToFinish _, reinforcementCons.getTimeToFinish _)
-  val endAttackButton = new EndAttackPhaseConsole(wmUICont.receiveInput)
-  val endTurnButton = new EndTurnConsole(wmUICont.receiveInput, endAttackButton.getTimeToFinish _)
+  val battleCons = new BattleConsole(attackCons.getTimeToFinish _, servInpHand.receiveInput)
+  val transferCons = new TransferConsole(servInpHand.receiveInput, attackCons.getTimeToFinish _, battleCons.getTimeToFinish _, reinforcementCons.getTimeToFinish _)
+  val endAttackButton = new EndAttackPhaseDisplay(servInpHand.receiveInput)
+  val endTurnButton = new EndTurnDisplay(servInpHand.receiveInput, endAttackButton.getTimeToFinish _)
+  val cardCollectionDisplay = new CardCollectionDisplay(servInpHand.receiveInput, wmUI.enableWMInteractions, wmUI.disableWMInteractions)
+  val cardClaimDisplay = new CardClaimDisplay(endTurnButton.getTimeToFinish _, cardCollectionDisplay)
+  val playerDisplay = new PlayerDisplayUI()
 
 
-  val uiControllers = List[UIController](placeCons, attackCons, battleCons, transferCons, reinforcementCons, endAttackButton, endTurnButton)
+  val uiControllers = List[UIController](placeCons, attackCons, battleCons, transferCons, reinforcementCons, endAttackButton, endTurnButton, playerDisplay, cardClaimDisplay, cardCollectionDisplay)
 
-  val playerListeners = List[PlayerListener](wmUI, placeCons, attackCons, reinforcementCons, endAttackButton, endTurnButton)
+  val playerListeners = List[PlayerListener](wmUI, placeCons, attackCons, reinforcementCons, endAttackButton, endTurnButton, playerDisplay, cardClaimDisplay)
   playerListeners.foreach{_.bindPlayer(service.getActivePlayer)}
   playerListeners.foreach(service.subscribePlayerListener)
 
-  val countryListeners = List[CountryListener](wmUI, placeCons)
+  val countryListeners = List[CountryListener](wmUI, placeCons, playerDisplay)
   countryListeners.foreach{_.bindCountries(service.getCountries)}
   countryListeners.foreach(service.subscribeCountryListener)
 
-  val phaseListeners = List[PhaseListener](wmUI, placeCons, attackCons, battleCons, transferCons, reinforcementCons, endAttackButton, endTurnButton)
+  val phaseListeners = List[PhaseListener](wmUI, placeCons, attackCons, battleCons, transferCons, reinforcementCons, endAttackButton, endTurnButton, cardClaimDisplay)
   phaseListeners.foreach(_.bindPhase(service.getPhase))
   phaseListeners.foreach(service.subscribePhaseListener)
+
+  val deckListeners = List[DeckListener](cardClaimDisplay)
+  deckListeners.foreach(_.bindDeck(service.getDeck))
+  deckListeners.foreach(service.subscribeDeckListener)
+
 
 
   stage.scene.value.setRoot(wmUI)

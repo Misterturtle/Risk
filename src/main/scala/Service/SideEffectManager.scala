@@ -27,12 +27,10 @@ class SideEffectManager(setWM: (WorldMap) => Unit) {
         recordMutation()
         setWM(stampWithWM._2)
 
-
       case Failure =>
         println("Effect failed to validate state stamp")
     }
   }
-
 
   private def stamp: StateStamp ={
     StateStamp(mutations)

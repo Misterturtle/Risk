@@ -31,7 +31,7 @@
 }
 
 .worldMap {
-    -fx-background-image: url('map.png');
+    -fx-background-image: url('waterBG.jpg');
     -fx-background-repeat: no-repeat;
     -fx-background-size: stretch;
 }
@@ -75,6 +75,7 @@
 
 .whiteText{
     -fx-fill: white;
+    -fx-border-color: #ffa3fb;
 
 }
 

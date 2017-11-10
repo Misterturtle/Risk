@@ -21,7 +21,7 @@ import Sugar.CustomSugar._
 /**
   * Created by Harambe on 8/8/2017.
   */
-class EndTurnConsole(messageService: (Input) => Unit, delayFromEndAttCtrl: () => Duration) extends VBox with Scaleable with PlayerListener with PhaseListener with UIController {
+class EndTurnDisplay(messageService: (Input) => Unit, delayFromEndAttCtrl: () => Duration) extends VBox with Scaleable with PlayerListener with PhaseListener with UIController {
 
   val self = this
 
@@ -29,6 +29,7 @@ class EndTurnConsole(messageService: (Input) => Unit, delayFromEndAttCtrl: () =>
   def isDisplayed = _isDisplayed
   private val openAnimation = new TranslateTransition(new Duration(270), this)
   private val closeAnimation = new TranslateTransition(new Duration(270), this)
+  def getTimeToFinish: Duration = (closeAnimation.currentTime.value.toMillis == closeAnimation.duration.value.toMillis) ? new Duration(closeAnimation.duration.value) | new Duration(closeAnimation.duration.value.subtract(closeAnimation.currentTime.value))
 
   val text = new Text("End Turn")
   text.setScaleX(2)
@@ -47,6 +48,7 @@ class EndTurnConsole(messageService: (Input) => Unit, delayFromEndAttCtrl: () =>
     openAnimation.setOnFinished(onFinish)
     _isDisplayed = true
     openAnimation.setToY(0)
+    this.toFront()
     openAnimation.playFromStart()
   }
 

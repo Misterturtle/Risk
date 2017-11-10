@@ -24,7 +24,20 @@ object ReinforcementPhase {
   }
 
   def nextTurn(wm:WorldMap) :WorldMap = {
-    val wm2 = wm.setNextActivePlayer().setPhase(TurnPlacement)
-    TurnPlacePhase.beginTurn(wm2)
+
+    val wm2 = if (wm.getActivePlayer.get.isCountryTaken) {
+      val (ds, card) = wm.deckState.draw()
+      wm.updatePlayer(wm.getActivePlayer.get.awardCard(card))
+        .setNextActivePlayer()
+        .setPhase(TurnPlacement)
+        .copy(deckState = ds)
+    }
+    else {
+      wm.setNextActivePlayer()
+        .setPhase(TurnPlacement)
+    }
+
+    val wm3 = TurnPlacePhase.beginTurn(wm2)
+    wm3
   }
 }

@@ -29,15 +29,21 @@ trait PhaseListener extends Listener {
   def onPhaseChange(oldPhase:Phase, newPhase:Phase): () => Unit
 }
 
-class Service() {
+trait DeckListener extends Listener {
+  protected val _deck = new ObjectProperty[DeckState]
+  def bindDeck(serviceDeck: ReadOnlyObjectProperty[DeckState]) = _deck.bind(serviceDeck)
+  def onDeckChange(oldDeck:DeckState, newDeck:DeckState): () => Unit
+}
+
+class Service(servInputHandler: ServiceInputHandler) {
 
   val sideEffectManager = new SideEffectManager(mutateWorldMapUnsafe)
+  def getSideEffectManager() :SideEffectManager = sideEffectManager
 
-  private val players = List[Player](HumanPlayer("Turtle", 1, 0, CustomColors.red), ComputerPlayer("Boy Wonder", 2, 0, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 0, CustomColors.green))
+  private val players = List[Player](HumanPlayer("Turtle", 1, 0, CustomColors.red, Nil), ComputerPlayer("Boy Wonder", 2, 0, CustomColors.blue, Nil), ComputerPlayer("Some Scrub", 3, 0, CustomColors.green, Nil))
   private val initWM = WorldMap(CountryFactory.getCountries, players, 0, NotInGame)
-  private val _mutableWorldMap = new ObjectProperty[WorldMap]()
-  _mutableWorldMap.set(initWM)
-  def getWorldMapProperty: ReadOnlyObjectProperty[WorldMap] = _mutableWorldMap
+  private var _mutableWorldMap = initWM
+  def getWorldMapCopy(): WorldMap = _mutableWorldMap.copy()
 
   private val _activePlayer = new ObjectProperty[Player]()
   def getActivePlayer: ReadOnlyObjectProperty[Player] = _activePlayer
@@ -51,13 +57,18 @@ class Service() {
   def getPhase: ReadOnlyObjectProperty[Phase] = _phase
   private val phaseListeners = new ListBuffer[PhaseListener]()
 
+  private val _deck = new ObjectProperty[DeckState]()
+  def getDeck: ReadOnlyObjectProperty[DeckState] = _deck
+  private val deckListeners = new ListBuffer[DeckListener]()
+
   def subscribePhaseListener(ln: PhaseListener): Unit = phaseListeners.append(ln)
   def subscribeCountryListener(ln: CountryListener): Unit = countryListeners.append(ln)
   def subscribePlayerListener(ln: PlayerListener): Unit = playerListeners.append(ln)
+  def subscribeDeckListener(ln: DeckListener): Unit = deckListeners.append(ln)
 
 
   def mutateWorldMapUnsafe(wm: WorldMap): Unit = {
-    _mutableWorldMap.set(wm)
+    _mutableWorldMap = wm
     updateProperties(wm)
   }
 
@@ -83,11 +94,16 @@ class Service() {
       _phase.delegate.setValue(wm.phase)
     }
 
+    if(_deck.value != wm.deckState){
+      deckListeners.foreach(l => changeList.append(l.onDeckChange(_deck.value, wm.deckState)))
+      _deck.delegate.setValue(wm.deckState)
+    }
+
     changeList.foreach(_())
     changeList.clear()
   }
 
   //Entry Point
-  def begin() = sideEffectManager.performServiceEffect(Effects.begin(_mutableWorldMap.value))
+  def begin() = sideEffectManager.performServiceEffect(Effects.begin(_mutableWorldMap))
 
 }

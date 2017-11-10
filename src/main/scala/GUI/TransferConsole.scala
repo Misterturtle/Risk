@@ -52,6 +52,25 @@ class TransferConsole(messageService: (Input) => Unit, delayFromBattleCtrl: () =
     }
   }
 
+  val increaseAllButton = new SVGPath()
+  increaseAllButton.setContent("M271.5,6c-138.071,0-250,111.929-250,250s111.929,250,250,250s250-111.929,250-250S409.571,6,271.5,6z\n\t M250.484,232.799l-14.165,14.164c-4.043,4.043-10.112,4.043-14.164,0l-40.467-40.476c-3.043-3.034-9.112-1.009-9.112,4.052v166.945\n\tc0,6.07-4.043,10.113-10.112,10.113h-20.242c-6.069,0-10.112-4.043-10.112-10.113V209.522c0-4.044-5.061-7.078-9.112-4.044\n\tL82.53,245.946c-4.052,4.052-10.121,4.052-14.164,0l-14.165-14.165c-2.026-2.017-3.034-4.043-3.034-7.078\n\tc0-3.035,1.008-5.061,3.034-7.087l91.055-91.063c2.026-2.017,5.06-3.034,7.086-3.034c3.035,0,5.06,1.017,7.086,3.034l91.055,91.063\n\tc2.026,2.026,3.034,4.052,3.034,7.087C253.519,228.747,252.51,230.773,250.484,232.799z M479.177,247.405\n\tc-4.043,4.043-10.112,4.043-14.164,0l-40.467-40.476c-3.043-3.034-9.112-1.009-9.112,4.052v166.946\n\tc0,6.07-4.044,10.113-10.112,10.113h-20.243c-6.068,0-10.111-4.043-10.111-10.113V209.964c0-4.044-5.061-7.078-9.112-4.044\n\tl-40.468,40.467c-4.052,4.052-10.121,4.052-14.164,0l-14.165-14.165c-2.025-2.017-3.034-4.043-3.034-7.078\n\tc0-3.035,1.009-5.061,3.034-7.087l91.056-91.063c2.026-2.017,5.061-3.034,7.087-3.034c3.034,0,5.06,1.017,7.086,3.034l91.056,91.063\n\tc2.025,2.026,3.034,4.052,3.034,7.087c0,4.043-1.009,6.069-3.034,8.095L479.177,247.405z")
+  increaseAllButton.setScaleX(.09)
+  increaseAllButton.setScaleY(.09)
+  increaseAllButton.setPickOnBounds(true)
+  def increaseAllButtonButtonAction: () => Unit = {
+    () => {
+      val armiesToIncrease = sourceArmiesText.getText.toInt - 1
+      transferArmiesText.setText((transferArmiesText.getText.toInt + armiesToIncrease).toString)
+      sourceArmiesText.setText((sourceArmiesText.getText.toInt - armiesToIncrease).toString)
+      targetArmiesText.setText((targetArmiesText.getText.toInt + armiesToIncrease).toString)
+    }
+  }
+
+  val increaseBox = new HBox()
+  increaseBox.alignment = Pos.Center
+  increaseBox.spacing = 5
+  increaseBox.children.addAll(new Group(increaseButton), new Group(increaseAllButton))
+
   val decreaseButton = new SVGPath()
   decreaseButton.setContent("M256,512c141.964,0,256-114.036,256-256S397.964,0,256,0S0,114.036,0,256S114.036,512,256,512z\n\t M143.127,282.764l16.291-16.291c4.654-4.654,11.637-4.654,16.291,0l46.545,46.545c3.492,3.492,10.473,1.164,10.473-4.654v-192\n\tc0-6.981,4.655-11.636,11.637-11.636h23.273c6.981,0,11.636,4.654,11.636,11.636v193.164c0,4.654,5.818,8.146,10.474,4.654\n\tl46.545-46.545c4.654-4.654,11.637-4.654,16.291,0l16.291,16.291c2.327,2.326,3.49,4.654,3.49,8.145c0,3.491-1.163,5.818-3.49,8.146\n\tL264.146,404.945c-2.327,2.328-5.818,3.491-8.146,3.491c-3.491,0-5.818-1.163-8.146-3.491L143.127,300.219\n\tc-2.327-2.328-3.49-4.655-3.49-8.146C139.637,287.418,140.8,285.091,143.127,282.764L143.127,282.764z")
   decreaseButton.setScaleX(.09)
@@ -67,6 +86,24 @@ class TransferConsole(messageService: (Input) => Unit, delayFromBattleCtrl: () =
     }
   }
 
+  val decreaseAllButton = new SVGPath()
+  decreaseAllButton.setContent("M256,512c141.385,0,256-114.615,256-256S397.385,0,256,0S0,114.615,0,256S114.615,512,256,512z\n\t M277.52,279.758l14.505-14.504c4.14-4.141,10.354-4.141,14.504,0l41.438,41.447c3.116,3.107,9.331,1.033,9.331-4.149V131.6\n\tc0-6.216,4.14-10.355,10.354-10.355h20.729c6.215,0,10.355,4.14,10.355,10.355v171.993c0,4.142,5.182,7.248,9.33,4.142\n\tl41.439-41.439c4.148-4.148,10.363-4.148,14.504,0l14.504,14.505c2.074,2.065,3.107,4.141,3.107,7.247\n\tc0,3.107-1.033,5.183-3.107,7.258l-93.24,93.249c-2.074,2.065-5.182,3.106-7.256,3.106c-3.107,0-5.182-1.041-7.257-3.106\n\tl-93.241-93.249c-2.074-2.075-3.106-4.15-3.106-7.258C274.413,283.907,275.445,281.832,277.52,279.758z M43.339,264.801\n\tc4.14-4.14,10.355-4.14,14.504,0l41.438,41.447c3.116,3.107,9.331,1.033,9.331-4.148V131.147c0-6.217,4.141-10.356,10.354-10.356\n\th20.729c6.214,0,10.354,4.14,10.354,10.356v171.993c0,4.141,5.183,7.248,9.331,4.141l41.439-41.438\n\tc4.148-4.149,10.363-4.149,14.504,0l14.505,14.505c2.074,2.065,3.106,4.141,3.106,7.248s-1.032,5.182-3.106,7.256l-93.241,93.25\n\tc-2.075,2.064-5.182,3.106-7.257,3.106c-3.107,0-5.181-1.042-7.256-3.106l-93.241-93.25c-2.074-2.074-3.107-4.148-3.107-7.256\n\tc0-4.141,1.033-6.216,3.107-8.29L43.339,264.801z")
+  decreaseAllButton.setScaleX(.09)
+  decreaseAllButton.setScaleY(.09)
+  decreaseAllButton.setPickOnBounds(true)
+  def decreaseAllButtonAction: () => Unit = {
+    () => {
+      val armiesToReduce = transferArmiesText.getText.toInt - 1
+      sourceArmiesText.setText((sourceArmiesText.getText.toInt + armiesToReduce).toString)
+      targetArmiesText.setText((targetArmiesText.getText.toInt - armiesToReduce).toString)
+      transferArmiesText.setText((transferArmiesText.getText.toInt - armiesToReduce).toString)
+    }
+  }
+
+  val decreaseBox = new HBox()
+  decreaseBox.alignment = Pos.Center
+  decreaseBox.spacing = 5
+  decreaseBox.children.addAll(new Group(decreaseAllButton), new Group(decreaseButton))
 
   val confirmButton = new SVGPath()
   confirmButton.setContent("M46.652,17.374c-13.817,0-24.999,11.182-25,25\n\tc0,13.818,11.182,25,25,25c13.819,0,25.001-11.182,25.001-25S60.472,17.374,46.652,17.374z M44.653,55.373c-6-3-11-6.999-16-9.999\n\tc1.347-3,2.722-4.499,5.722-5.499c2,4,6.278,3.499,8.278,6.499c5-6,10-12,16-17c2,0,3,3,6,3C63,36.625,48.653,45.374,44.653,55.373z")
@@ -124,7 +161,7 @@ class TransferConsole(messageService: (Input) => Unit, delayFromBattleCtrl: () =
   transferArmiesText.setScaleY(2)
 
   val armySelectionBox = new HBox()
-  armySelectionBox.children.addAll(new Group(decreaseButton), new Group(transferArmiesText), new Group(increaseButton))
+  armySelectionBox.children.addAll(decreaseBox, new Group(transferArmiesText), increaseBox)
   armySelectionBox.spacing = 10
   armySelectionBox.alignment = Pos.Center
 
@@ -154,7 +191,9 @@ class TransferConsole(messageService: (Input) => Unit, delayFromBattleCtrl: () =
 
   private def enableButtons(): Unit ={
     increaseButton.setOnMouseClicked(increaseButtonAction)
+    increaseAllButton.setOnMouseClicked(increaseAllButtonButtonAction)
     decreaseButton.setOnMouseClicked(decreaseButtonAction)
+    decreaseAllButton.setOnMouseClicked(decreaseAllButtonAction)
     confirmButton.setOnMouseClicked(confirmButtonAction)
     cancelButton.setOnMouseClicked(cancelButtonAction)
   }
@@ -190,6 +229,7 @@ class TransferConsole(messageService: (Input) => Unit, delayFromBattleCtrl: () =
     openAnimation.setOnFinished(onFinish)
     _isDisplayed = true
     openAnimation.setToY(0)
+    this.toFront()
     openAnimation.playFromStart()
   }
 
@@ -224,8 +264,8 @@ class TransferConsole(messageService: (Input) => Unit, delayFromBattleCtrl: () =
   }
 
   override def bindPrefSize(sceneWidth: ReadOnlyDoubleProperty, sceneHeight: ReadOnlyDoubleProperty): Unit = {
-    prefHeight.bind(sceneHeight.divide(4))
-    prefWidth.bind(sceneWidth.divide(10))
+    prefHeight.bind(sceneHeight.divide(6))
+    prefWidth.bind(sceneWidth.divide(15))
   }
 
   override def init(sceneWidth: ReadOnlyDoubleProperty, sceneHeight: ReadOnlyDoubleProperty): Unit = {

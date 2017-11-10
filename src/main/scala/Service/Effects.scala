@@ -2,6 +2,7 @@ package Service
 
 import TypeAlias.Effect
 
+import scala.concurrent.Future
 import scalaz.Scalaz._
 
 /**
@@ -19,7 +20,7 @@ object Effects {
     effect.flatMap(_ => state(d))
   }
 
-  def countryClickedDuringInitPlace(wm: WorldMap, countryClicked: Country): Effect[WorldMap] = {
+  private def countryClickedDuringInitPlace(wm: WorldMap, countryClicked: Country): Effect[WorldMap] = {
     val effect = init[StateStamp]
     if (InitPlacePhase.isValidInitPlaceArmyPlacement(wm, wm.getActivePlayer.get, countryClicked)) {
       val wm2 = wm.placeArmies(countryClicked, wm.getActivePlayer.get, 1)
@@ -30,7 +31,7 @@ object Effects {
     }
   }
 
-  def countryClickedDuringTurnPlace(wm:WorldMap, countryClicked:Country):Effect[WorldMap] = {
+  private def countryClickedDuringTurnPlace(wm:WorldMap, countryClicked:Country):Effect[WorldMap] = {
     val effect = init[StateStamp]
     val wm2 = TurnPlacePhase.attemptToPlaceArmy(wm, countryClicked)
 
@@ -40,7 +41,7 @@ object Effects {
     else effect.flatMap(_ => state(wm2))
   }
 
-  def countryClickedDuringAttackingPhase(wm:WorldMap, countryClicked:Country):Effect[WorldMap] = {
+  private def countryClickedDuringAttackingPhase(wm:WorldMap, countryClicked:Country):Effect[WorldMap] = {
     val effect = init[StateStamp]
     wm.phase match {
       case Attacking(None, _) =>
@@ -54,7 +55,7 @@ object Effects {
     }
   }
 
-  def countryClickedDuringReinforcementPhase(wm:WorldMap, country:Country): Effect[WorldMap] = {
+  private def countryClickedDuringReinforcementPhase(wm:WorldMap, country:Country): Effect[WorldMap] = {
     val effect = init[StateStamp]
 
     wm.phase.asInstanceOf[Reinforcement] match {
@@ -87,6 +88,18 @@ object Effects {
       case _ =>
         val effect = init[StateStamp]
         effect.flatMap(_ => state(worldMap))
+    }
+  }
+
+  def turnInCards(wm:WorldMap, cards:List[Card]): Effect[WorldMap] = {
+    val effect = init[StateStamp]
+    wm.phase match {
+      case TurnPlacement =>
+        effect.flatMap(_ => state(TurnPlacePhase.turnInCards(wm, cards)))
+
+      case _ =>
+        effect.flatMap(_ => state(wm))
+
     }
   }
 
@@ -157,6 +170,19 @@ object Effects {
     val wm2 = ReinforcementPhase.nextTurn(wm)
 
     effect.flatMap(_ => state(wm2))
+  }
+
+
+  def compPlacement(wm:WorldMap): (Effect[WorldMap], Future[CompInput]) = {
+    val effect = init[StateStamp]
+    val (wm2, future) = TurnPlacePhase.compPlacementAI(wm)
+    (effect.flatMap(_ => state(wm2)), future)
+  }
+
+  def compAttackSource(wm:WorldMap): (Effect[WorldMap], Future[CompInput]) = {
+    val effect = init[StateStamp]
+    val (wm2, future) = AttackingPhase.compSelectSourceAI(wm)
+    (effect.flatMap(_ => state(wm2)), future)
   }
 
 

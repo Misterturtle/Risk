@@ -1,3 +1,5 @@
+import javafx.embed.swing.JFXPanel
+
 import GUI.{CustomColors, WorldMapUI}
 import Service._
 import org.scalatest.mockito.MockitoSugar
@@ -10,8 +12,11 @@ import org.mockito.Mockito._
   */
 class ReinforcementPhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
+  //Initialize Graphics
+  new JFXPanel()
+
   val mockUI = mock[WorldMapUI]
-  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green))
+  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red, Nil), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue, Nil), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green, Nil))
   var mutableCountries = CountryFactory.getCountries
   var mutableWorldMap = new WorldMap(mutableCountries, players, 1, InitialPlacement)
 
@@ -143,17 +148,36 @@ class ReinforcementPhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
   "If a EndTurn input is received" - {
     val wm = beginRP.setPhase(Reinforcement(None, None))
-    val wm2 = Effects.endTurn(wm).eval(StateStamp(-1))
+
+
 
     "Begin the next player turn" in {
+      val wm2 = Effects.endTurn(wm).eval(StateStamp(-1))
       wm2.activePlayerNumber shouldBe 2
     }
 
     "The phase should be set to TurnPlacement" in {
+      val wm2 = Effects.endTurn(wm).eval(StateStamp(-1))
       wm2.phase shouldBe TurnPlacement
     }
 
+    "The player should be awarded a card if he conquered a country" in {
+      val wm2 = wm.updatePlayer(wm.getActivePlayer.get.setCountryTaken(true))
+      val playerNumber = wm2.getActivePlayer.get.playerNumber
+      val wm3 = Effects.endTurn(wm2).eval(StateStamp(-1))
 
+      wm2.getPlayerByPlayerNumber(playerNumber).get.cards.size shouldBe 0
+      wm3.getPlayerByPlayerNumber(playerNumber).get.cards.size shouldBe 1
+    }
+
+    "The player should no be awarded a card if he did not conquer a country" in {
+      val wm2 = wm.updatePlayer(wm.getActivePlayer.get.setCountryTaken(false))
+      val playerNumber = wm2.getActivePlayer.get.playerNumber
+      val wm3 = Effects.endTurn(wm2).eval(StateStamp(-1))
+
+      wm2.getPlayerByPlayerNumber(playerNumber).get.cards.size shouldBe 0
+      wm3.getPlayerByPlayerNumber(playerNumber).get.cards.size shouldBe 0
+    }
   }
 
 

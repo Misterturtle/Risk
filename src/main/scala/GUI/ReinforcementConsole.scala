@@ -67,6 +67,7 @@ class ReinforcementConsole(delayFromAttackCtrl: () => Duration, delayFromTransCt
     openAnimation.setOnFinished(onFinish)
     _isDisplayed = true
     openAnimation.setToY(0)
+    this.toFront()
     openAnimation.playFromStart()
   }
 

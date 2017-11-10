@@ -1,20 +1,18 @@
 package GUI
 
+import javafx.animation.Animation
 import javafx.beans.binding.{DoubleBinding}
 import javafx.beans.property.{ReadOnlyDoubleProperty}
 import javafx.beans.value.{ObservableValue, ChangeListener}
 import javafx.event.{ActionEvent, EventHandler}
 import javafx.scene.layout.{CornerRadii, BackgroundFill, Background}
-import javafx.scene.paint.Paint
 
 import Service._
 
 import scalafx.animation.TranslateTransition
-import scalafx.beans.property.{BooleanProperty, ReadOnlyObjectProperty, ObjectProperty}
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.{Scene, Group}
-import scalafx.scene.layout.{StackPane, AnchorPane, VBox, HBox}
-import scalafx.scene.paint.Color
+import scalafx.scene.layout.{AnchorPane, VBox}
 import scalafx.scene.text.Text
 import scalafx.util.Duration
 import scalaz.Scalaz._
@@ -74,6 +72,7 @@ class PlacementConsole() extends VBox with Scaleable with PlayerListener with Co
     openAnimation.setOnFinished(() => onFinish())
     _isDisplayed = true
     openAnimation.setToY(0)
+    this.toFront()
     openAnimation.playFromStart()
   }
 
@@ -181,7 +180,12 @@ class PlacementConsole() extends VBox with Scaleable with PlayerListener with Co
         closeAnim(updateAndOpenWhenClosed)
 
       case _ =>
-        if (_isDisplayed) {
+        if(_isDisplayed){
+          openAnimation.stop()
+          closeAnim(() => {})
+        }
+        if (closeAnimation.status.value == Animation.Status.RUNNING) {
+          closeAnimation.stop()
           closeAnim(() => {})
         }
     }

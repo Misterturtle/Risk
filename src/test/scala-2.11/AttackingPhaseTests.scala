@@ -1,3 +1,5 @@
+import javafx.embed.swing.JFXPanel
+
 import GUI.{CustomColors, WorldMapUI}
 import Service._
 import org.scalatest.mockito.MockitoSugar
@@ -9,8 +11,11 @@ import org.mockito.Mockito._
   */
 class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
+  //Init Graphics
+  new JFXPanel()
+
   val mockUI = mock[WorldMapUI]
-  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green))
+  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red, Nil), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue, Nil), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green, Nil))
   var mutableCountries = CountryFactory.getCountries
   var mutableWorldMap = new WorldMap(mutableCountries, players, 1, InitialPlacement)
 
@@ -83,4 +88,6 @@ class AttackingPhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
     newWM.phase shouldBe Reinforcement(None,None)
   }
+
+
 }

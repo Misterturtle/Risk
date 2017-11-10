@@ -27,8 +27,6 @@ case class BattleResult(offRolls: List[Int] = Nil, defRolls: List[Int] = Nil, rG
   def offDefArmiesLost(): (Int, Int) = {
     val sortedOffRolls = offRolls.sorted.reverse
     val sortedDefRolls = defRolls.sorted.reverse
-    sortedOffRolls.foreach(println)
-    sortedDefRolls.foreach(println)
 
     var offArmiesLost = 0
     var defArmiesLost = 0

@@ -5,7 +5,7 @@ import scalaz.Scalaz._
 /**
   * Created by Harambe on 7/20/2017.
   */
-case class WorldMap(countries: List[Country], players: List[Player], activePlayerNumber: Int, phase: Phase) {
+case class WorldMap(countries: List[Country], players: List[Player], activePlayerNumber: Int, phase: Phase, deckState: DeckState = DeckState()) {
 
   def setNextActivePlayer(): WorldMap = {
     if(activePlayerNumber == players.size)
@@ -44,7 +44,11 @@ case class WorldMap(countries: List[Country], players: List[Player], activePlaye
   def updateCountryAndPlayer(country: Country, player: Player) = updateSingleCountry(country).updatePlayer(player)
 
   def updatePlayer(newPlayer: Player): WorldMap = {
-    val newPlayerList = players.map(oldPlayer => if (oldPlayer.playerNumber == newPlayer.playerNumber) newPlayer else oldPlayer)
+    val newPlayerList = players.map(oldPlayer =>
+      if (oldPlayer.playerNumber == newPlayer.playerNumber)
+        newPlayer
+      else
+        oldPlayer)
     copy(players = newPlayerList)
   }
 

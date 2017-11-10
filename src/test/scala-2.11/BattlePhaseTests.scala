@@ -1,3 +1,5 @@
+import javafx.embed.swing.JFXPanel
+
 import GUI.{CustomColors, WorldMapUI}
 import Service._
 import org.scalatest.mockito.MockitoSugar
@@ -11,8 +13,11 @@ import scala.util.Random
   */
 class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
+  //Init Graphics
+  new JFXPanel()
+
   val mockUI = mock[WorldMapUI]
-  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green))
+  val players = List[Player](HumanPlayer("Turtle", 1, 1, CustomColors.red, Nil), HumanPlayer("Boy Wonder", 2, 1, CustomColors.blue, Nil), ComputerPlayer("Some Scrub", 3, 1, CustomColors.green, Nil))
   var mutableCountries = CountryFactory.getCountries
   var mutableWorldMap = new WorldMap(mutableCountries, players, 1, InitialPlacement)
 
@@ -115,6 +120,10 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
     "The target country should have it's owner set to the attacking player" in {
       postBattle.getCountry("NW Territory").owner.map(_.playerNumber).contains(postBattle.activePlayerNumber)
     }
+
+    "The attacking player should have it's isCountryTaken flag set to true" in {
+      postBattle.getActivePlayer.get.isCountryTaken shouldBe true
+    }
   }
 
   "If the attack reduces the attacking armies to one, " - {
@@ -153,5 +162,9 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
     val postRetreat = Effects.retreatFromBattle(wm).eval(StateStamp(-1))
 
     postRetreat.phase shouldBe Attacking(None, None)
+  }
+
+  "Conquering a country should enable the players countryTaken flag" in {
+
   }
 }

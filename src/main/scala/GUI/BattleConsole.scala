@@ -138,6 +138,7 @@ class BattleConsole(delayForAttCtrl: () => Duration, messageService: (Input) => 
     openAnimation.setOnFinished(onFinish)
     _isDisplayed = true
     openAnimation.setToY(0)
+    this.toFront()
     openAnimation.playFromStart()
   }
 
@@ -301,8 +302,8 @@ class BattleConsole(delayForAttCtrl: () => Duration, messageService: (Input) => 
   }
 
   override def bindPrefSize(sceneWidth: ReadOnlyDoubleProperty, sceneHeight: ReadOnlyDoubleProperty): Unit = {
-    prefHeight.bind(sceneHeight.divide(4))
-    prefWidth.bind(sceneWidth.divide(10))
+    prefHeight.bind(sceneHeight.divide(6))
+    prefWidth.bind(sceneWidth.divide(15))
   }
 
 
