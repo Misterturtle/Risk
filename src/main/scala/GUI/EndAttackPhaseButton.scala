@@ -12,9 +12,6 @@ import scalafx.beans.property.ReadOnlyDoubleProperty
 import scalafx.scene.Group
 import scalafx.scene.text.Text
 
-/**
-  * Created by Harambe on 8/8/2017.
-  */
 class EndAttackPhaseButton(val sceneWidth: ReadOnlyDoubleProperty, val sceneHeight: ReadOnlyDoubleProperty, val windowXScale: SimpleDoubleProperty, val windowYScale: SimpleDoubleProperty) extends NextPhaseButton {
 
   val text = new Text("End Attack Phase")
