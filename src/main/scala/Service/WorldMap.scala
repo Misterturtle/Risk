@@ -29,7 +29,9 @@ case class WorldMap(countries: List[Country], players: List[Player], activePlaye
 
   def getActivePlayer: Option[Player] = getPlayerByPlayerNumber(activePlayerNumber)
 
-  def getCountry(name:String): Country = countries.find(_.name == name).getOrElse(throw new Exception)
+  def getCountry(name:String): Country = {
+    countries.find(_.name.toLowerCase == name.toLowerCase()).getOrElse(throw new Exception)
+  }
 
   def setPhase(phase: Phase): WorldMap = copy(phase = phase)
 

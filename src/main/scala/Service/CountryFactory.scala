@@ -5,132 +5,123 @@ package Service
   */
 object CountryFactory {
 
-
   //North America
-  val alaska = "Alaska"
-  val nwTerritory = "NW Territory"
-  val greenland = "Greenland"
-  val alberta = "Alberta"
-  val ontario = "Ontario"
-  val quebec = "Quebec"
-  val westernUS = "Western US"
-  val easternUS = "Eastern US"
-  val centralAmerica = "Central America"
-
-
-
+  val ALASKA = "Alaska"
+  val NW_TERRITORY = "NW Territory"
+  val GREENLAND = "Greenland"
+  val ALBERTA = "Alberta"
+  val ONTARIO = "Ontario"
+  val QUEBEC = "Quebec"
+  val WESTERN_US = "Western US"
+  val EASTERN_US = "Eastern US"
+  val CENTRAL_AMERICA = "Central America"
 
   //South America
-  val venezuela = "Venezuela"
-  val peru = "Peru"
-  val brazil = "Brazil"
-  val argentina = "Argentina"
-
-
-
+  val VENEZUELA = "Venezuela"
+  val PERU = "Peru"
+  val BRAZIL = "Brazil"
+  val ARGENTINA = "Argentina"
 
   //Africa
-  val northAfrica = "North Africa"
-  val congo = "Congo"
-  val southAfrica = "South Africa"
-  val madagascar = "Madagascar"
-  val eastAfrica = "East Africa"
-  val egypt = "Egypt"
-
-
+  val NORTH_AFRICA = "North Africa"
+  val CONGO = "Congo"
+  val SOUTH_AFRICA = "South Africa"
+  val MADAGASCAR = "Madagascar"
+  val EAST_AFRICA = "East Africa"
+  val EGYPT = "Egypt"
 
   //Europe
-  val iceland = "Iceland"
-  val britain = "Britain"
-  val westEurope = "West Europe"
-  val northEurope = "North Europe"
-  val southEurope = "South Europe"
-  val scandinavia = "Scandinavia"
-  val ukraine = "Ukraine"
-
-
-
+  val ICELAND = "Iceland"
+  val BRITAIN = "Britain"
+  val WEST_EUROPE = "West Europe"
+  val NORTH_EUROPE = "North Europe"
+  val SOUTH_EUROPE = "South Europe"
+  val SCANDINAVIA = "Scandinavia"
+  val UKRAINE = "Ukraine"
 
   //Asia
-  val ural = "Ural"
-  val kazakhstan = "Kazakhstan"
-  val middleEast = "Middle East"
-  val india = "India"
-  val siam = "Siam"
-  val china = "China"
-  val mongolia = "Mongolia"
-  val irkutsk = "Irkutsk"
-  val siberia = "Siberia"
-  val yakutsk = "Yakutsk"
-  val kamchatka = "Kamchatka"
-  val japan = "Japan"
-
-
+  val URAL = "Ural"
+  val KAZAKHSTAN = "Kazakhstan"
+  val MIDDLE_EAST = "Middle East"
+  val INDIA = "India"
+  val SIAM = "Siam"
+  val CHINA = "China"
+  val MONGOLIA = "Mongolia"
+  val IRKUTSK = "Irkutsk"
+  val SIBERIA = "Siberia"
+  val YAKUTSK = "Yakutsk"
+  val KAMCHATKA = "Kamchatka"
+  val JAPAN = "Japan"
 
   //Australia
-  val indonesia = "Indonesia"
-  val papuaNewGuinea = "Papua New Guinea"
-  val westernAustralia = "Western Australia"
-  val easternAustralia = "Eastern Australia"
+  val INDONESIA = "Indonesia"
+  val PAPUA_NEW_GUINEA = "Papua New Guinea"
+  val WESTERN_AUSTRALIA = "Western Australia"
+  val EASTERN_AUSTRALIA = "Eastern Australia"
 
-
-
+  //Continents
+  val NORTH_AMERICA = "North America"
+  val SOUTH_AMERICA = "South America"
+  val AFRICA = "Africa"
+  val EUROPE = "Europe"
+  val ASIA = "Asia"
+  val AUSTRALIA = "Australia"
 
 
   lazy val adjacentCountriesLookup = Map[String, List[String]](
-    alaska -> List(nwTerritory, alberta, kamchatka),
-    nwTerritory -> List(alaska, greenland, alberta, ontario),
-    greenland -> List(quebec, nwTerritory, iceland),
-    alberta -> List(alaska, ontario, nwTerritory, westernUS),
-    ontario -> List(nwTerritory, alberta, westernUS, easternUS, quebec),
-    quebec -> List(greenland, easternUS, ontario),
-    westernUS -> List(centralAmerica, easternUS, ontario, alberta),
-    easternUS -> List(quebec, ontario, alberta, westernUS, centralAmerica),
-    centralAmerica -> List(westernUS, easternUS, argentina),
-    venezuela -> List(peru, brazil),
-    peru -> List(argentina, venezuela, brazil),
-    brazil -> List(peru, argentina, venezuela, northAfrica),
-    argentina -> List(peru, brazil, centralAmerica),
-    northAfrica -> List(westEurope, southEurope, egypt, eastAfrica, congo, brazil),
-    congo -> List(northAfrica, eastAfrica, southAfrica),
-    southAfrica -> List(madagascar, congo, eastAfrica),
-    madagascar -> List(southAfrica, eastAfrica),
-    eastAfrica -> List(madagascar, southAfrica, congo, northAfrica, egypt, middleEast),
-    egypt -> List(southEurope, middleEast, eastAfrica, northAfrica),
+    ALASKA -> List(NW_TERRITORY, ALBERTA, KAMCHATKA),
+    NW_TERRITORY -> List(ALASKA, GREENLAND, ALBERTA, ONTARIO),
+    GREENLAND -> List(QUEBEC, NW_TERRITORY, ICELAND),
+    ALBERTA -> List(ALASKA, ONTARIO, NW_TERRITORY, WESTERN_US),
+    ONTARIO -> List(NW_TERRITORY, ALBERTA, WESTERN_US, EASTERN_US, QUEBEC),
+    QUEBEC -> List(GREENLAND, EASTERN_US, ONTARIO),
+    WESTERN_US -> List(CENTRAL_AMERICA, EASTERN_US, ONTARIO, ALBERTA),
+    EASTERN_US -> List(QUEBEC, ONTARIO, ALBERTA, WESTERN_US, CENTRAL_AMERICA),
+    CENTRAL_AMERICA -> List(WESTERN_US, EASTERN_US, ARGENTINA),
+    VENEZUELA -> List(PERU, BRAZIL),
+    PERU -> List(ARGENTINA, VENEZUELA, BRAZIL),
+    BRAZIL -> List(PERU, ARGENTINA, VENEZUELA, NORTH_AFRICA),
+    ARGENTINA -> List(PERU, BRAZIL, CENTRAL_AMERICA),
+    NORTH_AFRICA -> List(WEST_EUROPE, SOUTH_EUROPE, EGYPT, EAST_AFRICA, CONGO, BRAZIL),
+    CONGO -> List(NORTH_AFRICA, EAST_AFRICA, SOUTH_AFRICA),
+    SOUTH_AFRICA -> List(MADAGASCAR, CONGO, EAST_AFRICA),
+    MADAGASCAR -> List(SOUTH_AFRICA, EAST_AFRICA),
+    EAST_AFRICA -> List(MADAGASCAR, SOUTH_AFRICA, CONGO, NORTH_AFRICA, EGYPT, MIDDLE_EAST),
+    EGYPT -> List(SOUTH_EUROPE, MIDDLE_EAST, EAST_AFRICA, NORTH_AFRICA),
     //Europe
-    iceland -> List(greenland, scandinavia, britain),
-    britain -> List(iceland, scandinavia, westEurope, northEurope),
-    westEurope -> List(britain, northAfrica, southEurope, northEurope),
-    northEurope -> List(britain, westEurope, southEurope, ukraine, scandinavia),
-    southEurope -> List(northAfrica, westEurope, egypt, ukraine, northEurope),
-    scandinavia -> List(ukraine, northEurope, britain, iceland),
-    ukraine -> List(scandinavia, northEurope, southEurope, middleEast, kazakhstan, ural),
+    ICELAND -> List(GREENLAND, SCANDINAVIA, BRITAIN),
+    BRITAIN -> List(ICELAND, SCANDINAVIA, WEST_EUROPE, NORTH_EUROPE),
+    WEST_EUROPE -> List(BRITAIN, NORTH_AFRICA, SOUTH_EUROPE, NORTH_EUROPE),
+    NORTH_EUROPE -> List(BRITAIN, WEST_EUROPE, SOUTH_EUROPE, UKRAINE, SCANDINAVIA),
+    SOUTH_EUROPE -> List(NORTH_AFRICA, WEST_EUROPE, EGYPT, UKRAINE, NORTH_EUROPE),
+    SCANDINAVIA -> List(UKRAINE, NORTH_EUROPE, BRITAIN, ICELAND),
+    UKRAINE -> List(SCANDINAVIA, NORTH_EUROPE, SOUTH_EUROPE, MIDDLE_EAST, KAZAKHSTAN, URAL),
     //Asia
-    ural -> List(siberia, china, kazakhstan, ukraine),
-    kazakhstan -> List(ural, ukraine, middleEast, india, china),
-    middleEast -> List(india, kazakhstan, ukraine, southEurope, egypt, eastAfrica),
-    india -> List(middleEast, kazakhstan, china, siam),
-    siam -> List(india, china, indonesia),
-    china -> List(siam, india, kazakhstan, ural, siberia, mongolia),
-    mongolia -> List(china, japan, siberia, irkutsk, kamchatka),
-    irkutsk -> List(yakutsk, kamchatka, mongolia, siberia),
-    siberia -> List(yakutsk, irkutsk, mongolia, china, ural),
-    yakutsk -> List(kamchatka, irkutsk, siberia),
-    kamchatka -> List(yakutsk, irkutsk, mongolia, alaska),
-    japan -> List(mongolia, kamchatka),
-    indonesia -> List(siam, westernAustralia, papuaNewGuinea),
-    westernAustralia -> List(easternAustralia, indonesia, papuaNewGuinea),
-    easternAustralia -> List(westernAustralia, papuaNewGuinea),
-    papuaNewGuinea -> List(indonesia, westernAustralia, easternAustralia)
+    URAL -> List(SIBERIA, CHINA, KAZAKHSTAN, UKRAINE),
+    KAZAKHSTAN -> List(URAL, UKRAINE, MIDDLE_EAST, INDIA, CHINA),
+    MIDDLE_EAST -> List(INDIA, KAZAKHSTAN, UKRAINE, SOUTH_EUROPE, EGYPT, EAST_AFRICA),
+    INDIA -> List(MIDDLE_EAST, KAZAKHSTAN, CHINA, SIAM),
+    SIAM -> List(INDIA, CHINA, INDONESIA),
+    CHINA -> List(SIAM, INDIA, KAZAKHSTAN, URAL, SIBERIA, MONGOLIA),
+    MONGOLIA -> List(CHINA, JAPAN, SIBERIA, IRKUTSK, KAMCHATKA),
+    IRKUTSK -> List(YAKUTSK, KAMCHATKA, MONGOLIA, SIBERIA),
+    SIBERIA -> List(YAKUTSK, IRKUTSK, MONGOLIA, CHINA, URAL),
+    YAKUTSK -> List(KAMCHATKA, IRKUTSK, SIBERIA),
+    KAMCHATKA -> List(YAKUTSK, IRKUTSK, MONGOLIA, ALASKA),
+    JAPAN -> List(MONGOLIA, KAMCHATKA),
+    INDONESIA -> List(SIAM, WESTERN_AUSTRALIA, PAPUA_NEW_GUINEA),
+    WESTERN_AUSTRALIA -> List(EASTERN_AUSTRALIA, INDONESIA, PAPUA_NEW_GUINEA),
+    EASTERN_AUSTRALIA -> List(WESTERN_AUSTRALIA, PAPUA_NEW_GUINEA),
+    PAPUA_NEW_GUINEA -> List(INDONESIA, WESTERN_AUSTRALIA, EASTERN_AUSTRALIA)
   )
 
-  val northAmerica = List[Country](alaska, nwTerritory, greenland, alberta, ontario, quebec, westernUS,
-    easternUS, centralAmerica)
-  val africa = List[Country](northAfrica, congo, southAfrica, madagascar, eastAfrica, egypt)
-  val asia = List[Country](ural, kazakhstan, middleEast, india, siam, china, mongolia, irkutsk, siberia, yakutsk, kamchatka, japan)
-  val australia = List[Country](indonesia, papuaNewGuinea, westernAustralia, easternAustralia)
-  val europe = List[Country](iceland, britain, westEurope, northEurope, southEurope, scandinavia, ukraine)
-  val southAmerica = List[Country](venezuela, peru, brazil, argentina)
+  val northAmerica = List[Country](ALASKA, NW_TERRITORY, GREENLAND, ALBERTA, ONTARIO, QUEBEC, WESTERN_US,
+    EASTERN_US, CENTRAL_AMERICA)
+  val africa = List[Country](NORTH_AFRICA, CONGO, SOUTH_AFRICA, MADAGASCAR, EAST_AFRICA, EGYPT)
+  val asia = List[Country](URAL, KAZAKHSTAN, MIDDLE_EAST, INDIA, SIAM, CHINA, MONGOLIA, IRKUTSK, SIBERIA, YAKUTSK, KAMCHATKA, JAPAN)
+  val australia = List[Country](INDONESIA, PAPUA_NEW_GUINEA, WESTERN_AUSTRALIA, EASTERN_AUSTRALIA)
+  val europe = List[Country](ICELAND, BRITAIN, WEST_EUROPE, NORTH_EUROPE, SOUTH_EUROPE, SCANDINAVIA, UKRAINE)
+  val southAmerica = List[Country](VENEZUELA, PERU, BRAZIL, ARGENTINA)
 
 
 
@@ -140,12 +131,12 @@ object CountryFactory {
 
 
   def continentLookup: Map[String, List[String]] = Map[String, List[String]](
-    "North America" -> northAmerica.map(_.name),
-    "South America" -> southAmerica.map(_.name),
-    "Africa" -> africa.map(_.name),
-    "Europe" -> europe.map(_.name),
-    "Asia" -> asia.map(_.name),
-    "Australia" -> australia.map(_.name)
+    NORTH_AMERICA -> northAmerica.map(_.name),
+    SOUTH_AMERICA -> southAmerica.map(_.name),
+    AFRICA -> africa.map(_.name),
+    EUROPE -> europe.map(_.name),
+    ASIA -> asia.map(_.name),
+    AUSTRALIA -> australia.map(_.name)
   )
 
   implicit def blankCountry(name:String): Country = Country(name, 0, None, adjacentCountriesLookup(name))

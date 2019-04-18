@@ -1,6 +1,8 @@
 import javafx.embed.swing.JFXPanel
 import javax.swing.JPanel
 
+import Service.CountryFactory._
+
 import Service._
 import org.scalatest.{FreeSpec, Matchers}
 
@@ -15,9 +17,7 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
   val wmCont = new WorldMapController()
 
   "One gigantuous end to end test" in {
-
-
-
+    
     // When a new game begins,
     wmCont.sideEffectManager.performServiceEffect(Effects.begin(wmCont.getCurrentWorldMap))
     val wm = wmCont.getCurrentWorldMap
@@ -45,9 +45,9 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
 
 
     //    Clicking a country should
-    clickOnCountry(wm, "alaska")
+    clickOnCountry(wm, ALASKA)
     val postClickWM = wmCont.getCurrentWorldMap
-    val postClickAlaska = postClickWM.countries.find(_.name == "alaska").get
+    val postClickAlaska = postClickWM.countries.find(_.name == ALASKA).get
 
     //      Place an army on the country
     postClickAlaska.armies shouldBe 1
@@ -62,9 +62,9 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
     postClickWM.activePlayerNumber shouldBe 2
 
     //    Clicking a 2nd country should
-    clickOnCountry(wm, "argentina")
+    clickOnCountry(wm, ARGENTINA)
     val postClickWM2 = wmCont.getCurrentWorldMap
-    val postClickArgentina = postClickWM2.countries.find(_.name == "argentina").get
+    val postClickArgentina = postClickWM2.countries.find(_.name == ARGENTINA).get
 
     //      Place an army on the country
     postClickArgentina.armies shouldBe 1
@@ -89,11 +89,11 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
 
     //      Clicking a self owned country before all countries owned should do nothing
     preclaimWM.countries.count(_.owner.map(_.name).contains("Turtle")) shouldBe 1
-    clickOnCountry(preclaimWM, "alaska")
+    clickOnCountry(preclaimWM, ALASKA)
     wmCont.getCurrentWorldMap shouldBe preclaimWM
 
     //      Clicking a country you don't own should do nothing
-    clickOnCountry(preclaimWM, "argentina")
+    clickOnCountry(preclaimWM, ARGENTINA)
     wmCont.getCurrentWorldMap shouldBe preclaimWM
 
 
@@ -154,8 +154,8 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
     secondPlayerPlaced2ndArmyWm.activePlayerNumber shouldBe 1
 
     //      Place armies until the Init Place Service.Phase is over
-    val firstPlayersCountry = secondPlayerPlaced2ndArmyWm.getCountry("alaska")
-    val secondPlayersCountry = secondPlayerPlaced2ndArmyWm.getCountry("argentina")
+    val firstPlayersCountry = secondPlayerPlaced2ndArmyWm.getCountry(ALASKA)
+    val secondPlayersCountry = secondPlayerPlaced2ndArmyWm.getCountry(ARGENTINA)
     for (a <- 1 to 20) {
       clickOnCountry(wmCont.getCurrentWorldMap, firstPlayersCountry.name)
       clickOnCountry(wmCont.getCurrentWorldMap, secondPlayersCountry.name)
@@ -172,20 +172,20 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
     turnPlacementWM.getActivePlayer.get.armies shouldBe 4
 
     //Clicking a non-owned country should do nothing
-    clickOnCountry(turnPlacementWM, "argentina")
+    clickOnCountry(turnPlacementWM, ARGENTINA)
     wmCont.getCurrentWorldMap shouldBe turnPlacementWM
 
     //Clicking on an owned country during Turn Placement
-    val armiesBeforeClick = turnPlacementWM.getCountry("alaska").armies
-    clickOnCountry(wmCont.getCurrentWorldMap, "alaska")
+    val armiesBeforeClick = turnPlacementWM.getCountry(ALASKA).armies
+    clickOnCountry(wmCont.getCurrentWorldMap, ALASKA)
 
     //should place the army
-    wmCont.getCurrentWorldMap.getCountry("alaska").armies shouldBe armiesBeforeClick + 1
+    wmCont.getCurrentWorldMap.getCountry(ALASKA).armies shouldBe armiesBeforeClick + 1
     wmCont.getCurrentWorldMap.getActivePlayer.get.armies shouldBe 3
 
     //Placing the rest of your armies
     for (a <- 1 to 3) {
-      clickOnCountry(wmCont.getCurrentWorldMap, "alaska")
+      clickOnCountry(wmCont.getCurrentWorldMap, ALASKA)
     }
 
     //Should transition to attack phase
