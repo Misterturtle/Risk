@@ -14,12 +14,16 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
   //Init JavaFX graphics
   new JFXPanel
 
-  val wmCont = new WorldMapController()
+  var wmCont:WorldMapController = null
+  var wmUICont:WorldMapUIController = null
 
   "One gigantuous end to end test" in {
-    
+    wmCont = new WorldMapController()
+    wmUICont = new WorldMapUIController(() => wmCont.getCurrentWorldMap)
+    SideEffectManager.setNewSingleton(new SideEffectManager(wmCont, wmUICont))
+
     // When a new game begins,
-    wmCont.sideEffectManager.performServiceEffect(Effects.begin(wmCont.getCurrentWorldMap))
+    SideEffectManager.receive(Effects.begin(wmCont.getCurrentWorldMap))
     val wm = wmCont.getCurrentWorldMap
 
     //    No countries should be owned
@@ -193,10 +197,8 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
   }
 
 
-
-
   def clickOnCountry(wm:WorldMap, countryName:String):Unit = {
-    wmCont.wmUICont.receiveInput(CountryClicked(wm.countries.find(_.name == countryName).get))
+    wmUICont.receiveInput(CountryClicked(wm.countries.find(_.name == countryName).get))
   }
 
 

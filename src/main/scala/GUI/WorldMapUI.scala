@@ -58,8 +58,8 @@ class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
   children.addAll(playerDisplay, placementDisplayConsole, attackDisplayConsole, battleDisplayConsole, transferDisplayConsole, endAttackPhaseButton)
 
 
-  private def updateDisplayConsole(wmUICont: WorldMapUIController): Unit = {
-    wmUICont.getPhase match {
+  private def updateDisplayConsole(worldMap: WorldMap): Unit = {
+    worldMap.phase match {
       case InitialPlacement =>
         placementDisplayConsole.checkAnimationUpdate(wmUICont)
 
@@ -127,9 +127,9 @@ class WorldMapUI(wmUICont: WorldMapUIController) extends AnchorPane {
     })
   }
 
-  def updateWorldMap(wmUICont: WorldMapUIController): Unit = {
-    wmUICont.getCountries.foreach { c => countriesUI(c.name).update() }
-    updateDisplayConsole(wmUICont)
+  def updateWorldMap(worldMap: WorldMap): Unit = {
+    worldMap.countries.foreach { c => countriesUI(c.name).update() }
+    updateDisplayConsole(worldMap)
     (playerDisplay.nameText.getText != wmUICont.getCurrPlayersName) ? playerDisplay.closeAnim() | playerDisplay.update()
   }
 

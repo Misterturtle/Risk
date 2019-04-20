@@ -1,10 +1,8 @@
 package Service
 
-import javafx.scene.paint.{Paint, Color}
+import GUI.WorldMapUI
+import javafx.scene.paint.{Color, Paint}
 
-/**
-  * Created by Harambe on 7/20/2017.
-  */
 trait UIController[A] {
   def receiveInput(input:Input): Unit
   val get: () => A
@@ -23,23 +21,27 @@ case object EndAttackPhase extends Input
 case object Retreat extends Input
 
 
-class WorldMapUIController(val get:()=>WorldMap, sideEffectManager: SideEffectManager) extends UIController[WorldMap] {
+class WorldMapUIController(val get:()=>WorldMap) extends UIController[WorldMap] {
+
+  val worldMapUI = new WorldMapUI(this)
 
   def receiveInput(input:Input): Unit = {
     input match {
       case CountryClicked(country) =>
-        sideEffectManager.performServiceEffect(Effects.getCountryClickedEffect(get(), country))
+        SideEffectManager.receive(Effects.getCountryClickedEffect(get(), country))
       case ConfirmBattle(source,target,offenseArmies) =>
-        sideEffectManager.performServiceEffect(Effects.executeBattle(get(), ConfirmBattle(source, target, offenseArmies)))
+        SideEffectManager.receive(Effects.executeBattle(get(), ConfirmBattle(source, target, offenseArmies)))
        case ConfirmTransfer(amount) =>
-        sideEffectManager.performServiceEffect(Effects.executeBattleTransfer(get(), ConfirmTransfer(amount)))
+        SideEffectManager.receive(Effects.executeBattleTransfer(get(), ConfirmTransfer(amount)))
       case Retreat =>
-        sideEffectManager.performServiceEffect(Effects.retreatFromBattle(get()))
+        SideEffectManager.receive(Effects.retreatFromBattle(get()))
       case EndAttackPhase =>
-        sideEffectManager.performServiceEffect(Effects.endAttackPhase(get()))
+        SideEffectManager.receive(Effects.endAttackPhase(get()))
     }
   }
 
+
+  def updateWorldMap(worldMap: WorldMap): Unit = worldMapUI.updateWorldMap(worldMap)
 
   def getCurrPlayersName: String = get().getActivePlayer.map(_.name).getOrElse("Invalid Player")
 

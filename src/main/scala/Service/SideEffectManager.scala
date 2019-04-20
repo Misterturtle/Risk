@@ -2,9 +2,6 @@ package Service
 
 import TypeAlias.Effect
 
-/**
-  * Created by Harambe on 7/20/2017.
-  */
 case class StateStamp(id: Int)
 
 trait Validation
@@ -13,33 +10,44 @@ case object Failure extends Validation
 
 case object Success extends Validation
 
+object SideEffectManager {
+  private var _sideEffectManager: Option[SideEffectManager] = None
 
+  def setNewSingleton(sideEffectManager: SideEffectManager) = _sideEffectManager = Some(sideEffectManager)
 
-class SideEffectManager(setWM: (WorldMap) => Unit) {
+  def receive(effect: Effect[WorldMap]): Validation ={
+    _sideEffectManager.map(manager => manager.performServiceEffect(effect)).getOrElse(Failure)
+  }
+}
+
+class SideEffectManager(worldMapController: WorldMapController, worldMapUIController: WorldMapUIController) {
 
   private var mutations = 0
+
   private def recordMutation() = mutations += 1
 
-  def performServiceEffect(effect:Effect[WorldMap]) : Unit = {
+  def performServiceEffect(effect: Effect[WorldMap]): Validation = {
     val stampWithWM = effect.run(stamp)
     validateStateStamp(stampWithWM._1) match {
       case Success =>
         recordMutation()
-        setWM(stampWithWM._2)
-
+        worldMapController.mutateWorldMapUnsafe(stampWithWM._2)
+        worldMapUIController.updateWorldMap(stampWithWM._2)
+        Success
 
       case Failure =>
         println("Effect failed to validate state stamp")
+        Failure
     }
   }
 
 
-  private def stamp: StateStamp ={
+  private def stamp: StateStamp = {
     StateStamp(mutations)
   }
 
   private def validateStateStamp(stateStamp: StateStamp): Validation = {
-    if(stateStamp.id == mutations)
+    if (stateStamp.id == mutations)
       Success
     else Failure
   }

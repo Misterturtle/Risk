@@ -1,10 +1,15 @@
 package Service
 
+import Service.TypeAlias.Effect
 import scalaz.Scalaz._
 
 /**
   * Created by Harambe on 7/20/2017.
   */
+case object WorldMap{
+  val EMPTY = new WorldMap(Nil, Nil, 0, null)
+}
+
 case class WorldMap(countries: List[Country], players: List[Player], activePlayerNumber: Int, phase: Phase) {
 
   def setNextActivePlayer(): WorldMap = {
@@ -33,7 +38,13 @@ case class WorldMap(countries: List[Country], players: List[Player], activePlaye
     countries.find(_.name.toLowerCase == name.toLowerCase()).getOrElse(throw new Exception)
   }
 
-  def setPhase(phase: Phase): WorldMap = copy(phase = phase)
+  def setPhase(phase: Phase): WorldMap = {
+    copy(phase = phase)
+  }
+
+  def setPhase__(phase: Phase): Effect[WorldMap] = Effect{ ss =>
+    (ss, copy(phase = phase))
+  }
 
   def setActivePlayer(playerNumber: Int): WorldMap = copy(activePlayerNumber = playerNumber)
 
