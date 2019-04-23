@@ -2,7 +2,9 @@ package Service
 
 import TypeAlias.Effect
 
-case class StateStamp(id: Int)
+case class StateStamp[A](id: Int, originalData: A)
+
+case class IdentityMonad[A](id: Int, originalData: A)
 
 trait Validation
 
@@ -27,7 +29,7 @@ class SideEffectManager(worldMapController: WorldMapController, worldMapUIContro
   private def recordMutation() = mutations += 1
 
   def performServiceEffect(effect: Effect[WorldMap]): Validation = {
-    val stampWithWM = effect.run(stamp)
+    val stampWithWM = effect.run(stamp())
     validateStateStamp(stampWithWM._1) match {
       case Success =>
         recordMutation()
@@ -42,11 +44,11 @@ class SideEffectManager(worldMapController: WorldMapController, worldMapUIContro
   }
 
 
-  private def stamp: StateStamp = {
-    StateStamp(mutations)
+  private def stamp(): StateStamp[WorldMap] = {
+    StateStamp(mutations, worldMapController.getCurrentWorldMap)
   }
 
-  private def validateStateStamp(stateStamp: StateStamp): Validation = {
+  private def validateStateStamp[A](stateStamp: StateStamp[A]): Validation = {
     if (stateStamp.id == mutations)
       Success
     else Failure

@@ -33,43 +33,43 @@ class ReinforcementPhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
 
   "If a non-owned country is selected, nothing should happen" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry(NW_TERRITORY)).eval(StateStamp(-1))
+    val wm = Effects.countryClicked(beginReinforcementPhase.getCountry(NW_TERRITORY)).eval(StateStamp(-1, beginReinforcementPhase))
 
 
     wm shouldBe beginReinforcementPhase
   }
 
   "If a owned country is selected, the source should be set to that country" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry(ALASKA)).eval(StateStamp(-1))
+    val wm = Effects.countryClicked(beginReinforcementPhase.getCountry(ALASKA)).eval(StateStamp(-1,beginReinforcementPhase))
 
     wm.phase.asInstanceOf[Reinforcement].source shouldBe Some(wm.getCountry(ALASKA))
   }
 
   "If the source is selected a second time, it should deselect the source" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry(ALASKA)).eval(StateStamp(-1))
-    val wm2 = Effects.getCountryClickedEffect(wm, wm.getCountry(ALASKA)).eval(StateStamp(-1))
+    val wm = Effects.countryClicked(beginReinforcementPhase.getCountry(ALASKA)).eval(StateStamp(-1, beginReinforcementPhase))
+    val wm2 = Effects.countryClicked(wm.getCountry(ALASKA)).eval(StateStamp(-1, wm))
 
     wm2.phase.asInstanceOf[Reinforcement].source shouldBe None
   }
 
   "If a non-owned country is selected as the target, nothing should happen" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry(ALASKA)).eval(StateStamp(-1))
-    val wm2 = Effects.getCountryClickedEffect(wm, wm.getCountry(NW_TERRITORY)).eval(StateStamp(-1))
+    val wm = Effects.countryClicked(beginReinforcementPhase.getCountry(ALASKA)).eval(StateStamp(-1, beginReinforcementPhase))
+    val wm2 = Effects.countryClicked(wm.getCountry(NW_TERRITORY)).eval(StateStamp(-1, wm))
 
     wm2.phase.asInstanceOf[Reinforcement].target shouldBe None
   }
 
   "If a non-adjacent owned country is selected as the target, nothing should happen" in {
     val wm = beginReinforcementPhase.updateSingleCountry(beginReinforcementPhase.getCountry(ONTARIO).setOwner(beginReinforcementPhase.getPlayerByPlayerNumber(1).get))
-    val wm2 = Effects.getCountryClickedEffect(wm, wm.getCountry(ALASKA)).eval(StateStamp(-1))
-    val wm3 = Effects.getCountryClickedEffect(wm2, wm2.getCountry(ONTARIO)).eval(StateStamp(-1))
+    val wm2 = Effects.countryClicked(wm.getCountry(ALASKA)).eval(StateStamp(-1, wm))
+    val wm3 = Effects.countryClicked(wm2.getCountry(ONTARIO)).eval(StateStamp(-1, wm2))
 
     wm3.phase.asInstanceOf[Reinforcement].target shouldBe None
   }
 
   "If a adjacent owned country is selected as the target, the target should be set" in {
-    val wm = Effects.getCountryClickedEffect(beginReinforcementPhase, beginReinforcementPhase.getCountry(ALASKA)).eval(StateStamp(-1))
-    val wm2 = Effects.getCountryClickedEffect(wm, wm.getCountry(ALBERTA)).eval(StateStamp(-1))
+    val wm = Effects.countryClicked(beginReinforcementPhase.getCountry(ALASKA)).eval(StateStamp(-1, beginReinforcementPhase))
+    val wm2 = Effects.countryClicked(wm.getCountry(ALBERTA)).eval(StateStamp(-1, wm))
 
     wm2.phase.asInstanceOf[Reinforcement].target shouldBe Some(wm2.getCountry(ALBERTA))
   }
@@ -79,7 +79,7 @@ class ReinforcementPhaseTests extends FreeSpec with Matchers with MockitoSugar {
     val target = beginReinforcementPhase.getCountry(ALBERTA).copy(armies = 1)
     val wm = beginReinforcementPhase.setPhase(Reinforcement(Some(source), Some(target))).updateSomeCountries(List(source,target))
     val confirmation = ConfirmTransfer(10)
-    val wm2 = Effects.executeTransfer(wm, confirmation).eval(StateStamp(-1))
+    val wm2 = Effects.executeTransfer(confirmation).eval(StateStamp(-1, wm))
 
     "Transfer those armies" in {
       wm2.getCountry(ALASKA).armies shouldBe 15

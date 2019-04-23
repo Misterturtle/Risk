@@ -1,10 +1,31 @@
 package Service
 
-import javafx.scene.paint.{Paint, Color}
+import Service.TypeAlias.Effect
+import javafx.scene.paint.{Color, Paint}
 
 /**
   * Created by Harambe on 7/10/2017.
   */
+
+object Player {
+
+  //todo: Set compiler to complain about match statement not being exhaustive
+
+  def setArmies(armiesAmount: Int): Player = Effect { player:Player =>
+    player match {
+      case h: HumanPlayer => h.copy(armies = 0)
+      case c: ComputerPlayer => c.copy(armies = 0)
+    }
+  }
+
+
+  def removeAllArmies(playerNumber:Int): Effect[Player] = Effect { player:Player =>
+    player match {
+      case h: HumanPlayer => h.copy(armies = 0)
+      case c: ComputerPlayer => c.copy(armies = 0)
+    }
+  }
+}
 
 trait Player{
   val playerNumber:Int

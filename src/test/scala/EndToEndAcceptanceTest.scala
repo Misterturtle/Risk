@@ -23,7 +23,7 @@ class EndToEndAcceptanceTest extends FreeSpec with Matchers {
     SideEffectManager.setNewSingleton(new SideEffectManager(wmCont, wmUICont))
 
     // When a new game begins,
-    SideEffectManager.receive(Effects.begin(wmCont.getCurrentWorldMap))
+    SideEffectManager.receive(Effects.begin())
     val wm = wmCont.getCurrentWorldMap
 
     //    No countries should be owned

@@ -37,7 +37,7 @@ class SideEffectManagerTest extends FreeSpec with Matchers with MockitoSugar {
   }
 
   def createDelayEvent(): Effect[WorldMap] ={
-    val a = init[StateStamp]
+    val a = init[StateStamp[WorldMap]]
     val b = a.map(ss => {
       println("Inside")
       Thread.sleep(2000)
@@ -48,7 +48,7 @@ class SideEffectManagerTest extends FreeSpec with Matchers with MockitoSugar {
   }
 
   def createQuickEvent(): Effect[WorldMap] = {
-    val a = init[StateStamp]
+    val a = init[StateStamp[WorldMap]]
 
     a.flatMap(_ => state(mock[WorldMap]))
   }

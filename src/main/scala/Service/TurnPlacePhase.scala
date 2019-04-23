@@ -53,7 +53,7 @@ object TurnPlacePhase{
     totalArmies
   }
 
-  def attemptToPlaceArmy(wm:WorldMap, country:Country):WorldMap = {
+  def attemptToPlaceArmy(country:Country)(wm:WorldMap):WorldMap = {
     if(country.isOwnedBy(wm.activePlayerNumber))
       wm.placeArmies(country, wm.getActivePlayer.get, 1)
     else wm

@@ -28,15 +28,15 @@ class WorldMapUIController(val get:()=>WorldMap) extends UIController[WorldMap] 
   def receiveInput(input:Input): Unit = {
     input match {
       case CountryClicked(country) =>
-        SideEffectManager.receive(Effects.getCountryClickedEffect(get(), country))
+        SideEffectManager.receive(Effects.countryClicked(country))
       case ConfirmBattle(source,target,offenseArmies) =>
-        SideEffectManager.receive(Effects.executeBattle(get(), ConfirmBattle(source, target, offenseArmies)))
+        SideEffectManager.receive(Effects.executeBattle(ConfirmBattle(source, target, offenseArmies)))
        case ConfirmTransfer(amount) =>
-        SideEffectManager.receive(Effects.executeBattleTransfer(get(), ConfirmTransfer(amount)))
+        SideEffectManager.receive(Effects.executeBattleTransfer(ConfirmTransfer(amount)))
       case Retreat =>
-        SideEffectManager.receive(Effects.retreatFromBattle(get()))
+        SideEffectManager.receive(Effects.retreatFromBattle())
       case EndAttackPhase =>
-        SideEffectManager.receive(Effects.endAttackPhase(get()))
+        SideEffectManager.receive(Effects.endAttackPhase())
     }
   }
 
