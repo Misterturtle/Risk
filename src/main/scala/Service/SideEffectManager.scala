@@ -1,10 +1,6 @@
 package Service
 
-import TypeAlias.Effect
-
 case class StateStamp[A](id: Int, originalData: A)
-
-case class IdentityMonad[A](id: Int, originalData: A)
 
 trait Validation
 
@@ -17,40 +13,21 @@ object SideEffectManager {
 
   def setNewSingleton(sideEffectManager: SideEffectManager) = _sideEffectManager = Some(sideEffectManager)
 
-  def receive(effect: Effect[WorldMap]): Validation ={
-    _sideEffectManager.map(manager => manager.performServiceEffect(effect)).getOrElse(Failure)
+  def receive(action: Action[WorldMap]): Validation = {
+    _sideEffectManager.map(manager => manager.performServiceEffect(action)).getOrElse(Failure)
   }
 }
 
 class SideEffectManager(worldMapController: WorldMapController, worldMapUIController: WorldMapUIController) {
 
-  private var mutations = 0
+  def performServiceEffect(action: Action[WorldMap]): Validation = {
+    val processedWorldMap = action.run(worldMapController.getCurrentWorldMap)
+    worldMapController.mutateWorldMapUnsafe(processedWorldMap)
+    worldMapUIController.updateWorldMap(processedWorldMap)
 
-  private def recordMutation() = mutations += 1
-
-  def performServiceEffect(effect: Effect[WorldMap]): Validation = {
-    val stampWithWM = effect.run(stamp())
-    validateStateStamp(stampWithWM._1) match {
-      case Success =>
-        recordMutation()
-        worldMapController.mutateWorldMapUnsafe(stampWithWM._2)
-        worldMapUIController.updateWorldMap(stampWithWM._2)
-        Success
-
-      case Failure =>
-        println("Effect failed to validate state stamp")
-        Failure
-    }
+    //todo add error handling
+    //todo add async handling
+    Success
   }
 
-
-  private def stamp(): StateStamp[WorldMap] = {
-    StateStamp(mutations, worldMapController.getCurrentWorldMap)
-  }
-
-  private def validateStateStamp[A](stateStamp: StateStamp[A]): Validation = {
-    if (stateStamp.id == mutations)
-      Success
-    else Failure
-  }
 }

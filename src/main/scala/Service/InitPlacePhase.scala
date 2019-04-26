@@ -1,46 +1,53 @@
 package Service
 
-/**
-  * Created by Harambe on 7/20/2017.
-  */
-object InitPlacePhase{
+import common.Common._
 
-  def beginTurn(wm:WorldMap):WorldMap ={
-    wm.getActivePlayer match {
-      case Some(p:HumanPlayer) =>
-        wm
-      case Some(c:ComputerPlayer) =>
-        beginComputerTurn(wm)
+object InitPlacePhase {
+
+  val setInitialPhase: Action[Phase] = Action { _:Phase =>
+    InitialPlacement
+  }
+
+  val endInitPhase: Action[WorldMap] = Action { worldMap:WorldMap =>
+    val wm2 = worldMap.copy(activePlayerNumber = 1, phase = TurnPlacement)
+    TurnPlacePhase.beginTurn(wm2)
+  }
+
+  val beginTurn: Action[WorldMap] = Action { worldMap:WorldMap =>
+    worldMap.getActivePlayer match {
+      case Some(p: HumanPlayer) =>
+        worldMap
+      case Some(c: ComputerPlayer) =>
+        beginComputerTurn(worldMap)
     }
   }
 
-  def allocateInitArmies(wm: WorldMap): WorldMap = {
-    val armies = 35 - (5 * (wm.players.size - 3))
-    wm.copy(players = wm.players.map(p => p.addArmies(armies)))
+  val nextTurn: Action[WorldMap] = FlatAction { wm: WorldMap =>
+    if (checkForEndOfInitPlace(wm))
+      endInitPhase
+    else {
+      wm.setNextActivePlayer() >>
+      beginTurn
+    }
   }
 
-  def isValidInitPlaceArmyPlacement(wm: WorldMap, player: Player, clickedCountry: Country): Boolean = {
-    if (wm.areAllCountriesOwned) {
-      clickedCountry.owner.map(_.playerNumber).getOrElse(-1) == wm.getActivePlayer.map(_.playerNumber).getOrElse(-2)
+  def allocateInitArmies(): Action[List[Player]] = Action { listOfPlayers: List[Player] =>
+      val armies = 35 - (5 * (listOfPlayers.size - 3))
+      listOfPlayers.map(p => p.addArmies(armies))
+  }
+
+  def isValidInitPlaceArmyPlacement(worldMap:WorldMap, player: Player, clickedCountry: Country): Boolean = {
+    if (worldMap.areAllCountriesOwned) {
+      clickedCountry.owner.map(_.playerNumber).getOrElse(-1) == worldMap.getActivePlayer.map(_.playerNumber).getOrElse(-2)
     }
     else {
       clickedCountry.owner.isEmpty
     }
   }
 
-  def nextTurn(wm: WorldMap): WorldMap = {
-    if (checkForEndOfInitPlace(wm))
-      endInitPhase(wm)
-    else{
-      beginTurn(wm.setNextActivePlayer())
-    }
-
-  }
-
-
   def beginComputerTurn(wm: WorldMap): WorldMap = {
-    val wm2 = initPlaceCompAI(wm)
-    nextTurn(wm2)
+    initPlaceCompAI(wm) >>
+    nextTurn
   }
 
 
@@ -57,15 +64,8 @@ object InitPlacePhase{
   }
 
 
-  def checkForEndOfInitPlace(wm:WorldMap): Boolean = {
+  def checkForEndOfInitPlace(wm: WorldMap): Boolean = {
     wm.phase == InitialPlacement && wm.noArmiesToPlace
   }
-
-  def endInitPhase(wm: WorldMap): WorldMap = {
-    val wm2 = wm.copy(activePlayerNumber = 1, phase = TurnPlacement)
-    TurnPlacePhase.beginTurn(wm2)
-  }
-
-
 
 }

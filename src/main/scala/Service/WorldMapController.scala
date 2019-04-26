@@ -17,5 +17,5 @@ class WorldMapController() {
   def getCurrentWorldMap: WorldMap = mutableWorldMap
 
   //Entry Point
-  def begin() = SideEffectManager.receive(Effects.begin())
+  def begin() = SideEffectManager.receive(Actions.begin())
 }

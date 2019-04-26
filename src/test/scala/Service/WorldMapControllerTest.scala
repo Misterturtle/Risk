@@ -1,6 +1,5 @@
 package Service
 
-import Service.TypeAlias.Effect
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito._
 import org.scalatest.{FreeSpec, FunSuite, Matchers}
@@ -20,7 +19,7 @@ class WorldMapControllerTest extends FreeSpec with Matchers with MockitoSugar{
 
       subject.begin()
 
-      verify(mockSideEffectManager).performServiceEffect(any(classOf[Effect[WorldMap]]))
+      verify(mockSideEffectManager).performServiceEffect(any(classOf[Action[WorldMap]]))
     }
   }
 

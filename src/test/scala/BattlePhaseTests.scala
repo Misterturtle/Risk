@@ -85,7 +85,7 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
     val mockRandom = mock[RandomFactory]
     when(mockRandom.roll()).thenReturn(1, 1, 5, 4, 2)
     val battle = preBattle.phase.asInstanceOf[Battle]
-    val postBattle = Effects.executeBattle(ConfirmBattle(battle.source, battle.target, 3), mockRandom).eval(StateStamp(-1, preBattle))
+    val postBattle = Actions.executeBattle(ConfirmBattle(battle.source, battle.target, 3), mockRandom).run(preBattle)
 
     "it should record the battle" in {
       postBattle.phase.asInstanceOf[Battle].previousBattle shouldBe Some(BattleResult(List(1, 1, 5), List(4, 2), mockRandom))
@@ -107,7 +107,7 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
     val mockRandom = mock[RandomFactory]
     when(mockRandom.roll()).thenReturn(1, 1, 5, 1)
     val battle = preBattle.phase.asInstanceOf[Battle]
-    val postBattle = Effects.executeBattle(ConfirmBattle(battle.source, battle.target, 3), mockRandom).eval(StateStamp(-1, preBattle))
+    val postBattle = Actions.executeBattle(ConfirmBattle(battle.source, battle.target, 3), mockRandom).run(preBattle)
 
 
     "The phase should active the transferring flag" in {
@@ -125,7 +125,7 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
     val mockRandom = mock[RandomFactory]
     when(mockRandom.roll()).thenReturn(1, 1, 1, 6)
     val battle = preBattle.phase.asInstanceOf[Battle]
-    val postBattle = Effects.executeBattle(ConfirmBattle(battle.source, battle.target, 3), mockRandom).eval(StateStamp(-1, preBattle))
+    val postBattle = Actions.executeBattle(ConfirmBattle(battle.source, battle.target, 3), mockRandom).run(preBattle)
 
     "The attacking country should retreat" in {
       postBattle.phase shouldBe Attacking(None, None)
@@ -137,7 +137,7 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
     val source = beginBattlePhase.getCountry(ALASKA).copy(armies = 25)
     val target = beginBattlePhase.getCountry(NW_TERRITORY).copy(armies = 0, owner = beginBattlePhase.getActivePlayer)
     val wm = beginBattlePhase.setPhase(Battle(source, target, None, true))
-    val postTransfer = Effects.executeBattleTransfer(ConfirmTransfer(10)).eval(StateStamp(-1, wm))
+    val postTransfer = Actions.executeBattleTransfer(ConfirmTransfer(10)).run(wm)
 
 
    "The amount of armies should be transferred" in {
@@ -152,7 +152,7 @@ class BattlePhaseTests extends FreeSpec with Matchers with MockitoSugar {
 
   "If the Retreat input is received, the phase should go back to Attacking" in {
     val wm = beginBattlePhase
-    val postRetreat = Effects.retreatFromBattle().eval(StateStamp(-1, wm))
+    val postRetreat = Actions.retreatFromBattle().run(wm)
 
     postRetreat.phase shouldBe Attacking(None, None)
   }

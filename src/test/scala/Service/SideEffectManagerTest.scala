@@ -1,19 +1,14 @@
 package Service
 
-import org.scalatest.{FreeSpec, Matchers}
-import org.scalatest.mockito.MockitoSugar
-import TypeAlias.Effect
 import org.mockito.Mockito._
-import scalaz.Scalaz.init
-import scalaz.Scalaz.state
-import scalaz.State
-import Service.Success
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FreeSpec, Matchers}
 
 class SideEffectManagerTest extends FreeSpec with Matchers with MockitoSugar {
 
   "receive performs the service effect passed in" in {
     val mockSideEffectManager = mock[SideEffectManager]
-    val mockEffect = mock[Effect[WorldMap]]
+    val mockEffect = mock[Action[WorldMap]]
     SideEffectManager.setNewSingleton(mockSideEffectManager)
 
     SideEffectManager.receive(mockEffect)
@@ -22,7 +17,7 @@ class SideEffectManagerTest extends FreeSpec with Matchers with MockitoSugar {
   }
 
   "Only one action can be performed at a time" in {
-//    val mockSideEffectManager = mock[SideEffectManager]
+    //    val mockSideEffectManager = mock[SideEffectManager]
     val subject = new SideEffectManager(new WorldMapController(), mock[WorldMapUIController])
 
     val timeConsumingEffect = createDelayEvent()
@@ -36,21 +31,13 @@ class SideEffectManagerTest extends FreeSpec with Matchers with MockitoSugar {
     secondResult shouldBe Success
   }
 
-  def createDelayEvent(): Effect[WorldMap] ={
-    val a = init[StateStamp[WorldMap]]
-    val b = a.map(ss => {
-      println("Inside")
-      Thread.sleep(2000)
-      ss
-    })
+  def createDelayEvent(): Action[WorldMap] = Action { worldMap: WorldMap =>
+    println("Inside")
+    Thread.sleep(2000)
 
-    b.flatMap(_ => state(mock[WorldMap]))
+    worldMap
   }
 
-  def createQuickEvent(): Effect[WorldMap] = {
-    val a = init[StateStamp[WorldMap]]
-
-    a.flatMap(_ => state(mock[WorldMap]))
-  }
+  def createQuickEvent(): Action[WorldMap] = Action {}
 
 }

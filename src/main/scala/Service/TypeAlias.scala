@@ -1,33 +1,21 @@
 package Service
 
-import Service.TypeAlias.{Effect, Effect__}
-import scalaz.State
-
-/**
-  * Created by Harambe on 7/17/2017.
-  */
-object TypeAlias {
-  type Effect[A] = State[StateStamp[A], A]
-  type Effect__[A] = State[IdentityMonad[A], A]
-}
-
-object Effect__ {
-  def apply[A](f: => A => A): Effect__[A] = State[IdentityMonad[A], A] {id =>
-    (id, f(id.originalData))
+object Action {
+  //todo: try to not have to use FlatAction object
+  def apply[A](f: A => A): Action[A] = {
+    new Action(f)
   }
 
-  def apply[A](f: A => Effect__[A]): Effect__[A] = State[IdentityMonad[A], A] { id =>
-    f(id.originalData).apply(id)
+  def apply[A](f: => Unit): Action[A] = Action { a:A => a }
+}
+
+object FlatAction {
+  def apply[A](f: A => Action[A]): Action[A] = {
+    new Action((a:A) => f(a).run(a))
   }
 }
 
-object Effect {
-  def apply[A](f: => A => A): Effect[A] = State[StateStamp[A], A] {ss =>
-    (ss, f(ss.originalData))
-  }
-
-  def apply[A](f: A => Effect[A]): Effect[A] = State[StateStamp[A], A] { ss =>
-    f(ss.originalData).apply(ss)
-  }
+class Action[A](f: A => A){
+  def run(a:A): A = f(a)
 }
 

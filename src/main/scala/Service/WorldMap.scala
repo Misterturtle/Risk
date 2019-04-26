@@ -3,38 +3,27 @@ package Service
 import scalaz.Scalaz._
 import common.Common._
 
-/**
-  * Created by Harambe on 7/20/2017.
-  */
 case object WorldMap {
-  def setArmiesForPlayer(playerNumber: Int, armiesAmount: Int)(worldMap: WorldMap): WorldMap = {
-    val updatedPlayers = worldMap.players
-      .map {
-        case player if player.playerNumber == playerNumber =>
-          player >> Player.setArmies(armiesAmount)
 
-        case player => player
-      }
-
-    worldMap.copy(players = updatedPlayers)
+  val setPhase: Phase => WorldMap => WorldMap = { phase: Phase => worldMap: WorldMap => worldMap.copy(phase = phase) }
+  val setActivePlayer: Int => Action[WorldMap] = { playerNumber: Int =>
+    Action { worldMap: WorldMap =>
+      worldMap.copy(activePlayerNumber = playerNumber)
+    }
   }
 
   val EMPTY = new WorldMap(Nil, Nil, 0, null)
   val INITIAL = new WorldMap(CountryFactory.getCountries, Nil, 0, NotInGame)
 
-  def removeAllArmiesFromPlayer(playerNumber: Int)(worldMap: WorldMap): WorldMap = {
-    val updatedPlayers = worldMap.players
-      .map {
-        case player if player.playerNumber == playerNumber => player >> Player.removeAllArmies
-        case player => player
-      }
-
-    worldMap.copy(players = updatedPlayers)
-  }
-
   def updatePlayer(player: Player)(worldMap: WorldMap): WorldMap = {
     val newPlayerList = worldMap.players.map(oldPlayer => if (oldPlayer.playerNumber == player.playerNumber) player else oldPlayer)
     worldMap.copy(players = newPlayerList)
+  }
+
+  def placeArmies(countryId: String, player: Player, amount: Int): Action[WorldMap] = FlatAction { worldMap: WorldMap =>
+    Country.addArmies(countryId, amount) >>
+      Country.setOwner(countryId, player) >>>
+      Player.removeArmies(player.playerNumber, amount)
   }
 }
 

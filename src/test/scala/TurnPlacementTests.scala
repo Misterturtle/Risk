@@ -1,10 +1,7 @@
 import GUI.{CustomColors, WorldMapUI}
 import Service._
-import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FreeSpec, Matchers}
-import scalaz._
-
 import common.Common._
 
 
@@ -12,29 +9,40 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
 
   val mockUI = mock[WorldMapUI]
 
-  private val initialPlacementWorldMap = randomPlacementWorldMap()
-  private val player1Country = initialPlacementWorldMap.countries.find(_.owner.map(_.playerNumber).contains(1)).get
-  private val player2Country = initialPlacementWorldMap.countries.find(_.owner.map(_.playerNumber).contains(2)).get
+  val createThreePlayers: WorldMap => WorldMap = (worldMap: WorldMap) => {
+    val players = List[Player](HumanPlayer("Turtle", 1, 0, CustomColors.red), HumanPlayer("Boy Wonder", 2, 0, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 0, CustomColors.green))
+    worldMap.copy(players = players)
+  }
 
-  private val player2TurnWorldMap = Effects.countryClicked(player1Country).eval(StateStamp(-1, player2TurnWorldMap))
+  val placeRandomInitialArmies: WorldMap => WorldMap = (worldMap: WorldMap) => {
+    var _worldMap = worldMap
+    val countriesPerPlayer = worldMap.countries.size / worldMap.players.size
 
+    for (a <- 1 to countriesPerPlayer) {
+      for (b <- worldMap.players.indices) {
+        def unownedCountry = _worldMap.countries.find(_.owner.isEmpty).get
+
+        _worldMap = _worldMap.updateSingleCountry(unownedCountry.copy(armies = 1, owner = Some(worldMap.players(b))))
+      }
+    }
+
+    _worldMap
+  }
+
+  private val initialPlacementWorldMap = WorldMap.INITIAL >>
+    createThreePlayers >>
+    placeRandomInitialArmies
 
   "Taking the last turn in the InitPlacePhase should transition to Turn Placement Phase" - {
 
-    val wmEffect = Effect { worldMap: WorldMap =>
-        liftPlayer(Player.removeAllArmies(1))
-        liftPlayer(Player.removeAllArmies(3))
+    val localWorldMap = initialPlacementWorldMap >>
+      WorldMap.setPhase(InitialPlacement) >>
+      Player.setArmiesForPlayer(2, 1) >>
+      WorldMap.setActivePlayer(2)
 
+    val player2Country = initialPlacementWorldMap.countries.find(_.owner.map(_.playerNumber).contains(2)).get
 
-      worldMap
-    }
-
-    val lastPlacement = initialPlacementWorldMap >>
-      WorldMap.removeAllArmiesFromPlayer(1) >>
-      WorldMap.removeAllArmiesFromPlayer(3) >>
-      WorldMap.setArmiesForPlayer(2, 1)
-
-    val turnPlaceWM = Effects.countryClicked(player2Country).eval(StateStamp(-1, player2TurnWorldMap))
+    val turnPlaceWM = Actions.countryClicked(player2Country).run(localWorldMap)
 
     "The phase should be set to TurnPlacement" in {
       turnPlaceWM.phase shouldBe TurnPlacement
@@ -50,42 +58,34 @@ class TurnPlacementTests extends FreeSpec with Matchers with MockitoSugar {
   }
 
   "During a human player's Turn Placement Phase" - {
-    val wm = randomPlacementWorldMap()
+
+    val activePlayerNumber = 2
+    val nonActivePlayerNumber = 3
+
+    val localWorldMap = initialPlacementWorldMap >>
+      WorldMap.setPhase(TurnPlacement) >>
+      Player.setArmiesForPlayer(activePlayerNumber, 1) >>
+      WorldMap.setActivePlayer(activePlayerNumber)
 
     "Clicking on an unowned country should do nothing" in {
-      val unownedCountry = wm.countries.find(_.owner.map(_.playerNumber).contains(3)).get
-      val newWM = Effects.countryClicked(unownedCountry).eval(StateStamp(-1, wm))
+      val unownedCountry = localWorldMap.countries.find(_.owner.map(_.playerNumber).contains(nonActivePlayerNumber)).get
+      val newWM = Actions.countryClicked(unownedCountry).run(localWorldMap)
 
-      newWM shouldBe wm
+      newWM shouldBe localWorldMap
     }
 
     "Clicking on an owned country should place an army" in {
-      val ownedCountry = wm.countries.find(_.owner.map(_.playerNumber).contains(2)).get
-      val newWM = Effects.countryClicked(ownedCountry).eval(StateStamp(-1, wm))
+      val ownedCountry = localWorldMap.countries.find(_.owner.map(_.playerNumber).contains(activePlayerNumber)).get
+      val newWM = Actions.countryClicked(ownedCountry).run(localWorldMap)
 
       newWM.getCountry(ownedCountry.name).armies shouldBe ownedCountry.armies + 1
     }
 
     "Placing the last army should transition to the attack phase" in {
-      val ownedCountry = wm.countries.find(_.owner.map(_.playerNumber).contains(2)).get
-      val attackPhaseWM = Effects.countryClicked(ownedCountry).eval(StateStamp(-1, wm))
+      val ownedCountry = localWorldMap.countries.find(_.owner.map(_.playerNumber).contains(activePlayerNumber)).get
+      val attackPhaseWM = Actions.countryClicked(ownedCountry).run(localWorldMap)
 
       attackPhaseWM.phase shouldBe Attacking(None, None)
     }
-  }
-
-  def randomPlacementWorldMap(): WorldMap = {
-    val players = List[Player](HumanPlayer("Turtle", 1, 0, CustomColors.red), HumanPlayer("Boy Wonder", 2, 0, CustomColors.blue), ComputerPlayer("Some Scrub", 3, 0, CustomColors.green))
-    var _worldMap = new WorldMap(CountryFactory.getCountries, players, 1, InitialPlacement)
-
-    for (a <- 1 to 14) {
-      for (b <- 0 until 3) {
-        def unownedCountry = _worldMap.countries.find(_.owner.isEmpty).get
-
-        _worldMap = _worldMap.updateSingleCountry(unownedCountry.copy(armies = 1, owner = Some(players(b))))
-      }
-    }
-
-    _worldMap
   }
 }

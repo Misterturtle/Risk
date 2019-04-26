@@ -8,15 +8,15 @@ import scalaz.Scalaz._
 /**
   * Created by Harambe on 7/20/2017.
   */
-object TurnPlacePhase{
+object TurnPlacePhase {
 
-  def beginTurn(wm:WorldMap):WorldMap = {
+  def beginTurn(wm: WorldMap): WorldMap = {
     val wm2 = allocateTurnArmies(wm)
 
     wm2.getActivePlayer match {
-      case Some(p:HumanPlayer) =>
+      case Some(p: HumanPlayer) =>
         wm2
-      case Some(c:ComputerPlayer) =>
+      case Some(c: ComputerPlayer) =>
         beginCompTurn(wm2)
     }
   }
@@ -53,22 +53,24 @@ object TurnPlacePhase{
     totalArmies
   }
 
-  def attemptToPlaceArmy(country:Country)(wm:WorldMap):WorldMap = {
-    if(country.isOwnedBy(wm.activePlayerNumber))
-      wm.placeArmies(country, wm.getActivePlayer.get, 1)
-    else wm
+  def attemptToPlaceArmy(countryName: String, sourcePlayerNumber: Int): Action[List[Country]] = Action { countries: List[Country] =>
+    countries.map { country =>
+      if (country.name == countryName && country.owner.map(_.playerNumber).getOrElse(-1) == sourcePlayerNumber)
+        country.copy(armies = country.armies + 1)
+      else country
+    }
   }
 
-  def beginCompTurn(wm:WorldMap):WorldMap = {
+  def beginCompTurn(wm: WorldMap): WorldMap = {
     val wm2 = compPlacementAI(wm)
     ReinforcementPhase.nextTurn(wm2)
   }
 
-  def compPlacementAI(wm:WorldMap):WorldMap = {
+  def compPlacementAI(wm: WorldMap): WorldMap = {
     val ownedCountries = wm.getCountriesOwnedByPlayer(wm.getActivePlayer.get)
     var mutatingWorldMap = wm
 
-    for(a<-0 until wm.getActivePlayer.map(_.armies).getOrElse(0)){
+    for (a <- 0 until wm.getActivePlayer.map(_.armies).getOrElse(0)) {
       val chosenCountry = ownedCountries(Random.nextInt(ownedCountries.size))
       mutatingWorldMap = mutatingWorldMap.placeArmies(chosenCountry, wm.getActivePlayer.get, 1)
     }
@@ -80,7 +82,7 @@ object TurnPlacePhase{
   }
 
 
-  def endTurnPlacementPhase(wm: WorldMap): WorldMap = {
-    wm.copy(phase = Attacking(None, None))
+  def endTurnPlacementPhase(): Action[WorldMap] = Action { worldMap:WorldMap =>
+    worldMap.copy(phase = Attacking(None, None))
   }
 }

@@ -7,24 +7,23 @@ object AttackingPhase {
   //todo: Currently able to select my own country as a target
 
 
-  def selectSource(wm:WorldMap, country:Country):WorldMap = {
-    println("Source selected")
-    if(isValidSourceTarget(wm, country))
-      wm.setPhase(wm.phase.asInstanceOf[Attacking].setSource(country))
-    else wm
+  def selectSource(country:Country):Action[WorldMap] = Action { worldMap:WorldMap =>
+    if(isValidSourceTarget(worldMap, country))
+      worldMap.setPhase(worldMap.phase.asInstanceOf[Attacking].setSource(country))
+    else worldMap
   }
 
-  def deselectSource(wm:WorldMap):WorldMap = {
-    wm.copy(phase = Attacking(None, None))
+  def deselectSource():Action[WorldMap] = Action { worldMap: WorldMap =>
+    worldMap.copy(phase = Attacking(None, None))
   }
 
 
-  def beginBattle(wm:WorldMap, country:Country):WorldMap = {
-    val source = wm.phase.asInstanceOf[Attacking].source.get
+  def beginBattle(country:Country):Action[WorldMap] = Action { worldMap:WorldMap =>
+    val source = worldMap.phase.asInstanceOf[Attacking].source.get
     if(isValidAttackTarget(source, country)){
-      wm.setPhase(Battle(source, country))
+      worldMap.setPhase(Battle(source, country))
     }
-    else wm
+    else worldMap
   }
 
   def isValidSourceTarget(wm:WorldMap, country:Country):Boolean = {
